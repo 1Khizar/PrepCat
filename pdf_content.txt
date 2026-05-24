@@ -1,0 +1,1408 @@
+--- PAGE 1 ---
+PrepBuddy
+Pakistan's Premier MDCAT & NUMS Study Platform
+Full Platform Proposal & Development Blueprint
+Prepared for Antigravity Development Team
+4
+Development Phases
+40+
+Platform Features
+FastAPI + Next.js
+Tech Stack
+Groq LLM
+AI Engine
+Version 1.0    April 2026
+
+--- PAGE 2 ---
+Table of Contents1. Executive Summary
+2. Problem Statement
+3. Solution Overview – PrepBuddy
+4. Target Audience & Market
+5. Complete Feature Set
+5.1 Landing / Marketing Website
+5.2 Student Authentication & Onboarding
+5.3 Student Profile & Dashboard
+5.4 Past Paper Bank
+5.5 Quiz & MCQ Engine
+5.6 Mock Test Mode
+5.7 AI-Powered Features (Groq LLM)
+5.8 Streak & Gamification System
+5.9 Friends & Competition System
+5.10 Performance Analytics
+5.11 Study Time Tracker
+5.12 News & Updates Section
+5.13 Admin Dashboard
+5.14 Notifications & Reminders
+5.15 Accessibility & Mobile
+6. Tech Stack & Architecture
+7. Database Schema Overview
+8. API Endpoints Overview
+9. Development Phases
+Phase 1 Foundation (Weeks 1–6)
+Phase 2 Core Features (Weeks 7–12)
+Phase 3 Advanced Features (Weeks 13–18)
+Phase 4 Scale & Polish (Weeks 19–24)
+10. Non-Functional Requirements
+11. Security & Compliance
+12. Deliverables Checklist
+
+--- PAGE 3 ---
+1. Executive SummaryPrepBuddy is a comprehensive, AI-powered EdTech platform purpose-built for Pakistani students
+preparing for MDCAT (Medical and Dental College Admission Test) and NUMS (National University of
+Medical Sciences) entrance examinations. Every year, over 200,000 students compete for a limited
+number of medical college seats in Pakistan. The preparation journey is hampered by scattered resources,
+lack of organized past papers, absence of personalised feedback, and no structured self-assessment
+tools.
+PrepBuddy solves all of this in one beautifully designed, student-friendly platform. It combines a rich
+past-paper bank, a subject-wise and chapter-wise quiz engine, AI-generated explanations powered by
+Groq LLM, gamification (streaks, leaderboards, friend competitions), real-time performance analytics, and
+a news feed — delivering everything a student needs to crack MDCAT or NUMS in one place.
+■ Core Purpose
+MDCAT & NUMS Preparation Platform for Pakistani Students
+■ AI Engine
+Groq LLM (primary) — scalable to GPT in later phases
+■ Tech Stack
+FastAPI (Backend) + Next.js 14 (Frontend) + PostgreSQL
+■ Platforms
+Web (desktop + mobile responsive) — PWA ready
+■ Market
+200,000+ MDCAT aspirants annually in Pakistan
+■ Timeline
+24 Weeks across 4 Development Phases
+■ Auth
+JWT-based Auth with Google OAuth option
+■ Analytics
+Real-time performance dashboard with AI insights
+
+--- PAGE 4 ---
+2. Problem Statement
+1. Scattered Past Papers
+Students spend hours searching across WhatsApp groups, Telegram channels, and random websites for
+past papers. There is no single, verified, well-organised repository for MDCAT/NUMS past papers.
+2. No Personalised Practice
+Generic YouTube videos and PDF books do not adapt to a student's weak areas. There is no tool that
+says: 'You are weak in Genetics — here are targeted MCQs.'
+3. Zero Progress Tracking
+Students have no way to measure their improvement over time. They do not know their accuracy per
+subject, speed per question, or readiness level before the exam.
+4. No Motivation Mechanism
+Preparation for 1–2 years is mentally exhausting. Without streaks, leaderboards, or friend competitions,
+students lose focus and motivation easily.
+5. Lack of Instant Explanations
+When a student gets an MCQ wrong, they often have no immediate, clear explanation of the correct
+answer with scientific reasoning — forcing them to search elsewhere.
+6. No Real-Time MDCAT News
+Policy changes, schedule updates, and seat allocation news are critical — yet there is no single trusted
+place where students get MDCAT/NUMS news alongside their study tools.
+
+--- PAGE 5 ---
+3. Solution Overview – PrepBuddyPrepBuddy is a single, unified platform that addresses every pain point above. Here is how each problem
+maps to a PrepBuddy feature:
+Feature
+Description
+Scattered Past Papers
+Organised Past Paper Bank (2020–2024+), filterable by year,
+subject, chapter
+No Personalised Practice
+AI-Powered Quiz Engine with weak-area detection and Groq
+LLM explanations
+Zero Progress Tracking
+Performance Dashboard with accuracy, speed, subject-wise
+breakdown
+No Motivation Mechanism
+Daily Streaks, XP Points, Leaderboards, Friend Challenges
+No Instant Explanations
+Groq LLM generates instant answer explanations for every MCQ
+No MDCAT News
+Dedicated MDCAT/NUMS News Feed section with latest
+updates
+Beyond solving existing problems, PrepBuddy also introduces features that students do not even know
+they need yet — such as AI-generated mock tests, study time heatmaps, avatar customisation, and friend
+competition rooms — making the platform addictive in a productive way.
+
+--- PAGE 6 ---
+4. Target Audience & MarketFeature
+Description
+Primary Users
+MDCAT aspirants — FSc Part I & II students (ages 16–22)
+across Pakistan
+Secondary Users
+NUMS aspirants and students repeating entry tests
+Tertiary Users
+Academy teachers and tutors who want to assign quizzes to
+students
+Admin Users
+PrepBuddy content team who upload and manage past papers
+and MCQs
+Market Size
+200,000+ MDCAT registrations per year; growing at ~8%
+annually
+Geography
+All provinces of Pakistan, with highest concentration in Punjab,
+KPK, Sindh
+Device Usage
+~70% mobile users, ~30% desktop — platform must be fully
+responsive
+Monetisation
+Freemium model: Basic access free, Premium subscription for
+full features
+
+--- PAGE 7 ---
+5. Complete Feature Set
+5.1 Landing / Marketing Website
+The first impression of PrepBuddy must be powerful enough to convert a visitor into a registered user. The
+landing page is a fully animated, high-conversion marketing website.
+Feature
+Description
+Hero Section with
+Animation
+Animated headline: 'Crack MDCAT 2025 — Pakistan's Smartest
+Prep Platform'. Animated counter showing total questions,
+students, and papers available.
+Feature Showcase
+Visual cards showing: Past Papers, AI Quiz, Streaks, Friend
+Competition, Analytics.
+How It Works Section
+3-step animated flow: Register → Choose Subject → Start
+Practicing.
+Statistics Bar
+Live counters: Questions attempted today, students active,
+papers available.
+Testimonials / Social Proof
+Student testimonial cards with avatars and score improvements.
+MDCAT Countdown Timer
+Live countdown to the next MDCAT exam date — creates
+urgency and keeps students returning.
+Subject Preview
+Interactive peek at Biology, Chemistry, Physics, English with
+sample MCQs — no login required.
+Call-to-Action (CTA)
+Prominent 'Start Free' button. Sticky top navbar with
+Login/Register buttons.
+SEO Optimised
+Full Next.js SSR/SSG for search engine optimisation. Meta tags
+for MDCAT, NUMS keywords.
+Dark Mode Toggle
+Landing page supports light/dark mode for visual comfort.
+5.2 Student Authentication & Onboarding
+Feature
+Description
+Email Registration
+Standard email + password signup with email verification OTP.
+Google OAuth
+One-click signup / login via Google account.
+Phone OTP Login
+Pakistani phone number OTP login (via Twilio or local gateway).
+
+--- PAGE 8 ---
+Feature
+Description
+Onboarding Wizard
+5-step wizard after first login: Avatar, Target Exam, Subjects,
+Study Goal, Daily Target.
+Profile Picture Upload
+Student uploads a photo or picks from 20+ built-in avatars.
+Password Reset
+Secure forgot-password flow via email link.
+Remember Me
+JWT with refresh tokens — stay logged in across sessions.
+Session Management
+View and revoke active sessions from profile settings.
+5.3 Student Profile & Dashboard
+Feature
+Description
+Profile Card
+Avatar, name, target exam, joining date, city, XP level badge.
+Quick Stats Widget
+Today's questions attempted, current streak, total XP, rank.
+Subject Progress Rings
+Circular progress rings for Biology, Chemistry, Physics, English
+— showing % mastery.
+Recent Activity Feed
+Chronological log of quizzes taken, papers viewed,
+achievements unlocked.
+Achievement Badges
+Earned badges displayed on profile: 'Week Warrior', 'Biology
+Master', '1000 MCQs', etc.
+Study Plan Section
+Personalised weekly study plan based on weak areas and exam
+date.
+Goal Tracker
+Daily MCQ target progress bar — e.g. '47 / 100 MCQs done
+today'.
+Friend List on Profile
+Show number of friends and mini-avatars of top 5 friends.
+Public Profile Option
+Students can make their profile public for friend invitations.
+Profile Edit
+Update avatar, bio, city, target exam date, daily MCQ goal.
+
+--- PAGE 9 ---
+5.4 Past Paper Bank
+The Past Paper Bank is the core content repository of PrepBuddy. It solves the single biggest complaint of
+MDCAT students — scattered, unverified past papers.
+Feature
+Description
+Year-wise Papers
+MDCAT & NUMS past papers from 2015 to present, organised
+by year.
+Subject Filter
+Filter papers by: Biology, Chemistry, Physics, English, or All
+Subjects.
+Chapter Filter
+Drill down to a specific chapter within a subject — e.g. Cell
+Biology.
+PDF Viewer (In-Platform)
+Embedded PDF viewer — students read papers inside the app,
+no download required.
+Download Option
+Premium students can download PDFs for offline use.
+Paper Bookmarking
+Bookmark specific papers to revisit later.
+Question Highlight Tool
+Students highlight specific questions in the PDF viewer for
+review.
+Difficulty Tag
+Each paper tagged with difficulty level: Easy / Medium / Hard.
+Answer Key Overlay
+Toggle to show/hide answer key alongside the paper.
+Paper Rating
+Students rate the difficulty of a paper (1–5 stars) —
+crowdsourced data.
+Search within Papers
+Full-text search across all past papers to find specific topics.
+Admin Upload Panel
+Admin uploads PDFs with metadata: Year, Exam, Subjects
+covered, Chapter tags.
+Paper Views Counter
+Show how many students have viewed/attempted each paper.
+Related Papers
+After viewing a paper, suggest related papers from the same
+subject/year.
+5.5 Quiz & MCQ Engine
+The Quiz Engine is the heart of PrepBuddy. It delivers personalised, subject-wise and chapter-wise MCQs
+with instant AI-powered explanations.
+
+--- PAGE 10 ---
+Feature
+Description
+Subject Selection
+Choose one or multiple subjects: Biology, Chemistry, Physics,
+English.
+Chapter Selection
+Select specific chapter(s) within a subject — e.g. Enzymes in
+Biology.
+Topic Selection
+Further narrow down to a specific topic — e.g. 'Competitive
+Inhibition'.
+Question Count Setting
+Set number of questions: 10, 20, 30, 50, or Custom.
+Timed Mode
+Optional countdown timer per question (30s / 60s / 90s) or full
+quiz timer.
+Untimed Practice Mode
+Relaxed mode with no timer — for learning new topics.
+4-Option MCQ Display
+Clean, tap-friendly MCQ UI with A/B/C/D options — large touch
+targets.
+Instant Feedback
+After selecting an answer: green = correct, red = wrong, correct
+option shown.
+AI Explanation (Groq)
+Every question has an AI-generated explanation via Groq LLM
+— shown after answer.
+Question Flagging
+Flag a question if it seems incorrect — sent to admin for review.
+Question Bookmarking
+Bookmark individual MCQs to a personal revision list.
+Quiz Result Summary
+End screen: Score, Time taken, Correct/Wrong/Skipped, Subject
+breakdown.
+Retry Wrong Questions
+One-click button to retry only the questions answered
+incorrectly.
+Quiz History
+Full log of past quizzes with scores, dates, and subjects.
+Adaptive Difficulty
+System serves harder questions on topics where student scores
+>80%, easier on <50%.
+Custom Question Mix
+Student can mix subjects — e.g. 30 Biology + 20 Chemistry in
+one session.
+Leaderboard per Quiz
+After a quiz, see how your score compares to friends who took
+the same quiz.
+
+--- PAGE 11 ---
+5.6 Mock Test Mode
+Feature
+Description
+Full MDCAT Mock
+Complete 200-question mock test simulating the actual MDCAT
+format and timing.
+NUMS Mock
+NUMS-specific mock with 100 questions and NUMS subject
+weightings.
+Subject-Wise Mock
+30-question mini-mock for one subject only — perfect for
+targeted practice.
+Timed Countdown
+Exact MDCAT timing: 200 questions in 150 minutes (45
+seconds/question average).
+No Going Back Mode
+Strict exam mode: cannot change answer once selected —
+trains exam discipline.
+Review Mode After Submit
+After submission, full review of all questions with explanations.
+Score Prediction
+AI predicts likely MDCAT score range based on mock
+performance.
+Percentile Rank
+Show student's percentile rank among all PrepBuddy students
+who took the mock.
+Mock Scheduling
+Set a recurring weekly mock test — platform sends reminder
+notification.
+Mock History
+All past mocks stored with scores, timing, and subject
+performance.
+Weak Area Report
+After each mock, AI generates a personalised weak area report.
+Print Result
+Students can print or download their mock test result as PDF.
+5.7 AI-Powered Features (Groq LLM)
+Groq LLM provides near-instant AI inference, making it ideal for real-time explanations and insights.
+PrepBuddy uses Groq as the primary AI engine with a clear upgrade path to GPT-4 for advanced
+reasoning tasks in later phases.
+Feature
+Description
+Instant MCQ Explanations
+After every question, Groq generates a 2–4 sentence
+explanation of the correct answer with scientific reasoning.
+AI Study Coach
+Chat interface where students ask questions: 'Explain the
+difference between mitosis and meiosis.'
+
+--- PAGE 12 ---
+Feature
+Description
+Weak Area Detection
+After 20+ questions, AI identifies and highlights weak chapters
+with a ranked list.
+Personalised Study Plan
+AI generates a week-by-week study plan based on exam date,
+weak areas, and daily time available.
+Mnemonics Generator
+Student selects a topic → Groq generates a memorable
+mnemonic — e.g. for amino acid classification.
+Concept Summary Cards
+AI generates a one-page summary card for any chapter —
+useful for last-minute revision.
+Difficulty Calibration
+AI monitors performance and adjusts question difficulty in
+real-time.
+Performance Narrative
+Weekly AI-written summary: 'This week you improved in Organic
+Chemistry but need work on Genetics.'
+Exam Readiness Score
+AI calculates a 0–100 readiness score based on mock results
+and practice history.
+
+--- PAGE 13 ---
+5.8 Streak & Gamification System
+Gamification is the key driver of daily retention. Students who maintain streaks are 5x more likely to
+continue using a platform consistently. PrepBuddy's gamification system is designed to be addictive in a
+healthy, motivating way.
+Feature
+Description
+Daily Streak Counter
+Fire emoji streak counter on dashboard — maintained by
+attempting at least 10 MCQs per day.
+Streak Freeze Token
+Students earn 1 freeze token per week — used to protect streak
+on a missed day (like Duolingo).
+XP Points System
+Earn XP for every: MCQ correct (+5), quiz completed (+20),
+mock completed (+100), daily goal hit (+30).
+Level System
+XP thresholds unlock levels: Beginner → Learner → Scholar →
+Expert → MDCAT Champion.
+Achievement Badges
+30+ unique badges: '7-Day Streak', 'Biology Ace', 'Speed
+Demon', 'First Mock', etc.
+Daily Challenge
+A special daily challenge of 5 tough MCQs — earns 2x XP if all
+correct.
+Weekly Goals
+Set a weekly MCQ target — progress bar on dashboard with
+celebration animation on completion.
+Leaderboard
+Global and friends-only leaderboard ranked by XP — resets
+weekly to keep it fair.
+Rewards Shop (Phase 3)
+XP points redeemable for: extra freeze tokens, premium mock
+tests, avatar items.
+Milestone Celebrations
+Confetti animation when student hits 100, 500, 1000 MCQ
+milestones.
+Streak Share
+One-tap share streak card to WhatsApp/Instagram — viral
+growth mechanic.
+5.9 Friends & Competition System
+Feature
+Description
+Friend Invite via Link
+Unique referral link — friend clicks it, registers, and is
+auto-added to friend list.
+WhatsApp Share
+Shareable invite card optimised for WhatsApp sharing.
+
+--- PAGE 14 ---
+Feature
+Description
+Friend Search
+Search PrepBuddy users by username or phone number to send
+a friend request.
+Friend List
+View friends' avatars, current streaks, XP, and last active time.
+1v1 Quiz Challenge
+Challenge a specific friend to a 20-question quiz in a chosen
+subject — real-time or async.
+Challenge Notification
+Friend receives a push notification: 'Ali challenged you! Can you
+beat his score of 85%?'
+Challenge Leaderboard
+After both complete, a comparison card shows both scores,
+time, accuracy.
+Group Competition Room
+Create a room with 2–10 friends, choose subject, all take same
+quiz simultaneously.
+Room Leaderboard
+Live leaderboard during group quiz updates as participants
+submit answers.
+Friend Activity Feed
+See friends' recent achievements and completed quizzes —
+social motivation.
+Challenge History
+Full log of all challenges: won, lost, pending — with detailed
+comparison.
+Block/Remove Friend
+Privacy controls: remove a friend, block unwanted users.
+
+--- PAGE 15 ---
+5.10 Performance Analytics Dashboard
+Feature
+Description
+Overall Accuracy Rate
+Big-number display: e.g. '74% accuracy across 2,340 MCQs
+attempted.'
+Subject-Wise Accuracy
+Bar chart comparing accuracy in Biology, Chemistry, Physics,
+English.
+Chapter-Wise Breakdown
+Drill-down table showing accuracy for every chapter within a
+subject.
+Accuracy Over Time
+Line chart showing accuracy trend — weekly average over last
+12 weeks.
+Speed Analytics
+Average time per question — track improvement in answering
+speed.
+Strengths & Weaknesses
+AI-curated list: Top 3 strong chapters and Top 3 weak chapters.
+Question Attempt Heatmap
+Calendar heatmap (like GitHub) showing MCQs attempted per
+day.
+Subject Pie Chart
+Pie chart of time spent per subject — helps identify subject
+neglect.
+Mock Score History
+Line graph of all mock test scores over time.
+Comparison with Average
+See how your score compares to the PrepBuddy platform
+average.
+Predicted MDCAT Score
+AI prediction: 'Based on your performance, you are likely to
+score 150–165/200.'
+Printable Report
+Export full performance report as PDF — useful for academy
+teachers.
+5.11 Study Time Tracker
+Feature
+Description
+Auto Session Tracking
+Platform auto-tracks time spent in quizzes, paper reading, and
+AI chat.
+Daily Study Time Widget
+Dashboard widget: 'You have studied for 2h 15m today.'
+Weekly View
+Bar chart of daily study hours for the current week.
+
+--- PAGE 16 ---
+Feature
+Description
+Monthly View
+Calendar view of study time per day — identify productive vs
+weak days.
+Subject Time Breakdown
+Pie chart: How much time spent on each subject this week.
+Study Goals
+Set a daily study time goal — e.g. 3 hours/day — with progress
+ring.
+Idle Detection
+If student is inactive for 5 minutes, timer pauses — accurate
+tracking.
+Study Streaks from Time
+Streak also maintained by studying for minimum 30 minutes/day.
+5.12 MDCAT & NUMS News Section
+Feature
+Description
+News Feed
+Curated list of latest MDCAT, NUMS, and PMC policy news —
+updated daily.
+Breaking News Banner
+Red banner on dashboard for critical announcements — e.g.
+'MDCAT 2025 date announced.'
+Category Filters
+Filter news by: Schedule, Policy Changes, Result
+Announcements, Tips & Tricks.
+Save Article
+Bookmark important news articles for later reading.
+Exam Date Calendar
+Official calendar of upcoming MDCAT and NUMS key dates.
+PMC Updates
+Direct integration with PMC (Pakistan Medical Commission)
+announcements.
+Student Blog
+PrepBuddy-authored blog posts: preparation tips, strategies,
+toppers' stories.
+Push Notifications
+Breaking news notifications: Students opt-in to receive instant
+alerts.
+
+--- PAGE 17 ---
+5.13 Admin Dashboard
+Feature
+Description
+Secure Admin Login
+Separate admin panel at /admin — JWT-protected with
+role-based access.
+Past Paper Upload
+Upload PDFs with metadata: Year, Exam Type, Subjects,
+Chapters, Difficulty.
+MCQ Management
+Add/Edit/Delete individual MCQs with: Question, 4 Options,
+Correct Answer, Explanation, Subject, Chapter, Topic.
+Bulk MCQ Import
+Upload MCQs in bulk via CSV/Excel template — instant
+processing.
+Student Management
+View all registered students: filter by activity, subject, registration
+date.
+Content Moderation
+Review flagged questions, approve/reject student-submitted
+corrections.
+Analytics Overview
+Admin dashboard showing: total users, daily active users, top
+quizzes, popular papers.
+News Management
+Create, edit, schedule, publish news articles and blog posts.
+Announcement Broadcast
+Send platform-wide push notifications to all students.
+Subject & Chapter CRUD
+Manage subject taxonomy: add new subjects, chapters, topics.
+User Roles
+Roles: Super Admin, Content Admin, Moderator — different
+permission levels.
+Revenue Dashboard (Ph 3)
+Track premium subscriptions, trial conversions, revenue by
+month.
+Export Reports
+Download user activity and content usage reports as Excel/CSV.
+5.14 Notifications & Reminders
+Feature
+Description
+Daily Study Reminder
+Push notification if student has not studied by a set time —
+customisable.
+Streak at Risk Alert
+Notification: 'Your streak is at risk! You have 3 hours left to
+practice.'
+Friend Challenge Alert
+Instant notification when a friend sends a quiz challenge.
+
+--- PAGE 18 ---
+Feature
+Description
+Achievement Unlock
+In-app celebration + notification when a badge is earned.
+Weekly Report
+Every Monday: personalised weekly performance email report.
+New Paper Available
+Notification when admin uploads a new past paper for a
+subscribed subject.
+Exam Countdown
+Daily notification: 'X days to MDCAT — you have studied Y
+hours this week.'
+Notification Preferences
+Student controls which notifications to receive and at what times.
+5.15 Accessibility, Mobile & UX
+Feature
+Description
+Fully Responsive
+Next.js responsive design — works flawlessly on mobile, tablet,
+and desktop.
+Progressive Web App
+PWA support — students can 'install' PrepBuddy on their phone
+home screen.
+Dark Mode
+Full platform dark mode toggle — easy on eyes during late-night
+study.
+Urdu Language Option
+Phase 3: Toggle between English and Urdu interface language.
+Font Size Control
+Students adjust text size for better reading comfort.
+Offline Mode (PWA)
+Phase 4: Cached quizzes available offline — useful for
+low-connectivity areas.
+Keyboard Navigation
+Full keyboard navigation for accessibility compliance.
+Loading Skeletons
+Skeleton screens instead of spinners — premium UX feel.
+Micro-animations
+Framer Motion animations on quiz transitions, streak updates,
+badge unlocks.
+Error Handling
+Friendly error pages — no raw error messages shown to
+students.
+
+--- PAGE 19 ---
+6. Tech Stack & ArchitectureLayer
+Technology
+Purpose
+Frontend
+Next.js 14 (App Router)
+React-based SSR/SSG framework —
+SEO-friendly, fast
+Frontend
+TypeScript
+Type safety across all frontend code
+Frontend
+Tailwind CSS
+Utility-first styling — fast UI development
+Frontend
+Framer Motion
+Smooth animations for streaks, badges,
+transitions
+Frontend
+React Query / TanStack
+Server state management, caching,
+pagination
+Frontend
+Recharts / Chart.js
+Performance analytics charts and graphs
+Backend
+FastAPI (Python)
+Async REST API — high performance,
+auto-generated docs
+Backend
+PostgreSQL
+Primary relational database
+Backend
+Redis
+Caching, session management, real-time
+leaderboards
+Backend
+Celery + Redis
+Background tasks: email sending, report
+generation
+AI
+Groq API (Llama 3)
+Ultra-fast LLM inference for MCQ
+explanations
+Auth
+JWT + OAuth2 (Google)
+Secure authentication system
+Storage
+AWS S3 / Cloudflare R2
+PDF storage and media uploads
+Email
+Resend / SendGrid
+Transactional emails and weekly reports
+Push Notif
+Firebase Cloud Messaging
+Mobile and web push notifications
+DevOps
+Docker + Docker Compose
+Containerised development and
+deployment
+DevOps
+GitHub Actions
+CI/CD pipeline for automated testing and
+deployment
+Hosting
+Vercel (Frontend)
+Next.js deployment with edge functions
+
+--- PAGE 20 ---
+Layer
+Technology
+Purpose
+Hosting
+Railway / DigitalOcean
+(Backend)
+FastAPI + PostgreSQL hosting
+Monitoring
+Sentry
+Error tracking and performance
+monitoring
+Architecture follows a decoupled microservices-ready monolith pattern: FastAPI backend exposes a clean
+REST API consumed by the Next.js frontend. The AI service (Groq) is called server-side to protect API
+keys. Redis handles real-time features. All PDFs are stored in object storage (S3/R2) and served via CDN
+for fast loading across Pakistan.
+
+--- PAGE 21 ---
+7. Database Schema OverviewThe following are the core database tables. Each table has standard audit fields: id (UUID), created_at,
+updated_at, is_deleted.
+users
+id, email, phone, password_hash, name, avatar_url, city, target_exam, xp_points, level, streak_count,
+streak_last_date, is_premium, role
+subjects
+id, name, slug, icon_url, color_hex
+chapters
+id, subject_id, name, slug, order_index
+topics
+id, chapter_id, name, slug
+questions
+id, subject_id, chapter_id, topic_id, question_text, option_a, option_b, option_c, option_d, correct_option, explanation,
+difficulty, year, source, is_active
+past_papers
+id, title, exam_type, year, subject_ids[], pdf_url, answer_key_url, difficulty, view_count, download_count
+quizzes
+id, user_id, mode, subject_ids[], chapter_ids[], question_count, score, accuracy, time_taken_sec, completed_at
+quiz_answers
+id, quiz_id, question_id, selected_option, is_correct, time_taken_sec
+bookmarks
+id, user_id, question_id, paper_id, created_at
+achievements
+id, user_id, badge_slug, earned_at
+friends
+id, user_id, friend_id, status (pending/accepted/blocked)
+challenges
+id, challenger_id, challenged_id, subject_id, status, challenger_score, challenged_score, expires_at
+
+--- PAGE 22 ---
+study_sessions
+id, user_id, session_start, session_end, duration_minutes, subject_id
+notifications
+id, user_id, type, title, body, is_read, sent_at
+news_articles
+id, title, slug, body, category, thumbnail_url, published_at, author_id
+streak_freezes
+id, user_id, used_on_date, remaining_count
+
+--- PAGE 23 ---
+8. API Endpoints OverviewFastAPI auto-generates Swagger UI at /docs. All endpoints use /api/v1/ prefix. Protected routes require
+Bearer JWT token.
+Auth
+POST /auth/register | POST /auth/login | POST /auth/google | POST /auth/refresh | POST /auth/forgot-password |
+POST /auth/reset-password
+User Profile
+GET /users/me | PATCH /users/me | GET /users/{id}/public | POST /users/me/avatar | GET /users/me/stats
+Subjects & Chapters
+GET /subjects | GET /subjects/{id}/chapters | GET /chapters/{id}/topics | GET /topics/{id}/questions
+Quiz Engine
+POST /quizzes/start | POST /quizzes/{id}/answer | POST /quizzes/{id}/complete | GET /quizzes/history | GET
+/quizzes/{id}/review | GET /quizzes/{id}/ai-explanation
+Mock Tests
+POST /mocks/start | POST /mocks/{id}/submit | GET /mocks/history | GET /mocks/{id}/result
+Past Papers
+GET /papers | GET /papers/{id} | GET /papers/{id}/download | POST /papers/{id}/bookmark | POST /papers/{id}/rate
+Streaks & Gamification
+GET /streaks/me | POST /streaks/freeze | GET /achievements/me | GET /leaderboard/global | GET
+/leaderboard/friends
+Friends & Challenges
+GET /friends | POST /friends/invite | PATCH /friends/{id}/accept | POST /challenges/create | GET
+/challenges/incoming | POST /challenges/{id}/complete
+Analytics
+GET /analytics/overview | GET /analytics/subjects | GET /analytics/chapters/{subject_id} | GET /analytics/heatmap |
+GET /analytics/study-time
+AI Features
+POST /ai/explain/{question_id} | POST /ai/study-plan | POST /ai/weak-areas | POST /ai/coach/chat | POST
+/ai/mnemonic | GET /ai/readiness-score
+News
+GET /news | GET /news/{slug} | POST /news/{id}/bookmark | GET /news/categories
+Admin
+
+--- PAGE 24 ---
+POST /admin/papers/upload | POST /admin/questions | POST /admin/questions/bulk-import | GET /admin/users |
+POST /admin/news | GET /admin/analytics/overview | POST /admin/notifications/broadcast
+
+--- PAGE 25 ---
+9. Development PhasesPrepBuddy is developed across 4 structured phases over 24 weeks. Each phase delivers a working,
+deployable version of the platform with increasing feature richness.
+PHASE 1  |  Foundation & Core Infrastructure
+Weeks 1–6  |  Deliverable: Working MVP with Auth, Past Papers, Basic Quiz
+Phase 1 establishes the entire technical foundation. By end of Phase 1, a student can register, view past
+papers, and take a basic subject-wise quiz.
+✓ Project setup: FastAPI + Next.js +
+PostgreSQL + Docker
+✓ Database schema — all core tables
+defined and migrated
+✓ Landing page with hero, features, stats,
+CTA, countdown timer
+✓ Student registration (email + OTP
+verification)
+✓ Student login (email/password + Google
+OAuth)
+✓ JWT auth with refresh token mechanism
+✓ Onboarding wizard (5-step profile setup)
+✓ Student profile page with avatar and
+basic stats
+✓ Subject/Chapter/Topic management
+(Admin CRUD)
+✓ MCQ management — Admin
+add/edit/delete questions
+✓ Bulk MCQ import via CSV
+✓ Past Paper upload by Admin (PDF +
+metadata)
+✓ Past Paper Bank page — list, filter by
+year/subject
+✓ Embedded PDF viewer for past papers
+✓ Basic Quiz Engine — subject + chapter
++ question count
+✓ MCQ display UI — 4 options, timer,
+navigation
+✓ Instant answer feedback
+(correct/incorrect highlight)
+✓ Quiz result summary screen
+✓ Admin dashboard — user list, paper list,
+MCQ list
+✓ Basic deployment: Vercel + Railway +
+PostgreSQL
+PHASE 2  |  AI, Gamification & Analytics
+Weeks 7–12  |  Deliverable: Full-featured platform with AI + Streaks + Analytics
+Phase 2 adds the AI brain (Groq), the gamification layer, performance analytics, friend system, and mock
+test mode — transforming MVP into a complete product.
+✓ Groq LLM integration — MCQ
+explanations per question
+✓ AI Study Coach chat interface
+✓ Weak area detection algorithm
+✓ AI-generated personalised study plan
+
+--- PAGE 26 ---
+✓ Daily streak system with fire counter
+✓ Streak freeze tokens (earn + spend)
+✓ XP points system — all earning events
+✓ Level system (Beginner → MDCAT
+Champion)
+✓ 30+ achievement badges with unlock
+logic
+✓ Daily challenge (5 special MCQs — 2x
+XP)
+✓ Weekly goal system with progress bar
+✓ Global + Friends leaderboard
+(XP-based, weekly reset)
+✓ Performance analytics dashboard — all
+charts
+✓ Subject-wise and chapter-wise accuracy
+breakdown
+✓ Study time tracker (auto-session
+tracking)
+✓ Activity calendar heatmap
+✓ Full MDCAT Mock Test mode (200Q /
+150 min)
+✓ NUMS Mock Test mode
+✓ Mock test result with percentile rank
+✓ Adaptive difficulty algorithm
+✓ Friend invite via referral link +
+WhatsApp share
+✓ Friend list + friend activity feed
+✓ 1v1 Quiz Challenge system
+✓ Challenge notifications (push + in-app)
+✓ Question bookmarking
+✓ Quiz retry (wrong answers only)
+✓ Push notification system (Firebase)
+✓ Email: weekly performance report
+✓ MDCAT News section — curated feed
+✓ Dark mode — full platform
+
+--- PAGE 27 ---
+PHASE 3  |  Advanced Features & Monetisation
+Weeks 13–18  |  Deliverable: Premium tier, Group Competitions, AI Enhancements
+Phase 3 introduces revenue generation through the premium subscription model, advanced AI features,
+group competition rooms, and Urdu language support.
+✓ Premium subscription system (Stripe /
+EasyPaisa)
+✓ Freemium feature gating logic
+✓ XP Rewards Shop (redeem tokens for
+perks)
+✓ Group Competition Rooms (2–10
+friends)
+✓ Live leaderboard during group quiz
+✓ AI Score Prediction ('You will likely
+score 160–170')
+✓ AI Readiness Score (0–100 exam
+readiness)
+✓ AI Mnemonic Generator per topic
+✓ AI Concept Summary Cards (chapter
+revision)
+✓ Full Urdu language interface toggle
+✓ Printable performance report (PDF
+export)
+✓ Subject-wise mini-mock tests (30
+questions)
+✓ Answer key overlay in PDF viewer
+✓ Question highlight tool in PDF viewer
+✓ Paper rating system (crowdsourced
+difficulty)
+✓ Paper bookmarking
+✓ Full-text search across past papers
+✓ PMC announcements feed integration
+✓ Exam Date official calendar
+✓ Streak share card
+(WhatsApp/Instagram)
+✓ Milestone celebration animations
+(confetti)
+✓ Admin: Revenue dashboard
+✓ Admin: Content moderation queue
+✓ Admin: Scheduled news publishing
+✓ Admin: Push notification broadcaster
+✓ Academy/Teacher role (assign quizzes
+to students)
+✓ Student report sharing with teacher
+✓ Google Analytics + Mixpanel integration
+PHASE 4  |  Scale, Polish & Future-Proofing
+Weeks 19–24  |  Deliverable: PWA, Offline Mode, Video Lectures, Platform Scale
+Phase 4 polishes every edge, adds offline capability, prepares for viral growth, and introduces video
+learning and advanced social features.
+✓ Progressive Web App (PWA) —
+installable on phone
+✓ Offline mode — cached quizzes
+available offline
+✓ Video lecture integration (embedded
+YouTube/Vimeo)
+✓ Video + MCQ pairing (watch lecture →
+take quiz on it)
+
+--- PAGE 28 ---
+✓ AI-powered video timestamp bookmarks
+✓ Live Class scheduling (Zoom/Google
+Meet integration)
+✓ Student Community Forum
+(subject-wise discussions)
+✓ Forum upvoting, pinning, moderation
+✓ GPT-4 upgrade option for complex AI
+queries
+✓ AI-generated full mock paper (from
+question bank)
+✓ Adaptive mock test based on
+weaknesses
+✓ Multi-city leaderboard (Lahore vs
+Karachi vs Islamabad)
+✓ National rank badge on profile
+✓ Monthly MDCAT Grand Challenge (all
+PrepBuddy users)
+✓ Referral rewards system (invite friends
+→ earn XP)
+✓ Parent dashboard — track child's study
+time
+✓ SMS OTP for rural areas with poor
+internet
+✓ NUMS-specific past paper bank
+expansion
+✓ AKU, Agha Khan entry test content
+✓ Performance benchmarking against top
+scorers
+✓ Automated platform health monitoring
+(Sentry + PagerDuty)
+✓ Load testing and scalability
+improvements
+✓ GDPR-compliant data export (student
+data portability)
+✓ Full accessibility audit (WCAG 2.1 AA)
+
+--- PAGE 29 ---
+10. Non-Functional RequirementsFeature
+Description
+Performance
+Page load < 2 seconds on 4G. API response < 300ms for 95% of
+requests. Groq AI response < 1.5 seconds.
+Scalability
+Architecture supports 50,000 concurrent users. Horizontal
+scaling via Docker + load balancer. Database connection
+pooling.
+Availability
+99.9% uptime target. Separate staging and production
+environments. Database daily backups with 30-day retention.
+Reliability
+Graceful error handling — never show raw errors to students.
+Retry logic for AI API calls. Circuit breaker for Groq API.
+SEO
+Next.js SSR for all public pages. Meta tags, Open Graph,
+sitemap.xml, robots.txt. Core Web Vitals score > 90.
+Internationalisation
+Text strings externalised for Urdu translation in Phase 3. RTL
+support considered in layout design.
+Browser Support
+Latest 2 versions of Chrome, Firefox, Safari, Edge. Mobile: iOS
+15+, Android 10+.
+11. Security & ComplianceFeature
+Description
+Authentication
+JWT access tokens (15-min expiry) + refresh tokens (7-day).
+Bcrypt password hashing (cost factor 12).
+Authorisation
+Role-based access control: Student, Teacher, Content Admin,
+Super Admin. Row-level security in DB.
+API Security
+Rate limiting: 100 req/min per IP. CORS whitelist. Input
+validation on all endpoints.
+Data Protection
+HTTPS enforced everywhere. Sensitive data encrypted at rest.
+No plaintext passwords ever stored.
+PDF Security
+PDFs served via signed S3 URLs (15-min expiry) — cannot be
+hotlinked or shared externally.
+
+--- PAGE 30 ---
+Feature
+Description
+Admin Security
+Admin panel on separate subdomain. 2FA required for admin
+login. All admin actions logged.
+Payment Security
+Payment processing via Stripe (PCI-DSS compliant) —
+PrepBuddy never stores card data.
+Privacy
+No student data sold to third parties. Privacy policy clearly
+displayed. Data deletion on request.
+12. Deliverables ChecklistThe following deliverables are expected from the Antigravity development team at the completion of each
+phase and at final handover:
+Feature
+Description
+Source Code
+Full source code in a private GitHub repository with branch
+protection rules.
+Documentation
+API documentation (Swagger UI), README for local setup,
+deployment guide.
+Database Migrations
+Alembic migration files for all database changes —
+rollback-safe.
+Admin Credentials
+Initial super admin account credentials and instructions.
+Seed Data
+Seed script with: 5 subjects, 20 chapters, 500 sample MCQs for
+demo.
+Test Suite
+Unit tests for critical business logic (quiz engine, streak logic, AI
+calls). Min 70% coverage.
+CI/CD Pipeline
+GitHub Actions pipeline: lint → test → build → deploy on push to
+main.
+Environment Config
+.env.example file with all required environment variables
+documented.
+Design Assets
+All Figma design files for UI components, landing page,
+dashboard.
+Deployment Setup
+Production environment on Vercel + Railway/DO, fully
+configured and live.
+
+--- PAGE 31 ---
+Feature
+Description
+Monitoring Setup
+Sentry error tracking configured. Basic uptime monitoring (e.g.
+UptimeRobot).
+Training Session
+1-hour handover call: how to use admin panel, upload papers,
+add MCQs, broadcast notifications.
+
+--- PAGE 32 ---
+13. Pricing Strategy & Business ModelPrepBuddy's business model is built for long-term dominance — not short-term revenue. The strategy is
+simple: Launch completely free, build a loyal student base, become the go-to name for MDCAT prep in
+Pakistan, and then introduce paid tiers once students cannot imagine preparing without PrepBuddy. This
+is exactly how Duolingo, Notion, and every successful EdTech platform has won their markets.
+■ Launch Philosophy: FREE FIRST, MONETISE LATER
+When PrepBuddy launches, 100% of all features are completely free for every student. No
+credit card, no trial limits, no paywalls. Every MCQ, every past paper, every AI explanation,
+every streak, every friend challenge — all free. The goal in Phase 1 and 2 is user
+acquisition and trust, not revenue. Once PrepBuddy has 10,000+ active students and
+strong word-of-mouth, the premium tier activates in Phase 3. Students who joined free are
+grandfathered with generous free access — they become the biggest advocates of the
+platform.
+13.1 Monetisation Timeline
+Phase
+Period
+Pricing Model
+Goal
+Phase 1–2
+(Launch)
+Months 0–6
+100% Free — No limits All
+features open to everyone
+Acquire first 10,000
+students Build brand &
+trust
+Phase 3
+(Growth)
+Months 6–12
+Freemium introduced Free
+tier + Premium tier launched
+Convert 5–10% to paid
+Target: 500–1,000
+premium users
+Phase 4
+(Scale)
+Months 12–24
+Academy / Institutional plans
+added Annual plans with
+discount
+Target: 5,000+ premium
+users Break-even on
+operating costs
+Year 2+
+(Profit)
+Month 24+
+Full freemium + B2B
+Academy model Sponsored
+content, Academy
+partnerships
+Sustainable profitable
+business Market leader in
+MDCAT prep
+13.2 Pricing Tiers (Activated in Phase 3 — Month 6+)
+
+--- PAGE 33 ---
+When the premium tier goes live, PrepBuddy uses a 3-tier freemium model. The Free tier remains
+generous enough that students love the platform — but the Premium tier is compelling enough that serious
+MDCAT aspirants upgrade.
+Feature
+■ Free (Always
+Free)
+■ Premium PKR 999 /
+month ≈ PKR 7,999 /
+year
+■ Academy PKR
+4,999 / month (Up to
+50 students)
+Past Paper Access
+Last 2 years
+only
+All years
+(2015–present)
+All years + Admin
+upload
+MCQs Available
+500 MCQs /
+subject
+Unlimited MCQs
+Unlimited + Custom
+MCQs
+Daily Quiz Limit
+3 quizzes / day
+Unlimited quizzes
+Unlimited + Assign to
+students
+AI Explanations (Groq)
+5 per day
+Unlimited
+Unlimited
+AI Study Coach Chat
+■ Not included
+✓ Included
+✓ Included
+AI Study Plan
+■ Not included
+✓ Personalised weekly
+plan
+✓ Class-wide plan
+Mock Tests
+1 per week
+Unlimited mocks
+Unlimited + Custom
+mocks
+Performance Analytics
+Basic (7-day)
+Full (all-time) + export
+Full + per-student
+reports
+PDF Download
+■ Not available
+✓ Download all papers
+✓ Download + bulk
+share
+Streak Freeze Tokens
+1 per month
+4 per month
+4 per month
+Friend Challenges
+✓ Unlimited
+✓ Unlimited
+✓ Unlimited
+Group Competition
+Rooms
+Max 3 friends
+Up to 10 friends
+Up to 50 students
+Leaderboard
+✓ Visible
+✓ + National rank
+badge
+✓ + Academy
+leaderboard
+Question Bookmarks
+Up to 50
+Unlimited
+Unlimited
+Concept Summary Cards
+(AI)
+■ Not included
+✓ Any chapter
+✓ Any chapter
+Mnemonic Generator (AI)
+■ Not included
+✓ Included
+✓ Included
+
+--- PAGE 34 ---
+Feature
+■ Free (Always
+Free)
+■ Premium PKR 999 /
+month ≈ PKR 7,999 /
+year
+■ Academy PKR
+4,999 / month (Up to
+50 students)
+Exam Readiness Score
+■ Not included
+✓ Real-time score
+✓ Per-student score
+Printable Result PDF
+■ Not included
+✓ Included
+✓ Included
+Urdu Interface
+✓ Included
+✓ Included
+✓ Included
+Offline Mode (PWA)
+■ Not included
+✓ Included (Phase 4)
+✓ Included (Phase 4)
+Ads
+Minimal,
+non-intrusive
+✓ Ad-free experience
+✓ Ad-free
+Support
+Community
+forum
+Priority email support
+Dedicated WhatsApp
+support
+Pricing Notes:
+ PKR 999/month for Premium = roughly PKR 33/day — less than one photocopy. Extremely affordable
+for serious students.
+ Annual plan at PKR 7,999 gives students ~33% discount vs monthly — encourages long-term
+commitment.
+ Students who joined during the free launch phase get a Founding Member discount: 50% off
+Premium for life.
+ Payment methods: EasyPaisa, JazzCash, Debit/Credit Card via Stripe — all major Pakistani payment
+methods.
+ Academy plan allows coaching academies to manage up to 50 student accounts — ideal for MDCAT
+prep centres.
+ Free trial: 14-day full Premium trial for all new users — no credit card required at signup.
+ Student verification discount: Students with a valid CNIC or student ID get an additional 20% off.
+13.3 Revenue Projections (Conservative Estimates)
+These are realistic, conservative estimates based on standard freemium conversion rates (3–8%) in
+EdTech platforms in South Asia. These numbers grow significantly with word-of-mouth, social media
+growth, and academy partnerships.
+Milestone
+Total Users
+Premium Users
+(5% conversion)
+Monthly
+Revenue (PKR)
+Annual
+Revenue
+(PKR)
+Month 6 (Premium
+Launch)
+10,000
+500
+499,500
+~6,000,000
+
+--- PAGE 35 ---
+Milestone
+Total Users
+Premium Users
+(5% conversion)
+Monthly
+Revenue (PKR)
+Annual
+Revenue
+(PKR)
+Month 12
+35,000
+1,750
+1,748,250
+~21,000,000
+Month 18
+80,000
+4,000
+3,996,000
+~48,000,000
+Month 24 (+
+Academy plans)
+150,000
+7,500 + 50
+academies
+7,742,500
+~93,000,000
+13.4 Additional Revenue Streams (Phase 4+)
+Feature
+Description
+Sponsored Content
+MDCAT prep books, academies, and medical universities can
+sponsor newsletter sections or blog posts — clearly labelled as
+sponsored.
+Academy Partnerships
+Formal partnerships with top MDCAT academies (Kips, Star,
+etc.) — PrepBuddy becomes their digital practice platform.
+In-App Advertising
+Minimal, tasteful ads on the Free tier only — medical book
+publishers, academy ads. Never intrusive.
+Institutional Licensing
+Universities and government bodies license PrepBuddy content
+for their own student portals.
+Data Insights
+(Anonymised)
+Sell aggregated, anonymised performance data to PMC or
+universities to help improve MDCAT question quality.
+PrepBuddy Store
+Branded merchandise: PrepBuddy notebooks, planners — sold
+to students who love the brand.
+13.5 Why 'Free First' is the Right Strategy for Pakistan
+ Pakistani students are extremely price-sensitive. Asking for money at signup kills conversion instantly
+— even PKR 200 is a barrier.
+ Word-of-mouth is the #1 growth channel in Pakistan. A student who loves PrepBuddy tells 10 friends.
+Free removes all friction to try it.
+ Building a large free user base creates a powerful data moat — PrepBuddy knows more about
+MDCAT prep patterns than anyone else.
+ Once students have months of streak history, quiz data, and friends on PrepBuddy, switching to a
+competitor becomes painful. Retention becomes natural.
+ Investors, media, and academies take PrepBuddy more seriously with 50,000 users than with 500
+paying users. Free growth builds credibility.
+
+--- PAGE 36 ---
+ The MDCAT calendar is fixed (once a year). Free access lets PrepBuddy capture ALL students at the
+start of their prep cycle — not just those who can pay.
+ PrepBuddy — Empowering Pakistan's Medical Aspirants, One MCQ at a Time.
+ Document Version 1.1  April 2026  Confidential
+
