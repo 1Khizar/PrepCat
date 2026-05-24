@@ -32,7 +32,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        # Add your production frontend URL here later, e.g. "https://prepbuddy.com"
+        "https://prepbuddy-tau.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
