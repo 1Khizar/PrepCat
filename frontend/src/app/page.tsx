@@ -51,10 +51,8 @@ export default function Home() {
 
       <main>
         {/* SECTION 1: PREMIUM FULL-SCREEN HERO */}
-        <section className="relative overflow-hidden min-h-[85svh] md:min-h-[100svh]" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #eff6ff 100%)' }}>
-          {/* Background blobs */}
-          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-primary/8 rounded-full blur-[100px] animate-slow-spin" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-brand-secondary/6 rounded-full blur-[80px]" />
+        <section className="relative overflow-hidden bg-white min-h-[85svh] md:min-h-[100svh]">
+          {/* Clean White Background (no blobs) */}
 
           {/* Full-height column */}
           <div className="relative z-10 flex flex-col min-h-[85svh] md:min-h-[100svh]">
