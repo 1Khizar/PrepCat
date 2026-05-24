@@ -50,106 +50,144 @@ export default function Home() {
       <Navbar />
 
       <main>
-        {/* SECTION 1: PREMIUM HERO */}
-        <section className="relative bg-white pt-28 md:pt-32 pb-4 lg:pt-24 lg:pb-6 overflow-hidden min-h-[70vh] flex items-center">
-          {/* Animated Background Blobs */}
-          <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-brand-primary/5 rounded-full blur-[120px] animate-slow-spin" />
-          <div className="absolute bottom-[20%] left-[-5%] w-[400px] h-[400px] bg-brand-secondary/5 rounded-full blur-[100px]" />
+        {/* SECTION 1: PREMIUM FULL-SCREEN HERO */}
+        <section className="relative overflow-hidden min-h-[85svh] md:min-h-[100svh]" style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 50%, #eff6ff 100%)' }}>
+          {/* Background blobs */}
+          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-brand-primary/8 rounded-full blur-[100px] animate-slow-spin" />
+          <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-brand-secondary/6 rounded-full blur-[80px]" />
 
-          <div className="container relative z-10">
-            <div className="grid lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6 text-center lg:text-left">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="eyebrow-amazing !mb-2"
-                >
-                  <Sparkles size={12} className="animate-pulse" />
-                  Official Past Papers & Topic-Wise MCQs
-                </motion.div>
+          {/* Full-height column */}
+          <div className="relative z-10 flex flex-col min-h-[85svh] md:min-h-[100svh]">
 
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="text-4xl sm:text-5xl lg:text-7xl font-bold text-gradient leading-[1] tracking-tight"
-                >
-                  Master the MDCAT <br />
-                  <span className="text-brand-primary italic">Smarter.</span>
-                </motion.h1>
+            {/* Top spacing — generous gap below navbar on mobile */}
+            <div className="h-24 md:h-32 lg:h-24 flex-shrink-0" />
 
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 }}
-                  className="text-lg md:text-xl text-slate-500 max-w-lg mx-auto lg:mx-0 font-medium leading-relaxed"
-                >
-                  Stop wasting time on disorganized PDFs. Get structured practice and instant explanations.
-                </motion.p>
+            {/* Main hero content */}
+            <div className="flex-1 flex flex-col justify-center container">
 
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="flex flex-row items-center justify-center lg:justify-start gap-3 sm:gap-4 pt-6 w-full"
-                >
-                  <Link href="/register" className="btn-amazing flex-1 sm:flex-none group !px-2 sm:!px-10 !py-3.5 text-center justify-center">
-                    Create Account
-                  </Link>
-                  <Link href="/login" className="btn-amazing-outline flex-1 sm:flex-none !px-2 sm:!px-10 !py-3.5 text-center justify-center">
-                    Login
-                  </Link>
-                </motion.div>
+              {/* Desktop: 2-col grid; Mobile: single col */}
+              <div className="grid lg:grid-cols-2 gap-12 items-center">
 
-                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 pt-2 flex items-center justify-center lg:justify-start gap-2">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map(i => <div key={i} className="w-5 h-5 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[6px]">👨‍⚕️</div>)}
-                  </div>
-                  Join 200+ Waitlist
+                {/* Left col — always visible */}
+                <div>
+                  {/* Eyebrow badge */}
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                    className="eyebrow-amazing mb-8 md:mb-5"
+                  >
+                    <Sparkles size={12} className="animate-pulse" />
+                    Official Past Papers &amp; Topic-Wise MCQs
+                  </motion.div>
+
+                  {/* Main heading */}
+                  <motion.h1
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                    className="text-[2.5rem] sm:text-5xl lg:text-7xl font-extrabold leading-[1.08] tracking-tight text-slate-900 mb-8 md:mb-5 mt-0"
+                  >
+                    Master the<br />
+                    MDCAT{" "}<span className="text-brand-primary italic">Smarter.</span>
+                  </motion.h1>
+
+                  {/* Subtitle */}
+                  <motion.p
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    className="text-base md:text-xl text-slate-500 font-medium leading-relaxed mb-7 max-w-sm md:max-w-lg"
+                  >
+                    Stop wasting time on disorganized PDFs. Get structured practice and instant explanations.
+                  </motion.p>
+
+                  {/* CTA Buttons */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.6, delay: 0.3 }}
+                    className="flex gap-3 mb-6"
+                  >
+                    <Link href="/register" className="btn-amazing !py-4 !px-5 flex-1 sm:flex-none sm:!px-10 text-center text-[15px]">
+                      Create Account
+                    </Link>
+                    <Link href="/login" className="btn-amazing-outline !py-4 !px-5 flex-1 sm:flex-none sm:!px-10 text-center text-[15px]">
+                      Login
+                    </Link>
+                  </motion.div>
+
+                  {/* Social proof */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.45 }}
+                    className="flex items-center gap-2 mb-8"
+                  >
+                    <div className="flex -space-x-2">
+                      {[1,2,3].map(i => (
+                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-[9px] shadow-sm">👨‍⚕️</div>
+                      ))}
+                    </div>
+                    <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Trusted by 200+ Students</span>
+                  </motion.div>
+
+                  {/* Animated stat pills — mobile only - REMOVED */}
                 </div>
+
+                {/* Right col — desktop image only */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.85, rotate: 4 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  transition={{ duration: 1, type: "spring" }}
+                  className="relative hidden lg:block"
+                >
+                  <div className="relative z-10 animate-bop shadow-2xl rounded-[2.5rem] overflow-hidden border-4 border-white max-w-[500px] ml-auto">
+                    <Image src="/hero-mdcat.png" alt="PrepBuddy MDCAT Study Visual" width={500} height={500} className="w-full h-auto" />
+                  </div>
+                  <motion.div
+                    animate={{ y: [0, 10, 0] }}
+                    transition={{ duration: 5, repeat: Infinity }}
+                    className="absolute -bottom-6 -right-6 amazing-card !p-4 shadow-xl z-20"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-brand-secondary">
+                        <Star size={20} fill="currentColor" />
+                      </div>
+                      <div>
+                        <div className="text-lg font-bold italic tracking-tighter">20,000+</div>
+                        <div className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Solved MCQs</div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </motion.div>
+
               </div>
-
-              {/* Hero Image / Illustration */}
-              <motion.div
-                initial={{ opacity: 0, scale: 0.8, rotate: 5 }}
-                animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                transition={{ duration: 1, type: "spring" }}
-                className="relative hidden lg:block"
-              >
-                <div className="relative z-10 animate-bop shadow-2xl rounded-[2.5rem] overflow-hidden border-4 border-white max-w-[500px] ml-auto">
-                  <Image
-                    src="/hero-mdcat.png"
-                    alt="PrepBuddy MDCAT Study Visual"
-                    width={500}
-                    height={500}
-                    className="w-full h-auto"
-                  />
-                </div>
-
-                {/* Floating Stats Card 2 */}
-                <motion.div
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  className="absolute -bottom-6 -right-6 amazing-card !p-4 shadow-xl z-20"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-brand-secondary">
-                      <Star size={20} fill="currentColor" />
-                    </div>
-                    <div>
-                      <div className="text-lg font-bold italic tracking-tighter">20,000+</div>
-                      <div className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Solved MCQs</div>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
             </div>
+
+            {/* Scroll indicator — mobile only */}
+            <motion.div
+              animate={{ y: [0, 7, 0] }}
+              transition={{ duration: 1.6, repeat: Infinity }}
+              className="pb-5 flex flex-col items-center gap-1 lg:hidden"
+            >
+              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-300">Scroll</span>
+              <div className="w-5 h-8 border-2 border-slate-200 rounded-full flex items-start justify-center pt-1">
+                <motion.div
+                  animate={{ y: [0, 12, 0] }}
+                  transition={{ duration: 1.6, repeat: Infinity }}
+                  className="w-1.5 h-1.5 bg-brand-primary rounded-full"
+                />
+              </div>
+            </motion.div>
+
           </div>
         </section>
 
         {/* SECTION 2: COMPACT STATS GRID (MOBILE-READY) */}
         <section className="py-6 md:py-10 relative bg-white border-y border-slate-50">
           <div className="container">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
               {[
                 { title: "15 Years", subtitle: "Archive", icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
                 { title: "20,000+", subtitle: "Questions", icon: Brain, color: "text-emerald-600", bg: "bg-emerald-50" },
@@ -161,7 +199,7 @@ export default function Home() {
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                   key={i}
-                  className="amazing-card !p-5 md:!p-8 text-center hover:-translate-y-2 transition-all duration-300 shadow-sm hover:shadow-xl border border-slate-100 group"
+                  className="amazing-card !p-4 md:!p-8 text-center hover:-translate-y-2 transition-all duration-300 shadow-sm hover:shadow-xl border border-slate-100 group"
                 >
                   <div className={`w-12 h-12 md:w-16 md:h-16 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:rotate-6 transition-transform shadow-inner`}>
                     <stat.icon size={24} className="md:w-8 md:h-8" />
@@ -176,7 +214,7 @@ export default function Home() {
 
 
         {/* SECTION 4: THE PREPARATION GAP (STRATEGY) */}
-        <section className="pt-2 md:pt-4 pb-8 md:pb-12 bg-slate-50 relative">
+        <section className="py-10 md:py-12 bg-slate-50 relative">
           <div className="container">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6 lg:pl-10">
@@ -232,9 +270,9 @@ export default function Home() {
         </section>
 
         {/* SECTION 5: SUBJECT DISCOVERY (CONTENT SHOWCASE) */}
-        <section className="py-16 md:py-20 relative overflow-hidden">
+        <section className="py-10 md:py-20 relative overflow-hidden">
           <div className="container">
-            <div className="text-center mb-12 space-y-3">
+            <div className="text-left md:text-center mb-8 space-y-3">
               <div className="eyebrow-amazing">Subject Mastery</div>
               <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Everything you need to <span className="text-brand-primary">Succeed.</span></h2>
               <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
@@ -274,13 +312,13 @@ export default function Home() {
         </section>
 
         {/* SECTION 6: INTERACTIVE DEMO */}
-        <section id="demo" className="py-12 md:py-16 relative overflow-hidden bg-white">
+        <section id="demo" className="py-8 md:py-16 relative overflow-hidden bg-white">
           {/* Soft Background Accents */}
           <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(5,150,105,0.05),transparent_70%)]" />
 
           <div className="container relative z-10">
             <div className="grid lg:grid-cols-2 gap-10 items-center">
-              <div className="space-y-4 text-center lg:text-left">
+              <div className="space-y-4 text-left lg:text-left">
                 <div className="eyebrow-amazing !py-1 !px-3 !text-[10px]">Interactive Demo</div>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight text-gradient">Experience the <br /> <span className="text-brand-primary">Clean Interface</span></h2>
                 <p className="text-base text-slate-500 font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
@@ -364,15 +402,15 @@ export default function Home() {
         </section>
 
         {/* SECTION 7: FINAL CTA (PREMIUM LIGHT) */}
-        <section className="py-12 md:py-20 bg-white relative overflow-hidden">
+        <section className="py-10 md:py-20 bg-white relative overflow-hidden">
           {/* Mesh Gradient Background */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-brand-primary/10 via-brand-secondary/5 to-transparent rounded-full blur-[120px] -z-0" />
 
           <div className="container relative z-10">
             <div className="amazing-card !bg-white/80 !backdrop-blur-3xl !p-6 md:!p-24 text-center border-2 border-slate-100 shadow-[0_50px_100px_rgba(0,0,0,0.05)] rounded-[2.5rem] md:rounded-[4rem] max-w-5xl mx-auto overflow-hidden">
-              <div className="relative z-10 space-y-10 max-w-4xl mx-auto">
+              <div className="relative z-10 space-y-6 max-w-4xl mx-auto">
                 <div className="eyebrow-amazing mx-auto italic">Limited Beta Early Access</div>
-                <h2 className="text-4xl md:text-7xl font-bold tracking-tighter leading-[1.1] text-gradient">Your future in white coat <br className="hidden md:block" /> starts here.</h2>
+                <h2 className="text-3xl md:text-7xl font-bold tracking-tighter leading-[1.1] text-gradient">Your future in white coat <br className="hidden md:block" /> starts here.</h2>
                 <p className="text-lg md:text-xl text-slate-500 font-medium">
                   Join the most advanced medical test preparation platform in Pakistan. <br className="hidden md:block" /> Secure early access as a founding beta member.
                 </p>
@@ -395,7 +433,7 @@ export default function Home() {
       </main>
 
       {/* PREMIUM FOOTER */}
-      <footer className="pt-32 pb-12 bg-slate-50 relative overflow-hidden border-t border-slate-200">
+      <footer className="pt-16 md:pt-32 pb-12 bg-slate-50 relative overflow-hidden border-t border-slate-200">
         {/* Subtle decorative glow */}
         <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 blur-[150px] -z-0" />
 
