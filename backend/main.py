@@ -2,23 +2,57 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
+from contextlib import asynccontextmanager
 
 from app.api import questions, auth, papers
+
+from app.db.session import Base, engine, SessionLocal
+from app.models import engagement, user
+from app.models.user import User as UserModel, UserRole
+from app.core.security import get_password_hash
+
+Base.metadata.create_all(bind=engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup: Seed Admin
+    db = SessionLocal()
+    try:
+        admin_email = os.getenv("ADMIN_EMAIL")
+        admin_pass = os.getenv("ADMIN_PASSWORD")
+        admin_name = os.getenv("ADMIN_FULL_NAME", "Admin")
+        
+        if admin_email and admin_pass:
+            admin_user = db.query(UserModel).filter(UserModel.email == admin_email).first()
+            if not admin_user:
+                new_admin = UserModel(
+                    email=admin_email,
+                    username="admin",
+                    hashed_password=get_password_hash(admin_pass),
+                    full_name=admin_name,
+                    role=UserRole.ADMIN,
+                    is_active=True
+                )
+                db.add(new_admin)
+                db.commit()
+                print("Successfully seeded admin user")
+    except Exception as e:
+        print(f"Error seeding admin: {e}")
+    finally:
+        db.close()
+    yield
 
 app = FastAPI(
     title="PrepBuddy API",
     description="Backend API for PrepBuddy MDCAT & NUMS Prep Platform",
-    version="1.0.0"
+    version="1.0.0",
+    lifespan=lifespan
 )
 
 # Register Routers
 app.include_router(auth.router)
 app.include_router(questions.router)
 app.include_router(papers.router)
-
-from app.db.session import Base, engine
-from app.models import engagement, user
-Base.metadata.create_all(bind=engine)
 
 # Mount uploads directory
 UPLOAD_DIR = "uploads"
@@ -32,7 +66,8 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000",
         "http://127.0.0.1:3000",
-        "https://prepbuddy-tau.vercel.app"
+        "https://prepbuddy-tau.vercel.app",
+        "https://prep-buddy-theta.vercel.app"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],

@@ -11,14 +11,16 @@ PrepBuddy is a premium, high-performance EdTech platform tailored specifically f
 ### 🏥 For Students (The "Future Doctor" Experience)
 
 - **Clinical Intelligence Dashboard**: A sophisticated, glassmorphic overview of academic standing, mastery goals, and study streaks.
+- **Mobile-First Excellence**: Full-viewport responsive hero sections, professional typography, and an intuitively optimized mobile layout across all views.
 - **Paper Vault**: Instant access to verified past papers from PMDC, UHS, SZABMU, and NUMS (2015-2024).
 - **Smart Quiz Engine**: Practice MCQs with instant expert feedback and detailed solution logic.
 - **Mastery Analytics**: Subject-wise progress tracking with visual heatmaps and accuracy indicators.
-- **Gamified Progress**: Earn XP, maintain daily study streaks (🔥), and climb the "Medical Ranks."
+- **Real-Data Gamification**: Fully functional XP progression, precise daily study streak tracking (🔥), and user engagement logging synchronized seamlessly with the Supabase backend.
 
 ### 🛡️ For Administrators (The Control Center)
 
-- **Student Management**: Full oversight of registered students, including account status (Active/Blocked).
+- **Robust Security & User Management**: Full oversight of registered students, including real-time session termination and instant access revocation for blocked accounts.
+- **Google Drive Integration**: Streamlined workflow with a persistent Google Drive connection for directly managing and hosting Past Paper PDFs.
 - **Paper Portal**: Clean interface to upload and publish official past papers with year, board, and subject metadata.
 - **Data Export**: One-click CSV export for student lists and performance metrics.
 - **Content Studio**: Manage the MCQ bank, chapters, and topics directly from the dashboard.
@@ -38,12 +40,12 @@ PrepBuddy is built using a modern, industry-leading stack for maximum speed and 
 - **Backend**:
   - **Core**: FastAPI (Python 3.13+)
   - **Manager**: `uv` (High-performance Python package management)
-  - **ORM**: SQLAlchemy 2.0
-  - **Database**: **Supabase PostgreSQL** (Managed Cloud Database)
-  - **Security**: JWT-based Authentication
+  - **ORM & Migrations**: SQLAlchemy 2.0 with Alembic for scalable schema management
+  - **Database**: **Supabase PostgreSQL** (Managed Cloud Database w/ Pooler Connection)
+  - **Security**: Robust JWT-based Authentication & Real-time Session Revocation
 - **Cloud Infrastructure**:
   - **Database & Auth**: Supabase (PostgreSQL)
-  - **File Storage**: Supabase Storage (PDF Past Papers)
+  - **File Storage**: Google Drive API Integration for Admin File Management
 - **Deployment**:
   - **Frontend**: Vercel
   - **Backend**: Docker / Railway / Render
@@ -57,11 +59,11 @@ PrepBuddy/
 ├── frontend/             # Next.js 15 Workspace
 ├── backend/              # FastAPI High-Performance Brain
 │   ├── app/              # Application Logic
-│   │   ├── api/          # REST Endpoints (Auth, Papers, Questions)
+│   │   ├── api/          # REST Endpoints (Auth, Papers, Questions, Analytics)
 │   │   ├── models/       # Database Schemas (Supabase Postgres)
-│   │   └── core/         # Supabase & Security Config
-│   ├── main.py           # API Entry Point
-│   └── uploads/          # (Legacy) Moved to Supabase Storage
+│   │   └── core/         # Security, Configurations, Google Drive Integration
+│   ├── alembic/          # Database Migration Scripts
+│   └── main.py           # API Entry Point
 └── README.md             # The Project Encyclopedia
 ```
 
