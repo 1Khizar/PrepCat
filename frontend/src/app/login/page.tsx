@@ -47,7 +47,7 @@ export default function LoginPage() {
       });
 
       localStorage.setItem("token", res.data.access_token);
-      localStorage.setItem("prepBuddy_user", formData.identifier);
+      localStorage.setItem("prepcat_user", formData.identifier);
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Invalid credentials. Please ensure you are registered.");
@@ -60,7 +60,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center p-6 bg-amazing-gradient relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full -z-10">
-        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]" />
+        <div className="absolute top-[-10%] right-[-10%] w-[600px] h-[600px] bg-blue-500/10 rounded-full blur-[120px]" />
         <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-[100px]" />
       </div>
 

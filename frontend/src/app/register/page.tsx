@@ -55,7 +55,7 @@ export default function RegisterPage() {
       });
 
       localStorage.setItem("token", res.data.access_token);
-      localStorage.setItem("prepBuddy_user", formData.name);
+      localStorage.setItem("prepcat_user", formData.name);
 
       router.push("/dashboard");
     } catch (err: any) {
@@ -165,7 +165,7 @@ export default function RegisterPage() {
                 disabled={loading}
                 className="btn-amazing w-full py-4 text-base group disabled:opacity-50 !rounded-xl shadow-xl"
               >
-                {loading ? "Creating Account..." : "Join PrepBuddy Academy"}
+                {loading ? "Creating Account..." : "Join PrepCat Academy"}
                 <ArrowRight size={18} className={loading ? "animate-pulse" : "group-hover:translate-x-1 transition-transform"} />
               </button>
 

@@ -60,9 +60,21 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     if db.query(UserModel).filter(UserModel.email == user_in.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # Ensure username is unique and clean
+    base_username = re.sub(r'[^a-zA-Z0-9]', '', user_in.username)
+    if not base_username:
+        base_username = user_in.email.split('@')[0]
+        base_username = re.sub(r'[^a-zA-Z0-9]', '', base_username)
+    
+    username = base_username
+    counter = 1
+    while db.query(UserModel).filter(UserModel.username == username).first():
+        username = f"{base_username}{counter}"
+        counter += 1
+
     db_user = UserModel(
         email=user_in.email,
-        username=user_in.username,
+        username=username,
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         phone_number=user_in.phone_number

@@ -40,7 +40,7 @@ const HeroSection = () => {
               transition={{ delay: 0.1 }}
               className="text-lg md:text-xl text-text-muted max-w-xl mx-auto lg:mx-0 font-medium leading-relaxed"
             >
-              Don't study harder, study <span className="text-brand-primary font-bold text-2xl">happier!</span> PrepBuddy makes mastering past papers fun, organized, and super easy for every future doctor.
+              Don't study harder, study <span className="text-brand-primary font-bold text-2xl">happier!</span> PrepCat makes mastering past papers fun, organized, and super easy for every future doctor.
             </motion.p>
 
             <motion.div

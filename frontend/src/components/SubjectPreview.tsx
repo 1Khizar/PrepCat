@@ -8,36 +8,36 @@ const subjects = [
   {
     name: "Biology",
     icon: Dna,
-    color: "text-emerald-500",
-    bg: "bg-emerald-50",
-    accent: "bg-emerald-500",
+    color: "text-blue-600",
+    bg: "bg-blue-50",
+    accent: "bg-blue-600",
     description: "Learn about life! Everything from cells to humans, perfectly organized for your MDCAT.",
     count: "24,000+ Questions",
   },
   {
     name: "Physics",
     icon: Zap,
-    color: "text-amber-500",
-    bg: "bg-amber-50",
-    accent: "bg-amber-500",
+    color: "text-blue-500",
+    bg: "bg-blue-50",
+    accent: "bg-blue-500",
     description: "Make physics fun with easy-to-follow past paper solutions and numerical practice.",
     count: "18,000+ Questions",
   },
   {
     name: "Chemistry",
     icon: Beaker,
-    color: "text-blue-500",
+    color: "text-blue-700",
     bg: "bg-blue-50",
-    accent: "bg-blue-500",
+    accent: "bg-blue-700",
     description: "Master all types of chemistry with official papers and simple explanations.",
     count: "21,000+ Questions",
   },
   {
     name: "English",
     icon: BookOpen,
-    color: "text-purple-500",
-    bg: "bg-purple-50",
-    accent: "bg-purple-500",
+    color: "text-blue-800",
+    bg: "bg-blue-50",
+    accent: "bg-blue-800",
     description: "Build your vocabulary and ace the grammar section with our curated sets.",
     count: "8,000+ Questions",
   },
@@ -50,7 +50,7 @@ const SubjectPreview = () => {
         <div className="max-w-2xl mx-auto space-y-6 mb-20">
           <div className="eyebrow mx-auto uppercase">Study Smarter</div>
           <h2 className="text-4xl md:text-5xl font-black text-text-navy">
-            Choose Your <span className="text-brand-primary">Favorite</span> Subject
+            Choose Your <span className="text-blue-600">Favorite</span> Subject
           </h2>
           <p className="text-lg text-text-muted font-bold">
             We've organized every past paper so you can focus on what matters most—your learning journey!
@@ -95,7 +95,7 @@ const SubjectPreview = () => {
         {/* Fun Trust Bar */}
         <div className="mt-24 p-12 bg-buddy-gradient rounded-[3.5rem] border-2 border-slate-50 flex flex-wrap justify-between items-center gap-10">
           <div className="flex flex-col items-center gap-4 flex-1">
-            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-primary shadow-sm">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-blue-600 shadow-sm">
               <Star size={24} fill="currentColor" />
             </div>
             <div className="text-center">
@@ -104,7 +104,7 @@ const SubjectPreview = () => {
             </div>
           </div>
           <div className="flex flex-col items-center gap-4 flex-1">
-            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-secondary shadow-sm">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-blue-700 shadow-sm">
               <Heart size={24} fill="currentColor" />
             </div>
             <div className="text-center">
@@ -113,7 +113,7 @@ const SubjectPreview = () => {
             </div>
           </div>
           <div className="flex flex-col items-center gap-4 flex-1">
-            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-brand-accent shadow-sm">
+            <div className="w-14 h-14 bg-white rounded-2xl flex items-center justify-center text-blue-500 shadow-sm">
               <Compass size={24} />
             </div>
             <div className="text-center">

@@ -78,7 +78,7 @@ const Footer = () => {
             <div className="space-y-6">
               <div className="flex flex-col gap-1">
                 <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Email Us Any time</span>
-                <div className="text-sm font-black text-text-navy pb-1">hello@prepbuddy.pk</div>
+                <div className="text-sm font-black text-text-navy pb-1">hello@prepcat.pk</div>
               </div>
               <div className="flex flex-col gap-1">
                 <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest leading-none">Support Hotline</span>

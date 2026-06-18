@@ -56,13 +56,13 @@ export default function QuizPage() {
               <X size={24} />
             </Link>
             <div>
-              <div className="text-[10px] font-black text-brand-teal uppercase tracking-widest leading-none mb-1">Biology • Cell Structure</div>
+              <div className="text-[10px] font-black text-blue-600 uppercase tracking-widest leading-none mb-1">Biology • Cell Structure</div>
               <div className="text-sm font-bold text-slate-900 truncate max-w-[200px] md:max-w-none">MDCAT Full Length Practice</div>
             </div>
           </div>
           
           <div className="flex items-center gap-4 px-6 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
-            <Clock size={18} className="text-brand-teal" />
+            <Clock size={18} className="text-blue-600" />
             <span className="text-lg font-black tabular-nums tracking-tighter text-slate-800">12:45</span>
           </div>
         </header>
@@ -77,10 +77,10 @@ export default function QuizPage() {
                 <span className="text-xl font-black text-slate-300">/ 50</span>
               </div>
               <div className="flex gap-4">
-                <button className="p-3 rounded-lg border border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all shadow-sm">
+                <button className="p-3 rounded-lg border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm">
                   <Flag size={20} />
                 </button>
-                <button className="p-3 rounded-lg border border-slate-200 text-slate-400 hover:text-brand-gold hover:bg-amber-50 transition-all shadow-sm">
+                <button className="p-3 rounded-lg border border-slate-200 text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm">
                   <BookMarked size={20} />
                 </button>
               </div>
@@ -108,15 +108,15 @@ export default function QuizPage() {
                     <button
                       key={idx}
                       onClick={() => handleSelect(idx)}
-                      className={`option-box py-5 px-6 ${
-                        showCorrect ? "option-correct" : 
-                        showIncorrect ? "option-incorrect" : 
-                        isSelected ? "border-brand-teal bg-cyan-50/30 text-brand-navy" : ""
+                      className={`w-full text-left py-5 px-6 rounded-2xl border transition-all flex items-center justify-between ${
+                        showCorrect ? "border-blue-600 bg-blue-50/50 text-blue-900 font-bold" : 
+                        showIncorrect ? "border-slate-400 bg-slate-100 text-slate-700 font-bold" : 
+                        isSelected ? "border-blue-600 bg-blue-50/30 text-slate-900" : "border-slate-200 bg-white hover:border-blue-600 hover:bg-blue-50/20"
                       }`}
                     >
                       <span className="text-lg font-bold">{opt.text}</span>
-                      {showCorrect && <Check size={20} className="text-emerald-600" />}
-                      {showIncorrect && <X size={20} className="text-rose-600" />}
+                      {showCorrect && <Check size={20} className="text-blue-600" />}
+                      {showIncorrect && <X size={20} className="text-slate-500" />}
                     </button>
                   );
                 })}
@@ -129,14 +129,14 @@ export default function QuizPage() {
                 <motion.div 
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-emerald-50 border border-emerald-100 p-8 rounded-2xl flex flex-col md:flex-row gap-6 items-start"
+                  className="bg-blue-50 border border-blue-100 p-8 rounded-2xl flex flex-col md:flex-row gap-6 items-start"
                 >
-                  <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg">
+                  <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg">
                     <HelpCircle size={24} />
                   </div>
                   <div>
-                    <h4 className="text-xs font-black uppercase tracking-widest text-emerald-700 mb-3">Expert Explanation</h4>
-                    <p className="text-base text-emerald-800 leading-relaxed font-bold">
+                    <h4 className="text-xs font-black uppercase tracking-widest text-blue-700 mb-3">Expert Explanation</h4>
+                    <p className="text-base text-blue-800 leading-relaxed font-bold">
                       The smooth endoplasmic reticulum (SER) is the site for lipid synthesis and drug detoxification. It is distinct from the Rough ER because it lacks ribosomes on its surface.
                     </p>
                   </div>
