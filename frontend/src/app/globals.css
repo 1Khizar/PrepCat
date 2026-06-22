@@ -1,123 +1,177 @@
 @import "tailwindcss";
 
 @theme {
-  /* Amazing Professional Palette */
-  --color-brand-primary: #059669;
-  /* Emerald */
-  --color-brand-secondary: #2563EB;
-  /* Royal Blue */
-  --color-brand-accent: #F59E0B;
-  /* Amber */
+    /* Clean White & Blue Palette */
+    --color-brand-primary: #2563EB;
+    /* Royal Blue */
+    --color-brand-secondary: #1D4ED8;
+    /* Deep Blue */
+    --color-brand-accent: #3B82F6;
+    /* Sky Blue */
+    --color-brand-navy: #0F172A;
+    /* Navy */
+    --color-brand-teal: #2563EB;
+    /* Alias to blue for legacy usage */
 
-  --font-sans: var(--font-nunito), ui-sans-serif, system-ui;
-  --font-heading: var(--font-nunito), ui-sans-serif, system-ui;
+    --font-sans: var(--font-inter), ui-sans-serif, system-ui;
+    --font-heading: var(--font-plus-jakarta), ui-sans-serif, system-ui;
 
-  --color-bg-main: #FAFAFA;
-  --color-bg-subtle: #F1F5F9;
+    --color-bg-main: #FAFAFA;
+    --color-bg-subtle: #F1F5F9;
 
-  --color-text-main: #0F172A;
-  --color-text-muted: #64748B;
+    --color-text-main: #0F172A;
+    --color-text-muted: #64748B;
 
-  /* Custom Shadows */
-  --shadow-amazing: 0 20px 50px rgba(0, 0, 0, 0.05);
-  --shadow-amazing-hover: 0 30px 70px rgba(0, 0, 0, 0.08);
-  --shadow-primary-glow: 0 10px 30px rgba(5, 150, 105, 0.2);
+    /* Custom Shadows */
+    --shadow-amazing: 0 20px 50px rgba(0, 0, 0, 0.05);
+    --shadow-amazing-hover: 0 30px 70px rgba(0, 0, 0, 0.08);
+    --shadow-primary-glow: 0 10px 30px rgba(37, 99, 235, 0.2);
 }
 
 @layer base {
-  body {
-    @apply bg-bg-main text-text-main antialiased selection:bg-brand-primary selection:text-white;
-    font-family: var(--font-nunito, sans-serif);
-    font-size: 15px;
-    line-height: 1.6;
-  }
+    body {
+        @apply bg-bg-main text-text-main antialiased;
+        font-family: var(--font-inter), sans-serif;
+        font-size: 15px;
+        line-height: 1.6;
+    }
 
-  h1,
-  h2,
-  h3,
-  h4 {
-    @apply text-text-main font-extrabold tracking-tight;
-    line-height: 1.25;
-  }
+    ::selection {
+        background-color: #2563EB;
+        color: #ffffff;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+        @apply text-text-main font-extrabold tracking-tight;
+        font-family: var(--font-plus-jakarta), sans-serif;
+        line-height: 1.25;
+    }
 }
 
 @layer components {
-  .container {
-    @apply max-w-7xl mx-auto px-6;
-  }
+    .container {
+        @apply max-w-7xl mx-auto px-6;
+    }
 
-  /* AMAZING Glass Card - Squarish Structure */
-  .amazing-card {
-    @apply bg-white border border-slate-200 rounded-xl md:rounded-3xl p-6 md:p-8 transition-all duration-500 hover:shadow-amazing-hover hover:border-brand-primary/30;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  }
+    /* AMAZING Glass Card - Squarish Structure */
+    .amazing-card {
+        @apply bg-white border border-slate-200 rounded-xl p-6 transition-all duration-500;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
 
-  .amazing-input {
-    @apply w-full px-6 py-4 bg-slate-100/50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-900 outline-none transition-all focus:bg-white focus:border-brand-primary focus:ring-4 focus:ring-brand-primary/10 placeholder:text-slate-300;
-  }
+        @media (min-width: 768px) {
+            @apply rounded-3xl p-8;
+        }
 
-  .btn-amazing {
-    @apply px-6 md:px-10 py-3 md:py-5 bg-brand-primary text-white font-bold rounded-xl md:rounded-2xl hover:bg-emerald-600 transition-all shadow-primary-glow flex items-center justify-center gap-3 text-sm md:text-base active:scale-95 hover:-translate-y-1;
-  }
+        &:hover {
+            @apply border-brand-primary/30;
+            box-shadow: var(--shadow-amazing-hover);
+        }
+    }
 
-  .btn-amazing-outline {
-    @apply px-6 md:px-10 py-3 md:py-5 bg-white/50 backdrop-blur-md text-slate-900 border border-slate-200 font-bold rounded-xl md:rounded-2xl hover:bg-white transition-all flex items-center justify-center gap-3 text-sm md:text-base active:scale-95 shadow-sm hover:-translate-y-1;
-  }
+    .amazing-input {
+        @apply w-full px-6 py-4 bg-slate-100/50 border border-slate-200 rounded-2xl text-sm font-normal text-slate-900 outline-none transition-all;
 
-  .eyebrow-amazing {
-    @apply text-[11px] font-bold uppercase tracking-[0.3em] text-emerald-900 bg-emerald-100/80 backdrop-blur-md px-5 py-2.5 rounded-full inline-flex items-center gap-2 mb-6 border border-emerald-200/50 shadow-sm transition-all;
-  }
+        &::placeholder {
+            @apply text-slate-300;
+        }
+
+        &:focus {
+            @apply bg-white border-brand-primary ring-4 ring-brand-primary/10;
+        }
+    }
+
+    .btn-amazing {
+        @apply px-6 py-3 bg-brand-primary text-white font-bold rounded-xl transition-all shadow-primary-glow flex items-center justify-center gap-3 text-sm;
+
+        @media (min-width: 768px) {
+            @apply px-10 py-5 rounded-2xl text-base;
+        }
+
+        &:hover {
+            @apply bg-blue-700 -translate-y-1;
+        }
+
+        &:active {
+            @apply scale-95;
+        }
+    }
+
+    .btn-amazing-outline {
+        @apply px-6 py-3 bg-white/50 backdrop-blur-md text-slate-900 border border-slate-200 font-bold rounded-xl transition-all flex items-center justify-center gap-3 text-sm shadow-sm;
+
+        @media (min-width: 768px) {
+            @apply px-10 py-5 rounded-2xl text-base;
+        }
+
+        &:hover {
+            @apply bg-white -translate-y-1;
+        }
+
+        &:active {
+            @apply scale-95;
+        }
+    }
+
+    .eyebrow-amazing {
+        @apply text-[11px] font-bold uppercase tracking-[0.3em] text-blue-900 bg-blue-100/80 backdrop-blur-md px-5 py-2.5 rounded-full inline-flex items-center gap-2 mb-6 border border-blue-200/50 shadow-sm transition-all;
+    }
 }
 
 /* Animations for "Amazing" feel */
 @keyframes bop {
 
-  0%,
-  100% {
-    transform: translateY(0);
-  }
+    0%,
+    100% {
+        transform: translateY(0);
+    }
 
-  50% {
-    transform: translateY(-15px);
-  }
+    50% {
+        transform: translateY(-15px);
+    }
 }
 
 .animate-bop {
-  animation: bop 5s ease-in-out infinite;
+    animation: bop 5s ease-in-out infinite;
 }
 
 @keyframes slow-spin {
-  from {
-    transform: rotate(0deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
 
-  to {
-    transform: rotate(360deg);
-  }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
 .animate-slow-spin {
-  animation: slow-spin 20s linear infinite;
+    animation: slow-spin 20s linear infinite;
 }
 
 .bg-mesh {
-  background-color: #FAFAFA;
-  background-image:
-    radial-gradient(at 0% 0%, rgba(5, 150, 105, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.05) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(5, 150, 105, 0.05) 0px, transparent 50%);
+    background-color: #FAFAFA;
+    background-image:
+        radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(29, 78, 216, 0.05) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(59, 130, 246, 0.05) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(37, 99, 235, 0.05) 0px, transparent 50%);
 }
 
 .text-gradient {
-  @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700;
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700;
 }
 
 /* Hide scrollbar for components */
 .scrollbar-hide::-webkit-scrollbar {
-  display: none;
+    display: none;
 }
+
 .scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }

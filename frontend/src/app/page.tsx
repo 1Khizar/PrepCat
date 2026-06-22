@@ -51,11 +51,11 @@ export default function Home() {
 
       <main>
         {/* SECTION 1: PREMIUM FULL-SCREEN HERO */}
-        <section className="relative overflow-hidden bg-white min-h-[85svh] md:min-h-[100svh]">
+        <section className="relative overflow-hidden bg-white min-h-screen">
           {/* Clean White Background (no blobs) */}
 
           {/* Full-height column */}
-          <div className="relative z-10 flex flex-col min-h-[85svh] md:min-h-[100svh]">
+          <div className="relative z-10 flex flex-col min-h-screen">
 
             {/* Top spacing — generous gap below navbar on mobile */}
             <div className="h-24 md:h-32 lg:h-24 flex-shrink-0" />
@@ -70,7 +70,7 @@ export default function Home() {
                 <div>
                   {/* Eyebrow badge */}
                   <motion.div
-                    initial={{ opacity: 0, y: -10 }}
+                    initial={{ opacity: 1, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                     className="eyebrow-amazing mb-8 md:mb-5"
@@ -81,18 +81,18 @@ export default function Home() {
 
                   {/* Main heading */}
                   <motion.h1
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 1, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
                     className="text-[2.5rem] sm:text-5xl lg:text-7xl font-extrabold leading-[1.08] tracking-tight text-slate-900 mb-8 md:mb-5 mt-0"
                   >
                     Master the<br />
-                    MDCAT{" "}<span className="text-brand-primary italic">Smarter.</span>
+                    MDCAT{" "}<span className="text-blue-600 italic">Smarter.</span>
                   </motion.h1>
 
                   {/* Subtitle */}
                   <motion.p
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 1, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="text-base md:text-xl text-slate-500 font-medium leading-relaxed mb-7 max-w-sm md:max-w-lg"
@@ -102,7 +102,7 @@ export default function Home() {
 
                   {/* CTA Buttons */}
                   <motion.div
-                    initial={{ opacity: 0, y: 16 }}
+                    initial={{ opacity: 1, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.3 }}
                     className="flex gap-3 mb-6"
@@ -117,14 +117,14 @@ export default function Home() {
 
                   {/* Social proof */}
                   <motion.div
-                    initial={{ opacity: 0 }}
+                    initial={{ opacity: 1 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.45 }}
                     className="flex items-center gap-2 mb-8"
                   >
                     <div className="flex -space-x-2">
                       {[1,2,3].map(i => (
-                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-emerald-100 flex items-center justify-center text-[9px] shadow-sm">👨‍⚕️</div>
+                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-[9px] shadow-sm">👨‍⚕️</div>
                       ))}
                     </div>
                     <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Trusted by 200+ Students</span>
@@ -135,13 +135,13 @@ export default function Home() {
 
                 {/* Right col — desktop image only */}
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.85, rotate: 4 }}
+                  initial={{ opacity: 1, scale: 0.85, rotate: 4 }}
                   animate={{ opacity: 1, scale: 1, rotate: 0 }}
                   transition={{ duration: 1, type: "spring" }}
                   className="relative hidden lg:block"
                 >
                   <div className="relative z-10 animate-bop shadow-2xl rounded-[2.5rem] overflow-hidden border-4 border-white max-w-[500px] ml-auto">
-                    <Image src="/hero-mdcat.png" alt="PrepBuddy MDCAT Study Visual" width={500} height={500} className="w-full h-auto" />
+                    <Image src="/hero-mdcat.png" alt="PrepCat MDCAT Study Visual" width={500} height={500} className="w-full h-auto" />
                   </div>
                   <motion.div
                     animate={{ y: [0, 10, 0] }}
@@ -149,7 +149,7 @@ export default function Home() {
                     className="absolute -bottom-6 -right-6 amazing-card !p-4 shadow-xl z-20"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-brand-secondary">
+                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
                         <Star size={20} fill="currentColor" />
                       </div>
                       <div>
@@ -174,7 +174,7 @@ export default function Home() {
                 <motion.div
                   animate={{ y: [0, 12, 0] }}
                   transition={{ duration: 1.6, repeat: Infinity }}
-                  className="w-1.5 h-1.5 bg-brand-primary rounded-full"
+                  className="w-1.5 h-1.5 bg-blue-600 rounded-full"
                 />
               </div>
             </motion.div>
@@ -188,12 +188,12 @@ export default function Home() {
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
               {[
                 { title: "15 Years", subtitle: "Archive", icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
-                { title: "20,000+", subtitle: "Questions", icon: Brain, color: "text-emerald-600", bg: "bg-emerald-50" },
-                { title: "98% Reach", subtitle: "Accuracy", icon: Award, color: "text-amber-600", bg: "bg-amber-50" },
-                { title: "Real-time", subtitle: "Analytics", icon: Zap, color: "text-purple-600", bg: "bg-purple-50" }
+                { title: "20,000+", subtitle: "Questions", icon: Brain, color: "text-blue-700", bg: "bg-blue-50" },
+                { title: "98% Reach", subtitle: "Accuracy", icon: Award, color: "text-blue-500", bg: "bg-blue-50" },
+                { title: "Real-time", subtitle: "Analytics", icon: Zap, color: "text-blue-800", bg: "bg-blue-50" }
               ].map((stat, i) => (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
+                  initial={{ opacity: 1, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.1 }}
                   key={i}
@@ -216,13 +216,13 @@ export default function Home() {
           <div className="container">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6 lg:pl-10">
-                <div className="eyebrow-amazing">Why PrepBuddy?</div>
+                <div className="eyebrow-amazing">Why PrepCat?</div>
                 <h2 className="text-3xl md:text-5xl font-bold leading-tight text-gradient">
                   Academies are expensive. <br />
-                  <span className="text-brand-primary">PrepBuddy is smart.</span>
+                  <span className="text-blue-600">PrepCat is smart.</span>
                 </h2>
                 <p className="text-lg text-slate-500 font-medium leading-relaxed">
-                  Most students fail not because they don't study, but because they study unorganized content. PrepBuddy gives you the structure of an elite academy for free.
+                  Most students fail not because they don't study, but because they study unorganized content. PrepCat gives you the structure of an elite academy for free.
                 </p>
 
                 <div className="grid sm:grid-cols-2 gap-4 pt-2">
@@ -233,7 +233,7 @@ export default function Home() {
                     "Daily Rank Analysis"
                   ].map((item, i) => (
                     <div key={i} className="flex items-center gap-3 p-3 bg-white rounded-xl border border-slate-100 shadow-sm">
-                      <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center text-brand-primary">
+                      <div className="w-7 h-7 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600">
                         <CheckCircle2 size={16} />
                       </div>
                       <span className="font-bold text-slate-700 text-sm">{item}</span>
@@ -244,21 +244,21 @@ export default function Home() {
 
               <div className="relative flex justify-center lg:justify-end">
                 <div className="amazing-card !p-6 md:!p-8 relative overflow-hidden group border-2 border-brand-primary/10 max-w-lg lg:max-w-md">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-brand-primary/10 blur-3xl rounded-full" />
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl rounded-full" />
 
                   <div className="space-y-6 relative z-10">
                     <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="flex items-center gap-3 mb-3 text-red-500 font-bold text-[10px] uppercase tracking-widest">
+                      <div className="flex items-center gap-3 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
                         <XCircle size={12} /> The Old Way
                       </div>
                       <p className="text-slate-400 font-bold line-through italic text-sm">Expensive academies, heavy bags, and random PDFs with no proper keys.</p>
                     </div>
 
-                    <div className="p-6 bg-emerald-50 rounded-2xl border border-brand-primary/20 animate-shimmer">
-                      <div className="flex items-center gap-3 mb-3 text-brand-primary font-bold text-[10px] uppercase tracking-widest">
-                        <Sparkles size={12} /> The PrepBuddy Way
+                    <div className="p-6 bg-blue-50 rounded-2xl border border-blue-600/20 animate-shimmer">
+                      <div className="flex items-center gap-3 mb-3 text-blue-600 font-bold text-[10px] uppercase tracking-widest">
+                        <Sparkles size={12} /> The PrepCat Way
                       </div>
-                      <p className="text-emerald-900 font-bold text-lg italic leading-tight">"All your preparation, tracked, analyzed, and perfected in one tiny browser tab."</p>
+                      <p className="text-blue-900 font-bold text-lg italic leading-tight">"All your preparation, tracked, analyzed, and perfected in one tiny browser tab."</p>
                     </div>
                   </div>
                 </div>
@@ -272,7 +272,7 @@ export default function Home() {
           <div className="container">
             <div className="text-left md:text-center mb-8 space-y-3">
               <div className="eyebrow-amazing">Subject Mastery</div>
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Everything you need to <span className="text-brand-primary">Succeed.</span></h2>
+              <h2 className="text-3xl md:text-5xl font-bold tracking-tight">Everything you need to <span className="text-blue-600">Succeed.</span></h2>
               <p className="text-lg text-slate-500 font-medium max-w-2xl mx-auto">
                 Carefully curated questions for every subject, mapped exactly to the latest UHS and PMDC syllabus.
               </p>
@@ -280,10 +280,10 @@ export default function Home() {
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {[
-                { name: "Biology", count: "8,500+ MCQs", icon: Brain, color: "from-emerald-500/20 to-emerald-500/0", border: "hover:border-emerald-500/50" },
-                { name: "Chemistry", count: "6,200+ MCQs", icon: Sparkles, color: "from-blue-500/20 to-blue-500/0", border: "hover:border-blue-500/50" },
-                { name: "Physics", count: "4,800+ MCQs", icon: Zap, color: "from-amber-500/20 to-amber-500/0", border: "hover:border-amber-500/50" },
-                { name: "English", count: "1,500+ MCQs", icon: FileText, color: "from-purple-500/20 to-purple-500/0", border: "hover:border-purple-500/50" }
+                { name: "Biology", count: "8,500+ MCQs", icon: Brain, color: "from-blue-500/20 to-blue-500/0", border: "hover:border-blue-500/50" },
+                { name: "Chemistry", count: "6,200+ MCQs", icon: Sparkles, color: "from-blue-600/20 to-blue-600/0", border: "hover:border-blue-600/50" },
+                { name: "Physics", count: "4,800+ MCQs", icon: Zap, color: "from-blue-400/20 to-blue-400/0", border: "hover:border-blue-400/50" },
+                { name: "English", count: "1,500+ MCQs", icon: FileText, color: "from-blue-700/20 to-blue-700/0", border: "hover:border-blue-700/50" }
               ].map((subject, i) => (
                 <motion.div
                   key={i}
@@ -299,7 +299,7 @@ export default function Home() {
                       <h3 className="text-base md:text-xl font-bold">{subject.name}</h3>
                       <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{subject.count}</p>
                     </div>
-                    <div className="flex items-center gap-1 md:gap-2 text-brand-primary font-bold text-[10px] md:text-xs">
+                    <div className="flex items-center gap-1 md:gap-2 text-blue-600 font-bold text-[10px] md:text-xs">
                       Explore Topics <ChevronRight size={12} className="md:w-3.5 md:h-3.5" />
                     </div>
                   </div>
@@ -312,19 +312,19 @@ export default function Home() {
         {/* SECTION 6: INTERACTIVE DEMO */}
         <section id="demo" className="py-8 md:py-16 relative overflow-hidden bg-white">
           {/* Soft Background Accents */}
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(5,150,105,0.05),transparent_70%)]" />
+          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.05),transparent_70%)]" />
 
           <div className="container relative z-10">
             <div className="grid lg:grid-cols-2 gap-10 items-center">
               <div className="space-y-4 text-left lg:text-left">
                 <div className="eyebrow-amazing !py-1 !px-3 !text-[10px]">Interactive Demo</div>
-                <h2 className="text-3xl md:text-5xl font-bold leading-tight text-gradient">Experience the <br /> <span className="text-brand-primary">Clean Interface</span></h2>
+                <h2 className="text-3xl md:text-5xl font-bold leading-tight text-gradient">Experience the <br /> <span className="text-blue-600">Clean Interface</span></h2>
                 <p className="text-base text-slate-500 font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
                   We stripped away the clutter. Focus entirely on the question, get the answer, and read the explanation.
                 </p>
               </div>
 
-              <div className="amazing-card !bg-white !p-6 md:!p-10 shadow-[0_20px_80px_rgba(5,150,105,0.1)] border-2 border-emerald-50">
+              <div className="amazing-card !bg-white !p-6 md:!p-10 shadow-[0_20px_80px_rgba(37,99,235,0.1)] border-2 border-blue-50">
                 <AnimatePresence mode="wait">
                   {demoStep === 0 ? (
                     <motion.div
@@ -337,7 +337,7 @@ export default function Home() {
                       <div className="flex items-center justify-between">
                         <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Biology • Cell Structure</div>
                         <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="w-1/3 h-full bg-brand-primary" />
+                          <div className="w-1/3 h-full bg-blue-600" />
                         </div>
                       </div>
                       <h4 className="text-lg md:text-xl font-bold leading-tight text-slate-900">{mcqData.question}</h4>
@@ -346,9 +346,9 @@ export default function Home() {
                           <button
                             key={opt.id}
                             onClick={() => handleAnswer(opt.id)}
-                            className="bg-slate-50 border-2 border-slate-100 p-3 rounded-lg flex items-center gap-3 hover:border-brand-primary hover:bg-emerald-50 transition-all text-left group"
+                            className="bg-slate-50 border-2 border-slate-100 p-3 rounded-lg flex items-center gap-3 hover:border-blue-600 hover:bg-blue-50 transition-all text-left group"
                           >
-                            <span className="w-7 h-7 rounded-md bg-white flex items-center justify-center font-bold shadow-sm group-hover:bg-brand-primary group-hover:text-white transition-colors text-xs">{opt.id}</span>
+                            <span className="w-7 h-7 rounded-md bg-white flex items-center justify-center font-bold shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors text-xs">{opt.id}</span>
                             <span className="font-bold text-slate-700 text-[13px]">{opt.text}</span>
                           </button>
                         ))}
@@ -363,15 +363,15 @@ export default function Home() {
                     >
                       <div className="flex items-center gap-4">
                         {selectedOption === mcqData.correctId ? (
-                          <div className="flex items-center gap-3 text-brand-primary font-bold text-lg italic tracking-tighter">
-                            <div className="w-8 h-8 bg-emerald-100 rounded-full flex items-center justify-center shadow-inner">
+                          <div className="flex items-center gap-3 text-blue-600 font-bold text-lg italic tracking-tighter">
+                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
                               <CheckCircle2 size={18} />
                             </div>
                             Brilliant!
                           </div>
                         ) : (
-                          <div className="flex items-center gap-3 text-red-500 font-bold text-lg italic tracking-tighter">
-                            <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center shadow-inner">
+                          <div className="flex items-center gap-3 text-slate-500 font-bold text-lg italic tracking-tighter">
+                            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center shadow-inner">
                               <XCircle size={18} />
                             </div>
                             Not quite.
@@ -379,7 +379,7 @@ export default function Home() {
                         )}
                       </div>
 
-                      <div className="p-5 bg-slate-50 rounded-xl space-y-3 border border-slate-100 border-l-4 border-l-brand-primary">
+                      <div className="p-5 bg-slate-50 rounded-xl space-y-3 border border-slate-100 border-l-4 border-l-blue-600">
                         <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Clinical Explanation</div>
                         <p className="text-slate-600 font-bold text-sm leading-relaxed">{mcqData.explanation}</p>
                       </div>
@@ -402,7 +402,7 @@ export default function Home() {
         {/* SECTION 7: FINAL CTA (PREMIUM LIGHT) */}
         <section className="py-10 md:py-20 bg-white relative overflow-hidden">
           {/* Mesh Gradient Background */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-brand-primary/10 via-brand-secondary/5 to-transparent rounded-full blur-[120px] -z-0" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-600/10 via-blue-800/5 to-transparent rounded-full blur-[120px] -z-0" />
 
           <div className="container relative z-10">
             <div className="amazing-card !bg-white/80 !backdrop-blur-3xl !p-6 md:!p-24 text-center border-2 border-slate-100 shadow-[0_50px_100px_rgba(0,0,0,0.05)] rounded-[2.5rem] md:rounded-[4rem] max-w-5xl mx-auto overflow-hidden">
@@ -414,7 +414,7 @@ export default function Home() {
                 </p>
 
                 <div className="flex flex-col items-center gap-6 pt-4">
-                  <Link href="/register" className="btn-amazing !px-8 !py-4 md:!px-12 md:!py-6 text-lg md:text-xl !rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(5,150,105,0.4)]">
+                  <Link href="/register" className="btn-amazing !px-8 !py-4 md:!px-12 md:!py-6 text-lg md:text-xl !rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.4)]">
                     Register
                   </Link>
                   <div className="flex items-center gap-3 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
@@ -433,22 +433,22 @@ export default function Home() {
       {/* PREMIUM FOOTER */}
       <footer className="pt-16 md:pt-32 pb-12 bg-slate-50 relative overflow-hidden border-t border-slate-200">
         {/* Subtle decorative glow */}
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-brand-primary/5 blur-[150px] -z-0" />
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[150px] -z-0" />
 
         <div className="container relative z-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-24">
             {/* Brand Column */}
             <div className="space-y-8">
               <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-12 h-12 bg-brand-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-primary/20 group-hover:scale-110 transition-all">P</div>
-                <span className="text-3xl font-bold tracking-tighter text-slate-900">PrepBuddy</span>
+                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-all">P</div>
+                <span className="text-3xl font-bold tracking-tighter text-slate-900">PrepCat</span>
               </Link>
               <p className="text-slate-500 font-medium leading-relaxed">
                 Empowering the next generation of Pakistani medical students with structured practice and data-driven insights.
               </p>
               <div className="flex gap-3">
                 {[Globe, MessageSquare, Smartphone, Award].map((Icon, i) => (
-                  <Link key={i} href="#" className="w-9 h-9 bg-white rounded-lg flex items-center justify-center text-slate-400 hover:text-brand-primary hover:bg-emerald-50 transition-all shadow-sm border border-slate-100">
+                  <Link key={i} href="#" className="w-9 h-9 bg-white rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm border border-slate-100">
                     <Icon size={16} />
                   </Link>
                 ))}
@@ -461,7 +461,7 @@ export default function Home() {
               <ul className="space-y-4">
                 {["MCQs Bank", "Past Papers", "Subject Wisdom", "Formula Sheets", "Latest Syllabus"].map(link => (
                   <li key={link}>
-                    <Link href="#" className="text-slate-500 hover:text-brand-primary font-bold transition-colors text-sm">{link}</Link>
+                    <Link href="#" className="text-slate-500 hover:text-blue-600 font-bold transition-colors text-sm">{link}</Link>
                   </li>
                 ))}
               </ul>
@@ -473,23 +473,23 @@ export default function Home() {
               <ul className="space-y-4">
                 {["Mastery Dashboard", "Performance Tracking", "Pricing Plans", "Beta Access", "Future Docs"].map(link => (
                   <li key={link}>
-                    <Link href="#" className="text-slate-500 hover:text-brand-primary font-bold transition-colors text-sm">{link}</Link>
+                    <Link href="#" className="text-slate-500 hover:text-blue-600 font-bold transition-colors text-sm">{link}</Link>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* PrepBuddy Exclusive Column */}
+            {/* PrepCat Exclusive Column */}
             <div className="space-y-8">
               <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900">Beta Program</h4>
-              <div className="amazing-card !p-6 !bg-brand-primary/5 !border-brand-primary/10 !rounded-2xl space-y-4">
-                <div className="flex items-center gap-2 text-brand-primary font-bold italic text-xs tracking-tighter">
+              <div className="amazing-card !p-6 !bg-blue-600/5 !border-blue-600/10 !rounded-2xl space-y-4">
+                <div className="flex items-center gap-2 text-blue-600 font-bold italic text-xs tracking-tighter">
                   <Sparkles size={14} className="animate-pulse" /> FOUNDING STUDENT
                 </div>
                 <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
                   Join 500+ medical aspirants helping us build the smartest preparation hub in Pakistan.
                 </p>
-                <Link href="/register" className="text-[10px] font-bold uppercase tracking-widest text-brand-primary hover:underline block">
+                <Link href="/register" className="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:underline block">
                   Join The Waitlist →
                 </Link>
               </div>
@@ -498,11 +498,11 @@ export default function Home() {
 
           <div className="pt-8 border-t border-slate-200 flex flex-col items-center justify-center gap-6 text-center">
             <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
-              <Link href="#" className="hover:text-brand-primary transition-colors">Privacy Policy</Link>
-              <Link href="#" className="hover:text-brand-primary transition-colors">Terms of Service</Link>
+              <Link href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
+              <Link href="#" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
             </div>
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900">
-              Copyright © 2026 PrepBuddy All Rights Reserved
+              Copyright © 2026 PrepCat All Rights Reserved
             </p>
           </div>
         </div>

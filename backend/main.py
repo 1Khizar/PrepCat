@@ -43,8 +43,8 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(
-    title="PrepBuddy API",
-    description="Backend API for PrepBuddy MDCAT & NUMS Prep Platform",
+    title="PrepCat API",
+    description="Backend API for PrepCat MDCAT & NUMS Prep Platform",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -76,7 +76,7 @@ app.add_middleware(
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to PrepBuddy API", "status": "online"}
+    return {"message": "Welcome to PrepCat API", "status": "online"}
 
 @app.get("/health")
 async def health_check():

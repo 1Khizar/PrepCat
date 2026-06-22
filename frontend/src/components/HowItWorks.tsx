@@ -26,11 +26,11 @@ const HowItWorks = () => {
               transition={{ delay: idx * 0.2 }}
               className="flex-1 flex flex-col items-center group"
             >
-              <div className="w-32 h-32 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-center mb-10 relative group-hover:border-brand-teal transition-all group-hover:scale-105 shadow-sm">
-                <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-brand-navy text-white font-black flex items-center justify-center text-xl shadow-lg">
+              <div className="w-32 h-32 rounded-[2rem] bg-slate-50 border border-slate-100 flex items-center justify-center mb-10 relative group-hover:border-blue-600 transition-all group-hover:scale-105 shadow-sm">
+                <div className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-slate-900 text-white font-black flex items-center justify-center text-xl shadow-lg">
                   {idx + 1}
                 </div>
-                <step.icon size={44} className="text-brand-teal" />
+                <step.icon size={44} className="text-blue-600" />
               </div>
               <h3 className="text-2xl font-black mb-4 text-slate-900">{step.title}</h3>
               <p className="text-slate-500 font-medium leading-relaxed max-w-[280px] mx-auto">

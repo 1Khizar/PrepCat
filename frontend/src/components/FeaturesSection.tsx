@@ -15,38 +15,38 @@ const FeaturesSection = () => {
       title: "Daily Motivation",
       description: "Stay consistent with daily streaks and goal tracking. Build the habit of studying every single day.",
       icon: Flame,
-      color: "bg-orange-50 text-orange-600",
+      color: "bg-blue-50 text-blue-700",
     },
     {
       title: "Compete with Friends",
       description: "Join study groups or dynamic challenge rooms to practice together and stay motivated.",
       icon: Users,
-      color: "bg-purple-50 text-purple-600",
+      color: "bg-blue-50 text-blue-500",
     },
     {
       title: "Progress Tracking",
       description: "See exactly which chapters you've mastered and where you need more practice with simple heatmaps.",
       icon: LineChart,
-      color: "bg-emerald-50 text-emerald-600",
+      color: "bg-blue-50 text-blue-800",
     },
     {
       title: "MDCAT Past Papers",
       description: "Access every verified UHS and NUMS paper from the last 10 years, all in one place.",
       icon: BookMarked,
-      color: "bg-rose-50 text-rose-600",
+      color: "bg-blue-100 text-blue-600",
     },
     {
       title: "Real Exam Experience",
       description: "Practice with full-length mock tests that feel exactly like the real MDCAT exam environment.",
       icon: Layers,
-      color: "bg-cyan-50 text-cyan-600",
+      color: "bg-blue-50 text-blue-600",
     },
   ];
 
   return (
     <section id="features" className="py-32 lg:py-48 bg-white relative overflow-hidden">
       {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-brand-teal/5 blur-[120px] rounded-full -z-10 translate-x-1/2 -translate-y-1/2" />
+      <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-500/5 blur-[120px] rounded-full -z-10 translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-blue-500/5 blur-[100px] rounded-full -z-10 -translate-x-1/2 translate-y-1/2" />
 
       <div className="container relative">
@@ -66,7 +66,7 @@ const FeaturesSection = () => {
             transition={{ delay: 0.1 }}
             className="text-4xl md:text-7xl font-black mb-10 text-slate-900 tracking-tight leading-[0.95]"
           >
-            Everything you need for <br /><span className="text-brand-teal">MDCAT Success</span>
+            Everything you need for <br /><span className="text-blue-600">MDCAT Success</span>
           </motion.h2>
           <motion.p 
             initial={{ opacity: 0, y: 20 }}
@@ -87,19 +87,19 @@ const FeaturesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
-              className="bg-white p-10 lg:p-12 rounded-[2.5rem] border border-slate-100 shadow-premium group hover:border-brand-teal/30 transition-all duration-500 hover:-translate-y-2"
+              className="bg-white p-10 lg:p-12 rounded-[2.5rem] border border-slate-100 shadow-premium group hover:border-blue-600/30 transition-all duration-500 hover:-translate-y-2"
             >
               <div className={`w-16 h-16 rounded-[1.25rem] ${feature.color} flex items-center justify-center mb-10 shadow-sm group-hover:scale-110 transition-transform duration-500`}>
                 <feature.icon size={32} />
               </div>
-              <h3 className="text-2xl font-black mb-6 text-slate-900 group-hover:text-brand-teal transition-colors">
+              <h3 className="text-2xl font-black mb-6 text-slate-900 group-hover:text-blue-600 transition-colors">
                 {feature.title}
               </h3>
               <p className="text-slate-500 leading-relaxed font-medium text-base mb-8">
                 {feature.description}
               </p>
-              <div className="flex items-center gap-2 text-xs font-black text-brand-navy uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:gap-4">
-                Learn More <ArrowRight size={16} className="text-brand-teal" />
+              <div className="flex items-center gap-2 text-xs font-black text-slate-900 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all group-hover:gap-4">
+                Learn More <ArrowRight size={16} className="text-blue-600" />
               </div>
             </motion.div>
           ))}

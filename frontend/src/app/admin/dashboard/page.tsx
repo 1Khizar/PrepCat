@@ -288,7 +288,7 @@ export default function AdminDashboard() {
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.setAttribute("href", url);
-    link.setAttribute("download", `prepbuddy_users_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute("download", `prepcat_users_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();
@@ -312,9 +312,9 @@ export default function AdminDashboard() {
       <aside className="w-72 bg-white border-r border-slate-100 hidden lg:flex flex-col sticky top-0 h-screen shrink-0 relative z-50 shadow-sm">
         <div className="p-8 flex flex-col h-full">
           <Link href="/admin/dashboard" className="flex items-center gap-3 mb-12 group">
-            <div className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg group-hover:scale-110 transition-transform">P</div>
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">P</div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-slate-900 leading-none tracking-tight">PrepBuddy</span>
+              <span className="text-lg font-bold text-slate-900 leading-none tracking-tight">PrepCat</span>
               <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">Admin Panel</span>
             </div>
           </Link>
@@ -328,9 +328,9 @@ export default function AdminDashboard() {
               <button
                 key={item.name}
                 onClick={() => { setActiveTab(item.name); setSearchQuery(""); setSelectedCategory(null); }}
-                className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-bold text-sm transition-all duration-300 ${activeTab === item.name
-                  ? "bg-slate-900 text-white shadow-xl"
-                  : "text-slate-500 hover:text-slate-900 hover:bg-slate-50"
+                className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-semibold text-[15px] transition-all duration-300 ${activeTab === item.name
+                  ? "bg-blue-600 text-white shadow-xl shadow-blue-200"
+                  : "text-slate-800 hover:text-blue-600 hover:bg-blue-50"
                   }`}
               >
                 <item.icon size={18} />
@@ -341,16 +341,16 @@ export default function AdminDashboard() {
 
           <div className="space-y-4 pt-6 border-t border-slate-100">
             <div className="flex items-center gap-3 px-2">
-              <div className="w-9 h-9 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center justify-center text-emerald-600">
+              <div className="w-9 h-9 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center justify-center text-blue-600">
                 <ShieldCheck size={16} />
               </div>
               <div>
-                <div className="text-xs font-bold text-slate-900">Super Admin</div>
-                <div className="text-[10px] font-bold text-slate-400">Full Access</div>
+                <div className="text-sm font-bold text-slate-900">Super Admin</div>
+                <div className="text-xs font-medium text-slate-400">Full Access</div>
               </div>
             </div>
 
-            <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-400 font-bold text-sm hover:text-slate-900 hover:bg-slate-50 transition-all">
+            <Link href="/dashboard" className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-700 font-semibold text-[15px] hover:text-blue-600 hover:bg-blue-50 transition-all">
               <ArrowUpRight size={16} />
               Student View
             </Link>
@@ -363,10 +363,10 @@ export default function AdminDashboard() {
         <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-end px-10 shrink-0">
           <div className="flex items-center gap-6">
             <div className="text-right">
-              <div className="text-xs font-bold text-slate-900 leading-none mb-0.5">Super Admin</div>
-              <div className="text-[9px] font-bold text-slate-400 uppercase">Manage Mode</div>
+              <div className="text-sm font-bold text-slate-900 leading-none mb-0.5">Super Admin</div>
+              <div className="text-[10px] font-semibold text-slate-400 uppercase">Manage Mode</div>
             </div>
-            <div className="w-9 h-9 rounded-xl bg-brand-navy flex items-center justify-center text-white font-bold text-sm">A</div>
+            <div className="w-9 h-9 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-sm">A</div>
           </div>
         </header>
 
@@ -375,8 +375,8 @@ export default function AdminDashboard() {
             <>
               <div className="flex justify-between items-end">
                 <div>
-                  <h1 className="text-2xl font-bold mb-1 text-slate-950">Paper Management</h1>
-                  <p className="text-slate-500 font-bold text-xs">Select a category to upload and manage past papers.</p>
+                  <h1 className="text-3xl font-bold mb-1 text-slate-950">Paper Management</h1>
+                  <p className="text-slate-500 font-medium text-sm">Select a category to upload and manage past papers.</p>
                 </div>
               </div>
 
@@ -386,19 +386,19 @@ export default function AdminDashboard() {
                   {/* MDCAT Row */}
                   <div className="space-y-3">
                     <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                      <div className="w-7 h-7 bg-slate-900 rounded-md flex items-center justify-center text-white text-[10px] font-bold">M</div>
+                      <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-[10px] font-bold">M</div>
                       MDCAT Papers
                     </h2>
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
                       {subjects.map(sub => {
                         const count = papers.filter(p => p.exam_type === "MDCAT" && p.subject === sub).length;
                         return (
-                          <button key={`mdcat-${sub}`} onClick={() => { setSelectedCategory({ exam: "MDCAT", subject: sub }); setUploadData(d => ({ ...d, exam_type: "MDCAT", subject: sub })); }} className="bg-white border border-slate-200 rounded-2xl p-6 text-left hover:shadow-xl hover:-translate-y-1 hover:border-slate-300 transition-all duration-500 group">
-                            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-4 group-hover:bg-slate-900 group-hover:text-white transition-all duration-500">
-                              <FileText size={18} />
+                          <button key={`mdcat-${sub}`} onClick={() => { setSelectedCategory({ exam: "MDCAT", subject: sub }); setUploadData(d => ({ ...d, exam_type: "MDCAT", subject: sub })); }} className="bg-white border border-slate-200 rounded-2xl p-8 min-h-[160px] text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group">
+                            <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 shadow-sm border border-blue-100/50">
+                              <FileText size={24} />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-900">{sub}</h3>
-                            <p className="text-xs font-bold text-slate-400 mt-1">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
+                            <h3 className="font-bold text-xl text-slate-900">{sub}</h3>
+                            <p className="text-sm font-medium text-slate-400 mt-1.5">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
                           </button>
                         );
                       })}
@@ -415,12 +415,12 @@ export default function AdminDashboard() {
                       {subjects.map(sub => {
                         const count = papers.filter(p => p.exam_type === "NUMS" && p.subject === sub).length;
                         return (
-                          <button key={`nums-${sub}`} onClick={() => { setSelectedCategory({ exam: "NUMS", subject: sub }); setUploadData(d => ({ ...d, exam_type: "NUMS", subject: sub })); }} className="bg-white border border-slate-100 rounded-2xl p-6 text-left hover:shadow-xl hover:-translate-y-1 hover:border-slate-300 transition-all duration-500 group">
-                            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
-                              <FileText size={18} />
+                          <button key={`nums-${sub}`} onClick={() => { setSelectedCategory({ exam: "NUMS", subject: sub }); setUploadData(d => ({ ...d, exam_type: "NUMS", subject: sub })); }} className="bg-white border border-slate-100 rounded-2xl p-8 min-h-[160px] text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group">
+                            <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 shadow-sm border border-blue-100/50">
+                              <FileText size={24} />
                             </div>
-                            <h3 className="font-bold text-lg text-slate-900">{sub}</h3>
-                            <p className="text-xs font-bold text-slate-400 mt-1">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
+                            <h3 className="font-bold text-xl text-slate-900">{sub}</h3>
+                            <p className="text-sm font-medium text-slate-400 mt-1.5">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
                           </button>
                         );
                       })}
@@ -437,12 +437,12 @@ export default function AdminDashboard() {
                       </button>
                       <div>
                         <h2 className="text-2xl font-bold text-slate-900">{selectedCategory.exam} — {selectedCategory.subject}</h2>
-                        <p className="text-sm font-bold text-slate-400">{categoryPapers.length} paper{categoryPapers.length !== 1 ? 's' : ''} in this category</p>
+                        <p className="text-sm font-medium text-slate-500">{categoryPapers.length} paper{categoryPapers.length !== 1 ? 's' : ''} in this category</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setShowAddModal(true)}
-                      className="bg-slate-900 text-white py-3 px-8 rounded-xl flex items-center gap-2 font-bold text-sm hover:bg-slate-800 transition-all"
+                      className="bg-blue-600 text-white py-3 px-8 rounded-xl flex items-center gap-2 font-bold text-sm hover:bg-blue-700 transition-all shadow-lg shadow-blue-200"
                     >
                       <Plus size={18} />
                       Upload to {selectedCategory.subject}
@@ -453,21 +453,21 @@ export default function AdminDashboard() {
                     <table className="w-full text-left border-collapse">
                       <thead className="bg-slate-50 border-b border-slate-100">
                         <tr>
-                          <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400 w-1/3">Paper Title</th>
-                          <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Year</th>
-                          <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">File</th>
-                          <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
+                          <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500 w-1/3">Paper Title</th>
+                          <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Year</th>
+                          <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">File</th>
+                          <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {categoryPapers.map((p) => (
-                          <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
-                            <td className="px-8 py-5 text-sm font-bold text-slate-900">{p.title}</td>
-                            <td className="px-8 py-5 text-sm font-bold text-slate-500">{p.year}</td>
+                          <tr key={p.id} className="hover:bg-slate-50/50 hover:scale-[1.01] transition-all duration-200">
+                            <td className="px-8 py-5 text-[15px] font-semibold text-slate-900">{p.title}</td>
+                            <td className="px-8 py-5 text-[15px] font-medium text-slate-600">{p.year}</td>
                             <td className="px-8 py-5">
                               {p.file_url ? (
-                                <a href={`http://localhost:8000${p.file_url}`} target="_blank" rel="noreferrer" className="text-xs font-bold text-blue-600 hover:underline flex items-center gap-1">
-                                  <Download size={14} /> Download
+                                <a href={`http://localhost:8000${p.file_url}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1.5">
+                                  <Download size={16} /> Download
                                 </a>
                               ) : <span className="text-xs text-slate-300">—</span>}
                             </td>
@@ -494,7 +494,7 @@ export default function AdminDashboard() {
               <div className="flex justify-between items-end mb-8">
                 <div>
                   <h1 className="text-3xl font-bold mb-2">User Management</h1>
-                  <p className="text-slate-500 font-medium">Monitor and manage user accounts and export data.</p>
+                  <p className="text-slate-500 font-medium text-sm">Monitor and manage user accounts and export data.</p>
                 </div>
                 <button
                   onClick={exportUsersToCSV}
@@ -514,29 +514,29 @@ export default function AdminDashboard() {
                   <table className="w-full text-left border-collapse">
                     <thead className="bg-slate-50 border-b border-slate-100">
                       <tr>
-                        <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Student Info</th>
-                        <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Username</th>
-                        <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Phone</th>
-                        <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Status</th>
-                        <th className="px-8 py-4 text-[10px] font-bold uppercase tracking-widest text-slate-400">Action</th>
+                        <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Student Info</th>
+                        <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Username</th>
+                        <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Phone</th>
+                        <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Status</th>
+                        <th className="px-8 py-4 text-xs font-semibold uppercase tracking-widest text-slate-500">Action</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 bg-white">
                       {filteredUsers.map((u) => (
                         <tr key={u.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="px-8 py-6">
-                            <div className="font-bold text-sm text-slate-900">{u.full_name}</div>
-                            <div className="text-xs text-slate-400 font-medium">{u.email}</div>
+                            <div className="font-semibold text-[15px] text-slate-900">{u.full_name}</div>
+                            <div className="text-sm text-slate-400 font-normal">{u.email}</div>
                           </td>
-                          <td className="px-8 py-6 text-xs font-bold text-slate-600">@{u.username}</td>
-                          <td className="px-8 py-6 text-xs text-slate-600 font-medium">{u.phone_number || "—"}</td>
+                          <td className="px-8 py-6 text-sm font-semibold text-slate-600">@{u.username}</td>
+                          <td className="px-8 py-6 text-sm text-slate-600 font-normal">{u.phone_number || "—"}</td>
                           <td className="px-8 py-6">
                             {u.is_blocked ? (
                               <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-rose-500 bg-rose-50 px-2 py-1 rounded-md w-max">
                                 <ShieldBan size={12} /> Blocked
                               </span>
                             ) : (
-                              <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-emerald-500 bg-emerald-50 px-2 py-1 rounded-md w-max">
+                              <span className="flex items-center gap-1 text-[10px] font-bold uppercase text-blue-600 bg-blue-50 px-2 py-1 rounded-md w-max">
                                 <ShieldCheck size={12} /> Active
                               </span>
                             )}
@@ -544,7 +544,7 @@ export default function AdminDashboard() {
                           <td className="px-8 py-6">
                             <button
                               onClick={() => toggleUserBlock(u)}
-                              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${u.is_blocked ? 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
+                              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${u.is_blocked ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
                             >
                               {u.is_blocked ? "Unblock" : "Block User"}
                             </button>
@@ -580,7 +580,7 @@ export default function AdminDashboard() {
                       <h3 className="text-xl font-bold text-slate-900 flex items-center gap-3">
                         Google Drive
                         {isDriveConnected ? (
-                          <span className="px-2.5 py-1 bg-emerald-100 text-emerald-800 text-[10px] uppercase font-bold tracking-widest rounded-full">Connected</span>
+                          <span className="px-2.5 py-1 bg-blue-100 text-blue-800 text-[10px] uppercase font-bold tracking-widest rounded-full">Connected</span>
                         ) : (
                           <span className="px-2.5 py-1 bg-slate-100 text-slate-500 text-[10px] uppercase font-bold tracking-widest rounded-full">Disconnected</span>
                         )}
@@ -595,7 +595,7 @@ export default function AdminDashboard() {
                         Disconnect
                       </button>
                     ) : (
-                      <button onClick={connectGoogleDrive} className="px-6 py-3 bg-slate-900 text-white font-bold rounded-xl hover:bg-black shadow-lg shadow-slate-200 transition-all active:scale-95">
+                      <button onClick={connectGoogleDrive} className="px-6 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition-all active:scale-95">
                         Connect Account
                       </button>
                     )}
@@ -712,10 +712,10 @@ export default function AdminDashboard() {
                     <button
                       type="button"
                       onClick={handleDrivePicker}
-                      className={`relative p-6 border-2 border-dashed ${driveFile ? 'border-emerald-600 bg-emerald-50/50' : 'border-slate-300 bg-white'} rounded-2xl flex flex-col items-center justify-center text-center group hover:border-emerald-600 hover:bg-emerald-50/50 transition-all cursor-pointer`}
+                      className={`relative p-6 border-2 border-dashed ${driveFile ? 'border-blue-600 bg-blue-50/50' : 'border-slate-300 bg-white'} rounded-2xl flex flex-col items-center justify-center text-center group hover:border-blue-600 hover:bg-blue-50/50 transition-all cursor-pointer`}
                     >
                       <div className="w-5 h-5 flex items-center justify-center">
-                        <svg viewBox="0 0 24 24" className={driveFile ? 'text-emerald-600' : 'text-slate-400'} fill="currentColor">
+                        <svg viewBox="0 0 24 24" className={driveFile ? 'text-blue-600' : 'text-slate-400'} fill="currentColor">
                           <path d="M7.74 3.522l-.004-.007a1.5 1.5 0 01.378-2.008 1.517 1.517 0 012.012.384l.006.009 5.8 9.539a1.5 1.5 0 01-.36 1.996 1.517 1.517 0 01-2.028-.372l-.006-.01zm4.72 13.918l.004.007a1.5 1.5 0 01-.378 2.008 1.517 1.517 0 01-2.012-.384l-.006-.009-5.8-9.539a1.5 1.5 0 01.36-1.996 1.517 1.517 0 012.028.372l.006.01zm4.04-12.87l-.01.002a1.5 1.5 0 00-1.127 1.782l.002.01 4.544 14.1a1.5 1.5 0 001.764 1.138 1.517 1.517 0 001.15-1.748l-.004-.012-4.544-14.1a1.5 1.5 0 00-1.775-1.172zm-8.814 1.34L7.697 5.9l8.606 14.072-.001.001a1.5 1.5 0 002.138.441 1.517 1.517 0 00.413-2.146l-.001-.001z" />
                         </svg>
                       </div>
@@ -730,7 +730,7 @@ export default function AdminDashboard() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex-1 py-4 bg-slate-900 hover:bg-black text-white font-bold rounded-2xl transition-all shadow-xl shadow-slate-200 active:scale-95 flex items-center justify-center gap-2"
+                    className="flex-1 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-blue-200 active:scale-95 flex items-center justify-center gap-2"
                   >
                     {loading ? <Loader2 className="animate-spin" /> : "Publish Paper"}
                   </button>

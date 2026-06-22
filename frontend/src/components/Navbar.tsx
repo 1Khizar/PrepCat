@@ -16,20 +16,15 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled
-        ? "py-4 bg-white/80 backdrop-blur-2xl border-b border-slate-100/50 shadow-sm"
-        : "py-5 bg-transparent"
-        }`}
-    >
+    <nav className="fixed top-0 left-0 right-0 z-[100] py-4 bg-white border-b border-slate-100 shadow-sm">
       <div className="container flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2 md:gap-3 group">
-          <div className="w-8 h-8 md:w-10 md:h-10 bg-brand-primary rounded-lg md:rounded-xl flex items-center justify-center text-white font-black text-sm md:text-lg shadow-lg shadow-brand-primary/20 group-hover:scale-110 transition-all">
+          <div className="w-8 h-8 md:w-10 md:h-10 bg-blue-600 rounded-lg md:rounded-xl flex items-center justify-center text-white font-black text-sm md:text-lg shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-all">
             P
           </div>
           <span className="text-xl md:text-2xl font-black text-slate-900 tracking-tighter">
-            PrepBuddy
+            PrepCat
           </span>
         </Link>
 
@@ -40,7 +35,7 @@ const Navbar = () => {
           </Link>
           <Link
             href="/register"
-            className="flex items-center gap-2 px-5 md:px-6 py-2 md:py-2.5 bg-brand-primary text-white text-[14px] md:text-[15px] font-bold rounded-lg md:rounded-xl hover:bg-emerald-600 transition-all shadow-primary-glow active:scale-95"
+            className="flex items-center gap-2 px-5 md:px-6 py-2 md:py-2.5 bg-blue-600 text-white text-[14px] md:text-[15px] font-bold rounded-lg md:rounded-xl hover:bg-blue-700 transition-all shadow-primary-glow active:scale-95"
           >
             <span>Register</span>
           </Link>

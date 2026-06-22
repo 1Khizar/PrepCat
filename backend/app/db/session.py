@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Using SQLite for development by default, can be switched to PostgreSQL
-SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./prepbuddy.db")
+SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./prepcat.db")
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False} if "sqlite" in SQLALCHEMY_DATABASE_URL else {}

@@ -48,7 +48,7 @@ export default function AdminLogin() {
     return (
         <main className="min-h-screen bg-slate-50 flex items-center justify-center p-6 relative overflow-hidden">
             {/* Subtle background glows */}
-            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-emerald-500/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
+            <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-blue-500/5 rounded-full blur-[150px] -translate-x-1/2 -translate-y-1/2" />
             <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full blur-[120px] translate-x-1/2 translate-y-1/2" />
 
             <motion.div
@@ -59,25 +59,25 @@ export default function AdminLogin() {
             >
                 {/* Logo & branding */}
                 <div className="text-center mb-10">
-                    <div className="w-16 h-16 bg-slate-900 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-6 shadow-xl">
+                    <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white font-black text-2xl mx-auto mb-6 shadow-xl shadow-blue-200">
                         P
                     </div>
-                    <h1 className="text-3xl font-black text-slate-900 tracking-tight">PrepBuddy Admin</h1>
-                    <p className="text-slate-400 font-bold text-sm mt-2">Secure access to the control center</p>
+                    <h1 className="text-3xl font-black text-blue-600 tracking-tight">PrepCat Admin</h1>
+                    <p className="text-slate-400 font-medium text-sm mt-2">Secure access to the control center</p>
                 </div>
 
                 {/* Login Card */}
                 <div className="bg-white border border-slate-100 rounded-2xl p-8 shadow-xl">
-                    <div className="flex items-center gap-3 mb-8 px-4 py-3 bg-emerald-50 border border-emerald-100 rounded-xl">
-                        <ShieldCheck size={18} className="text-emerald-600" />
-                        <span className="text-xs font-bold text-emerald-700">Protected Admin Portal</span>
+                    <div className="flex items-center gap-3 mb-8 px-4 py-3 bg-blue-50 border border-blue-100 rounded-xl">
+                        <ShieldCheck size={18} className="text-blue-600" />
+                        <span className="text-xs font-bold text-blue-700">Protected Admin Portal</span>
                     </div>
 
                     {error && (
                         <motion.div
                             initial={{ opacity: 0, y: -10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="mb-6 px-4 py-3 bg-rose-50 border border-rose-100 rounded-xl text-rose-600 text-sm font-bold"
+                            className="mb-6 px-4 py-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm font-medium"
                         >
                             {error}
                         </motion.div>
@@ -85,22 +85,22 @@ export default function AdminLogin() {
 
                     <form onSubmit={handleLogin} className="space-y-5">
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Admin Email</label>
+                            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Admin Email</label>
                             <div className="relative">
                                 <Mail size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input
                                     type="text"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    placeholder="admin@prepbuddy.com"
+                                    placeholder="admin@prepcat.com"
                                     required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-slate-900 font-bold text-sm outline-none placeholder:text-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white transition-all"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-4 text-slate-900 font-normal text-sm outline-none placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Password</label>
+                            <label className="text-[10px] font-semibold uppercase tracking-widest text-slate-400">Password</label>
                             <div className="relative">
                                 <Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
                                 <input
@@ -109,7 +109,7 @@ export default function AdminLogin() {
                                     onChange={(e) => setPassword(e.target.value)}
                                     placeholder="••••••••"
                                     required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-12 text-slate-900 font-bold text-sm outline-none placeholder:text-slate-300 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10 focus:bg-white transition-all"
+                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3.5 pl-11 pr-12 text-slate-900 font-normal text-sm outline-none placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white transition-all"
                                 />
                                 <button
                                     type="button"
@@ -124,7 +124,7 @@ export default function AdminLogin() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="w-full bg-slate-900 text-white py-4 rounded-xl font-black text-sm hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 shadow-lg"
+                            className="w-full bg-blue-600 text-white py-4 rounded-xl font-bold text-sm hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-2 shadow-lg shadow-blue-200"
                         >
                             {loading ? (
                                 <Loader2 size={18} className="animate-spin" />
@@ -138,8 +138,8 @@ export default function AdminLogin() {
                     </form>
                 </div>
 
-                <p className="text-center text-slate-400 text-xs font-bold mt-8">
-                    PrepBuddy © 2026 — Admin Access Only
+                <p className="text-center text-slate-400 text-xs font-medium mt-8">
+                    PrepCat © 2026 — Admin Access Only
                 </p>
             </motion.div>
         </main>

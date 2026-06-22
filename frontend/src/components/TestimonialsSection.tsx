@@ -15,7 +15,7 @@ const testimonials = [
     name: "Dr. Sana Malik",
     university: "Allama Iqbal Medical College",
     score: "188/200",
-    text: "PrepBuddy didn't just give me papers; it gave me a professional ecosystem. The subject-wise categorization is the most strategic resource I've used.",
+    text: "PrepCat didn't just give me papers; it gave me a professional ecosystem. The subject-wise categorization is the most strategic resource I've used.",
     avatar: "SM",
   },
   {
@@ -52,10 +52,10 @@ const TestimonialsSection = () => {
               <div className="flex justify-between w-full mb-10">
                 <div className="flex gap-1.5">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={14} className="fill-brand-teal text-brand-teal" />
+                    <Star key={i} size={14} className="fill-blue-600 text-blue-600" />
                   ))}
                 </div>
-                <CheckCircle2 size={18} className="text-brand-teal opacity-50" />
+                <CheckCircle2 size={18} className="text-blue-600 opacity-50" />
               </div>
 
               <p className="text-xl font-bold text-slate-800 leading-relaxed mb-12 italic tracking-tight">
@@ -63,12 +63,12 @@ const TestimonialsSection = () => {
               </p>
 
               <div className="flex items-center gap-5 mt-auto">
-                <div className="w-14 h-14 rounded-2xl bg-brand-navy text-white flex items-center justify-center font-black text-xl shadow-xl shadow-brand-navy/10 group-hover:bg-brand-teal transition-colors">
+                <div className="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-xl shadow-xl shadow-slate-900/10 group-hover:bg-blue-600 transition-colors">
                   {t.avatar}
                 </div>
                 <div>
                   <div className="font-black text-slate-900 text-base">{t.name}</div>
-                  <div className="text-[10px] font-black uppercase tracking-[0.1em] text-brand-teal mt-0.5">
+                  <div className="text-[10px] font-black uppercase tracking-[0.1em] text-blue-600 mt-0.5">
                     {t.university}
                   </div>
                   <div className="text-[9px] font-bold text-slate-400 mt-1 uppercase tracking-widest bg-white border border-slate-100 px-2 py-0.5 rounded-full inline-block">

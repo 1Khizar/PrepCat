@@ -60,9 +60,21 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     if db.query(UserModel).filter(UserModel.email == user_in.email).first():
         raise HTTPException(status_code=400, detail="Email already registered")
     
+    # Ensure username is unique and clean
+    base_username = re.sub(r'[^a-zA-Z0-9]', '', user_in.username)
+    if not base_username:
+        base_username = user_in.email.split('@')[0]
+        base_username = re.sub(r'[^a-zA-Z0-9]', '', base_username)
+    
+    username = base_username
+    counter = 1
+    while db.query(UserModel).filter(UserModel.username == username).first():
+        username = f"{base_username}{counter}"
+        counter += 1
+
     db_user = UserModel(
         email=user_in.email,
-        username=user_in.username,
+        username=username,
         hashed_password=get_password_hash(user_in.password),
         full_name=user_in.full_name,
         phone_number=user_in.phone_number
@@ -94,26 +106,20 @@ def read_users_me(current_user: UserModel = Depends(get_current_user)):
 def get_user_activity(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     today = date.today()
     
-    # Check if they already have an activity log for today
+    # Check if they have an activity log for today
     today_activity = db.query(UserActivity).filter(
         UserActivity.user_id == current_user.id,
         UserActivity.activity_date == today
     ).first()
     
-    # If not logged today, create it! (Daily streak tracking)
-    if not today_activity:
-        new_activity = UserActivity(user_id=current_user.id, activity_date=today)
-        db.add(new_activity)
-        db.commit()
-    
     # Calculate streak (look backwards from today)
     streak = 0
     check_date = today
     
-    # Get all distinct activity dates for the user ordered descending
+    # Get all distinct activity dates for the user
     activities = db.query(UserActivity.activity_date).filter(
         UserActivity.user_id == current_user.id
-    ).order_by(UserActivity.activity_date.desc()).all()
+    ).all()
     
     dates_set = {act[0] for act in activities}
     
@@ -124,8 +130,29 @@ def get_user_activity(db: Session = Depends(get_db), current_user: UserModel = D
     return {
         "current_streak": streak,
         "active_dates": [str(d) for d in dates_set],
-        "today_logged": True
+        "today_logged": today_activity is not None
     }
+
+
+@router.post("/activity/log")
+def log_user_activity(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    """Log user activity for today to maintain streak"""
+    today = date.today()
+    
+    # Check if they already have an activity log for today
+    existing_activity = db.query(UserActivity).filter(
+        UserActivity.user_id == current_user.id,
+        UserActivity.activity_date == today
+    ).first()
+    
+    if not existing_activity:
+        new_activity = UserActivity(user_id=current_user.id, activity_date=today)
+        db.add(new_activity)
+        db.commit()
+        db.refresh(new_activity)
+    
+    # Return updated activity data
+    return get_user_activity(db, current_user)
 
 # Admin specific routes
 def get_admin_user(current_user: UserModel = Depends(get_current_user)):

@@ -40,7 +40,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    localStorage.removeItem("prepBuddy_user");
+    localStorage.removeItem("prepcat_user");
     router.push("/login");
   };
 
@@ -85,9 +85,9 @@ export default function ProfilePage() {
                   My Profile
                 </h1>
                 <p className="text-slate-500 font-medium max-w-md">
-                  View and manage your account details. Currently signed in as a PrepBuddy Student.
+                  View and manage your account details. Currently signed in as a PrepCat Student.
                 </p>
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-black uppercase tracking-widest mt-4">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase tracking-widest mt-4">
                   <ShieldCheck size={14} /> Official Aspirant
                 </div>
               </div>
@@ -129,7 +129,7 @@ export default function ProfilePage() {
             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-slate-100">
               <button 
                 onClick={handleLogout}
-                className="btn-amazing-outline !border-red-100 !text-red-500 hover:!bg-red-50 flex items-center justify-center gap-2 w-full sm:w-auto"
+                className="btn-amazing-outline !border-blue-100 !text-blue-600 hover:!bg-blue-50 flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <LogOut size={18} /> Sign Out
               </button>

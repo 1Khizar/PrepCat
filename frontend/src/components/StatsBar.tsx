@@ -18,7 +18,7 @@ const StatsBar = () => {
           {stats.map((stat, i) => (
             <div key={i} className="flex flex-col items-center lg:items-start space-y-4">
               <div className="flex items-center gap-4">
-                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-brand-teal">
+                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-blue-600">
                   <stat.icon size={20} />
                 </div>
                 <div className="text-3xl font-black text-slate-900 tracking-tighter">{stat.value}</div>
