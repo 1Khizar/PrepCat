@@ -120,6 +120,15 @@ export default function Dashboard() {
         }
     };
 
+    const logActivity = async () => {
+        try {
+            const res = await api.post("/auth/activity/log");
+            setStreakData(res.data);
+        } catch (err) {
+            console.error("Failed to log activity", err);
+        }
+    };
+
     const handleSavePaper = async (paperId: number) => {
         // Optimistic UI Update: Instantly change the button state
         const paperToSave = papers.find(p => p.id === paperId);
@@ -390,15 +399,16 @@ export default function Dashboard() {
 
                                                 return (
                                                     <motion.div
-                                                        key={paper.id}
-                                                        initial={{ opacity: 0, y: 8 }}
-                                                        animate={{ opacity: 1, y: 0 }}
-                                                        transition={{ delay: i * 0.05 }}
-                                                        className="bg-white border border-slate-100 flex flex-row items-center justify-between p-4 md:p-5 hover:border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group gap-3 rounded-2xl"
-                                                        onClick={() => {
-                                                            setSelectedPaperForViewing(paper);
-                                                        }}
-                                                    >
+                                                key={paper.id}
+                                                initial={{ opacity: 0, y: 8 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                transition={{ delay: i * 0.05 }}
+                                                className="bg-white border border-slate-100 flex flex-row items-center justify-between p-4 md:p-5 hover:border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group gap-3 rounded-2xl"
+                                                onClick={() => {
+                                                    setSelectedPaperForViewing(paper);
+                                                    logActivity();
+                                                }}
+                                            >
                                                         <div className="flex items-center gap-3 min-w-0 pr-2">
                                                             <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 transition-all shadow-sm">
                                                                 <FileText size={18} className="md:w-[22px] md:h-[22px]" />
@@ -560,6 +570,7 @@ export default function Dashboard() {
                                                 className="bg-white border border-slate-100 flex flex-row items-center justify-between p-4 md:p-5 hover:border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-pointer group gap-3 rounded-2xl"
                                                 onClick={() => {
                                                     setSelectedPaperForViewing(paper);
+                                                    logActivity();
                                                 }}
                                             >
                                                 <div className="flex items-center gap-3 min-w-0 pr-2">

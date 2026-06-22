@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   title: "PrepCat — Preparation for College Admission Test",
@@ -31,7 +32,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className={`${nunito.variable} font-sans antialiased`} suppressHydrationWarning>{children}</body>
+      <body className={`${nunito.variable} font-sans antialiased`} suppressHydrationWarning>
+        {children}
+        <Analytics />
+      </body>
     </html>
   );
 }
