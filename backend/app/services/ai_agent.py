@@ -173,14 +173,20 @@ async def stream_agent_response(
     except Exception as e:
         logger.error(f"Agent error: {e}")
         try:
-            yield f"data: {json.dumps({'type': 'status', 'data': '\\n\\n_Note: Search is currently unavailable, answering from memory..._\\n\\n'})}\\n\\n"
+            status_data = '\n\n_Note: Search is currently unavailable, answering from memory..._\n\n'
+            status_json = json.dumps({'type': 'status', 'data': status_data})
+            yield f"data: {status_json}\n\n"
             plain_llm = get_llm(streaming=True)
             fallback_msgs = build_messages(system, session_history, message)
             async for chunk in plain_llm.astream(fallback_msgs):
                 if chunk.content:
-                    yield f"data: {json.dumps({'type': 'content', 'data': chunk.content})}\\n\\n"
-            yield f"data: {json.dumps({'type': 'done'})}\\n\\n"
+                    content_json = json.dumps({'type': 'content', 'data': chunk.content})
+                    yield f"data: {content_json}\n\n"
+            done_json = json.dumps({'type': 'done'})
+            yield f"data: {done_json}\n\n"
         except Exception as fallback_e:
             logger.error(f"Fallback error: {fallback_e}")
-            yield f"data: {json.dumps({'type': 'error', 'data': 'Something went wrong. Please try again.'})}\\n\\n"
-            yield f"data: {json.dumps({'type': 'done'})}\\n\\n"
+            err_json = json.dumps({'type': 'error', 'data': 'Something went wrong. Please try again.'})
+            yield f"data: {err_json}\n\n"
+            done_json = json.dumps({'type': 'done'})
+            yield f"data: {done_json}\n\n"
