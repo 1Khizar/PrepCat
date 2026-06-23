@@ -9,7 +9,7 @@ import re
 from jose import JWTError, jwt
 from app.core.security import ALGORITHM, SECRET_KEY
 from datetime import date, timedelta
-from app.models.engagement import UserActivity
+from app.models.engagement import UserActivity, SavedPaper
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -134,7 +134,7 @@ def get_user_activity(db: Session = Depends(get_db), current_user: UserModel = D
     }
 
 
-@router.post("/activity/log")
+@router.post("/record-daily-activity")
 def log_user_activity(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
     """Log user activity for today to maintain streak"""
     today = date.today()
@@ -154,6 +154,15 @@ def log_user_activity(db: Session = Depends(get_db), current_user: UserModel = D
     # Return updated activity data
     return get_user_activity(db, current_user)
 
+@router.post("/record-paper-view")
+def log_paper_opened(db: Session = Depends(get_db), current_user: UserModel = Depends(get_current_user)):
+    """Increment the user's paper opened count"""
+    if current_user.papers_opened_count is None:
+        current_user.papers_opened_count = 0
+    current_user.papers_opened_count += 1
+    db.commit()
+    return {"message": "Paper opened count incremented", "count": current_user.papers_opened_count}
+
 # Admin specific routes
 def get_admin_user(current_user: UserModel = Depends(get_current_user)):
     if current_user.role != "admin":
@@ -162,7 +171,7 @@ def get_admin_user(current_user: UserModel = Depends(get_current_user)):
 
 @router.get("/admin/users")
 def get_all_users(db: Session = Depends(get_db), admin: UserModel = Depends(get_admin_user)):
-    users = db.query(UserModel).filter(UserModel.role == "student").all()
+    users = db.query(UserModel).filter(UserModel.role == "student").order_by(UserModel.created_at.desc()).all()
     # Mask password for security
     for u in users:
         u.hashed_password = ""
@@ -185,4 +194,31 @@ def unblock_user(user_id: int, db: Session = Depends(get_db), admin: UserModel =
     user.is_blocked = False
     db.commit()
     return {"message": "User unblocked"}
+
+@router.get("/admin/users/{user_id}/stats")
+def get_user_stats(user_id: int, db: Session = Depends(get_db), admin: UserModel = Depends(get_admin_user)):
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    today = date.today()
+    streak = 0
+    check_date = today
+
+    activities = db.query(UserActivity.activity_date).filter(
+        UserActivity.user_id == user_id
+    ).all()
+
+    dates_set = {act[0] for act in activities}
+
+    while check_date in dates_set:
+        streak += 1
+        check_date = check_date - timedelta(days=1)
+
+    return {
+        "created_at": user.created_at,
+        "current_streak": streak,
+        "papers_opened": user.papers_opened_count or 0,
+        "saved_papers": db.query(SavedPaper).filter(SavedPaper.user_id == user_id).count()
+    }
 
