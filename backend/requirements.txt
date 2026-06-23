@@ -12,3 +12,7 @@ alembic
 cors
 httpx
 supabase
+langchain-groq
+langchain-community
+langchain-core
+duckduckgo-search>=6.1.0
