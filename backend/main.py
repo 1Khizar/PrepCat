@@ -4,10 +4,10 @@ from fastapi.staticfiles import StaticFiles
 import os
 from contextlib import asynccontextmanager
 
-from app.api import questions, auth, papers
+from app.api import questions, auth, papers, ai_tutor
 
 from app.db.session import Base, engine, SessionLocal
-from app.models import engagement, user
+from app.models import engagement, user, ai_memory
 from app.models.user import User as UserModel, UserRole
 from app.core.security import get_password_hash
 
@@ -53,6 +53,7 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(questions.router)
 app.include_router(papers.router)
+app.include_router(ai_tutor.router)
 
 # Mount uploads directory
 UPLOAD_DIR = "uploads"
