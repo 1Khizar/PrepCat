@@ -289,7 +289,8 @@ export default function Dashboard() {
 
         try {
             const token = localStorage.getItem("token");
-            const response = await fetch("http://localhost:8000/ai/chat", {
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000');
+            const response = await fetch(`${apiUrl}/ai/chat`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -607,7 +608,8 @@ export default function Dashboard() {
                                         papers
                                             .filter(p => p.exam_type === selectedSubjectInfo.exam && p.subject === selectedSubjectInfo.subject)
                                             .map((paper, i) => {
-                                                const fileUrl = paper.file_url ? (paper.file_url.startsWith('http') ? paper.file_url : `http://localhost:8000${paper.file_url}`) : '#';
+                                                const apiUrl = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000');
+                                                const fileUrl = paper.file_url ? (paper.file_url.startsWith('http') ? paper.file_url : `${apiUrl}${paper.file_url}`) : '#';
                                                 const isSaved = savedPapers.some((sp: any) => sp.id === paper.id);
 
                                                 return (
@@ -1059,7 +1061,7 @@ export default function Dashboard() {
                             {/* iFrame viewer */}
                             <div className="flex-1 bg-slate-800 relative w-full h-full">
                                 <iframe
-                                    src={`${selectedPaperForViewing.file_url ? (selectedPaperForViewing.file_url.startsWith('http') ? selectedPaperForViewing.file_url : `http://localhost:8000${selectedPaperForViewing.file_url}`) : ''}#toolbar=0&navpanes=0&scrollbar=1`}
+                                    src={`${selectedPaperForViewing.file_url ? (selectedPaperForViewing.file_url.startsWith('http') ? selectedPaperForViewing.file_url : `${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000')}${selectedPaperForViewing.file_url}`) : ''}#toolbar=0&navpanes=0&scrollbar=1`}
                                     className="w-full h-full border-0 bg-slate-800"
                                     title={selectedPaperForViewing.title}
                                 />

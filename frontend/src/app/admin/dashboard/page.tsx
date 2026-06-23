@@ -489,7 +489,7 @@ export default function AdminDashboard() {
                             <td className="px-8 py-5 text-[15px] font-medium text-slate-600">{p.year}</td>
                             <td className="px-8 py-5">
                               {p.file_url ? (
-                                <a href={`http://localhost:8000${p.file_url}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1.5">
+                                <a href={`${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000')}${p.file_url}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1.5">
                                   <Download size={16} /> Download
                                 </a>
                               ) : <span className="text-xs text-slate-300">—</span>}
