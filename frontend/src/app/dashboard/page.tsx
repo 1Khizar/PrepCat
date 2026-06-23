@@ -23,12 +23,18 @@ import {
     Flame,
     X,
     Maximize2,
-    Minimize2
+    Minimize2,
+    Bot,
+    Send,
+    RefreshCw,
+    Copy,
+    Check
 } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell } from 'recharts';
 
 // Removed static exams array - will fetch from backend
 
@@ -44,13 +50,24 @@ export default function Dashboard() {
     const [selectedSubjectInfo, setSelectedSubjectInfo] = useState<{ exam: string, subject: string } | null>(null);
     const [selectedPaperForViewing, setSelectedPaperForViewing] = useState<any | null>(null);
     const [isViewerMaximized, setIsViewerMaximized] = useState(false);
+    const [userInfo, setUserInfo] = useState<{email: string, username: string} | null>(null);
+    const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+
+    // ── AI Tutor state ──────────────────────────────────────────────────────
+    type ChatMsg = { role: 'user' | 'assistant'; content: string; id: string };
+    const [chatMessages, setChatMessages] = useState<ChatMsg[]>([]);
+    const [chatInput, setChatInput] = useState('');
+    const [isChatLoading, setIsChatLoading] = useState(false);
+    const [copiedId, setCopiedId] = useState<string | null>(null);
+    const chatBottomRef = useRef<HTMLDivElement>(null);
+    const chatInputRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
         fetchUserInfo();
         fetchPapers();
         
         // Log activity & fetch real streak data on load
-        api.get('/auth/activity').then(res => {
+        api.post('/auth/record-daily-activity').then(res => {
             setStreakData(res.data);
         }).catch(err => console.error(err));
 
@@ -89,6 +106,7 @@ export default function Dashboard() {
             if (res.data.full_name || res.data.username) {
                 setUserName(res.data.full_name || res.data.username);
             }
+            setUserInfo({ email: res.data.email, username: res.data.username });
         } catch (err: any) {
             console.error("Auth check failed.", err);
             if (err.response && (err.response.status === 401 || err.response.status === 403)) {
@@ -122,10 +140,20 @@ export default function Dashboard() {
 
     const logActivity = async () => {
         try {
-            const res = await api.post("/auth/activity/log");
+            const res = await api.post("/auth/record-daily-activity");
             setStreakData(res.data);
         } catch (err) {
             console.error("Failed to log activity", err);
+        }
+    };
+
+    const logPaperOpened = async () => {
+        try {
+            console.log("Attempting to log paper opened...");
+            const res = await api.post("/auth/record-paper-view");
+            console.log("Successfully logged paper opened! Current count:", res.data.count);
+        } catch (err) {
+            console.error("Failed to log paper opened", err);
         }
     };
 
@@ -192,41 +220,207 @@ export default function Dashboard() {
         { name: "English", icon: BookOpenText }
     ];
 
+    // Generate data for Monthly Activity Tracker
+    const getDaysInMonth = () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        
+        const days = [];
+        for (let i = 1; i <= daysInMonth; i++) {
+            const dateObj = new Date(year, month, i);
+            const monthStr = String(month + 1).padStart(2, '0');
+            const dayStr = String(i).padStart(2, '0');
+            const dateStr = `${year}-${monthStr}-${dayStr}`;
+            
+            const isCompleted = streakData.active_dates.includes(dateStr);
+            days.push({
+                day: i,
+                date: dateStr,
+                isCompleted,
+                isToday: i === now.getDate()
+            });
+        }
+        return days;
+    };
+    const monthDays = getDaysInMonth();
+
+    // Generate data for Subject Mastery Graph
+    const getSubjectDistribution = () => {
+        const counts: Record<string, number> = {};
+        savedPapers.forEach(paper => {
+            const subject = paper.subject || 'Other';
+            counts[subject] = (counts[subject] || 0) + 1;
+        });
+        
+        return Object.entries(counts).map(([name, count]) => ({
+            name,
+            count
+        })).sort((a, b) => b.count - a.count);
+    };
+    const subjectData = getSubjectDistribution();
+    const CHART_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4'];
+
+    // ── AI Tutor Handlers ───────────────────────────────────────────────────
+    const scrollToBottom = useCallback(() => {
+        if (chatBottomRef.current) {
+            chatBottomRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, []);
+
+    useEffect(() => {
+        if (activeTab === "AI Tutor") {
+            scrollToBottom();
+        }
+    }, [chatMessages, activeTab, scrollToBottom]);
+
+    const handleSendMessage = async () => {
+        if (!chatInput.trim() || isChatLoading) return;
+        
+        const userMsg = chatInput.trim();
+        setChatInput('');
+        const newMsgId = Date.now().toString();
+        
+        const historyToSend = chatMessages.map(m => ({ role: m.role, content: m.content }));
+        
+        setChatMessages(prev => [...prev, { role: 'user', content: userMsg, id: newMsgId }]);
+        setIsChatLoading(true);
+
+        try {
+            const token = localStorage.getItem("token");
+            const response = await fetch("http://localhost:8000/ai/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    message: userMsg,
+                    session_history: historyToSend
+                })
+            });
+
+            if (!response.ok || !response.body) throw new Error("Chat request failed");
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            const aiMsgId = (Date.now() + 1).toString();
+            setChatMessages(prev => [...prev, { role: 'assistant', content: '', id: aiMsgId }]);
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunkStr = decoder.decode(value, { stream: true });
+                const lines = chunkStr.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.substring(6));
+                            if (data.type === 'content' || data.type === 'status') {
+                                setChatMessages(prev => prev.map(msg => 
+                                    msg.id === aiMsgId 
+                                        ? { ...msg, content: msg.content + data.data } 
+                                        : msg
+                                ));
+                            } else if (data.type === 'error') {
+                                setChatMessages(prev => prev.map(msg => 
+                                    msg.id === aiMsgId 
+                                        ? { ...msg, content: msg.content + '\n\n**Error:** ' + data.data } 
+                                        : msg
+                                ));
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse SSE data", line);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error("Chat Error:", error);
+            setChatMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', id: Date.now().toString() }]);
+        } finally {
+            setIsChatLoading(false);
+            chatInputRef.current?.focus();
+        }
+    };
+
+    const handleCopy = (text: string, id: string) => {
+        navigator.clipboard.writeText(text);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+    };
+
+    const formatMarkdown = (text: string) => {
+        // Basic markdown parser for bold and code blocks
+        let formatted = text
+            // Code blocks
+            .replace(/```([\s\S]*?)```/g, '<pre class="bg-slate-900 text-slate-100 p-3 rounded-lg my-2 overflow-x-auto text-sm font-mono border border-slate-700"><code>$1</code></pre>')
+            // Inline code
+            .replace(/`([^`]+)`/g, '<code class="bg-slate-100 text-pink-600 px-1.5 py-0.5 rounded font-mono text-sm border border-slate-200">$1</code>')
+            // Bold
+            .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>')
+            // Newlines
+            .replace(/\n/g, '<br />');
+        return formatted;
+    };
+
     return (
         <div className="min-h-screen bg-slate-50 flex text-slate-900 font-sans selection:bg-slate-900 selection:text-white">
             {/* Sidebar - Clean White Style */}
             <aside className="w-72 bg-white border-r border-slate-100 hidden lg:flex flex-col sticky top-0 h-screen shrink-0 relative z-50 shadow-sm">
-                <div className="p-10 flex flex-col h-full">
-                    <Link href="/" className="flex items-center gap-4 mb-6 group">
-                        <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-brand-primary/20 group-hover:scale-110 transition-transform">P</div>
-                        <span className="text-2xl font-bold tracking-tighter text-slate-900 leading-none">PrepCat</span>
+                <div className="p-8 flex flex-col h-full">
+                    <Link href="/" className="flex items-center gap-3 mb-12 group">
+                        <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-200 group-hover:scale-110 transition-transform">P</div>
+                        <div className="flex flex-col">
+                            <span className="text-lg font-bold text-slate-900 leading-none tracking-tight">PrepCat</span>
+                            <span className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-1">Student Dashboard</span>
+                        </div>
                     </Link>
 
                     <nav className="space-y-2 flex-1">
                         {[
                             { icon: LayoutDashboard, label: "Home" },
                             { icon: TrendingUp, label: "My Progress" },
-                            { icon: Star, label: "Saved Papers" }
+                            { icon: Star, label: "Saved Papers" },
+                            { icon: Bot, label: "AI Tutor" }
                         ].map((item, i) => (
                             <button
                                 key={i}
                                 onClick={() => setActiveTab(item.label)}
-                                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all duration-300 ${activeTab === item.label ? "bg-brand-primary text-white shadow-xl shadow-brand-primary/25 scale-[1.02]" : "text-slate-700 hover:text-slate-900 hover:bg-white hover:shadow-sm"
+                                className={`w-full flex items-center gap-4 px-5 py-4 rounded-xl font-semibold text-[15px] transition-all duration-300 ${activeTab === item.label
+                                    ? "bg-blue-600 text-white shadow-xl shadow-blue-200"
+                                    : "text-slate-800 hover:text-blue-600 hover:bg-blue-50"
                                     }`}
                             >
-                                <item.icon size={20} />
+                                <item.icon size={18} />
                                 {item.label}
                             </button>
                         ))}
                     </nav>
 
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-4 px-6 py-4 text-slate-700 hover:text-blue-600 hover:bg-blue-50 rounded-2xl font-bold transition-all"
-                    >
-                        <LogOut size={20} />
-                        Sign Out
-                    </button>
+                    <div className="space-y-4 pt-6 border-t border-slate-100">
+                        <div className="flex items-center gap-3 px-2">
+                            <div className="w-9 h-9 bg-blue-500/10 border border-blue-500/20 rounded-lg flex items-center justify-center text-blue-600">
+                                <User size={16} />
+                            </div>
+                            <div className="overflow-hidden">
+                                <div className="text-sm font-bold text-slate-900 truncate">{userName.replace(/^Admin\s+/i, "")}</div>
+                                <div className="text-xs font-medium text-slate-400">Student Account</div>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-slate-700 font-semibold text-[15px] hover:text-rose-600 hover:bg-rose-50 transition-all"
+                        >
+                            <LogOut size={16} />
+                            Sign Out
+                        </button>
+                    </div>
                 </div>
             </aside>
 
@@ -246,7 +440,7 @@ export default function Dashboard() {
                             <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-blue-600 rounded-full border-2 border-white" />
                         </div>
                         <div className="h-6 w-[1px] bg-slate-100 hidden sm:block" />
-                        <div className="flex items-center gap-3 cursor-pointer group">
+                        <div className="flex items-center gap-3 cursor-pointer group relative" onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
                             <div className="text-right hidden sm:block">
                                 <div className="text-xs font-bold text-slate-900 leading-none mb-0.5 group-hover:text-brand-primary transition-colors">
                                     {userName.replace(/^Admin\s+/i, "")}
@@ -256,6 +450,33 @@ export default function Dashboard() {
                             <div className="w-9 h-9 rounded-xl bg-brand-primary flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-brand-primary/20 transition-transform group-hover:scale-105">
                                 {userName.replace(/^Admin\s+/i, "").charAt(0)}
                             </div>
+                            
+                            {/* Profile Dropdown */}
+                            <AnimatePresence>
+                                {showProfileDropdown && userInfo && (
+                                    <motion.div 
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: 10 }}
+                                        className="absolute right-0 top-12 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-50 cursor-default"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-xl">
+                                                {userName.charAt(0)}
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                                <h4 className="font-bold text-slate-900 truncate">{userName}</h4>
+                                                <p className="text-xs text-slate-500 font-medium truncate">{userInfo.email}</p>
+                                            </div>
+                                        </div>
+                                        <div className="bg-slate-50 rounded-xl p-3 mb-2">
+                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Username</div>
+                                            <div className="font-semibold text-slate-700 text-sm">{userInfo.username}</div>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
                     </div>
                 </header>
@@ -268,9 +489,9 @@ export default function Dashboard() {
                         <>
                             {/* Simple Greeting Area */}
                             <div className="mb-2 md:mb-4 w-full">
-                                <h1 className="text-xl md:text-3xl font-bold text-slate-900 mb-1.5 md:mb-2">PrepCat Academy</h1>
-                                <p className="text-sm md:text-base text-slate-500 font-medium">
-                                    Welcome, <span className="text-brand-primary font-bold">{userName.replace(/^Admin\s+/i, "")}</span>. Your personalized curriculum awaits.
+                                <h1 className="text-3xl font-bold mb-1 text-slate-950">PrepCat Academy</h1>
+                                <p className="text-sm text-slate-500 font-medium">
+                                    Welcome, <span className="text-blue-600 font-bold">{userName.replace(/^Admin\s+/i, "")}</span>. Your personalized curriculum awaits.
                                 </p>
                             </div>
 
@@ -279,18 +500,16 @@ export default function Dashboard() {
                                 <div className="absolute -top-10 right-0 w-72 h-72 bg-brand-primary/5 rounded-full blur-[100px] -z-10" />
 
                                 <div className="mb-2 w-full">
-                                    <h2 className="text-lg md:text-2xl font-bold flex items-center gap-3 text-slate-900 mb-1">
-                                        <div className="w-7 h-7 md:w-8 md:h-8 bg-brand-primary/10 rounded-lg flex items-center justify-center text-brand-primary shadow-inner">
-                                            <FileText size={16} />
-                                        </div>
-                                        MDCAT Preparation
+                                    <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
+                                        <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-[10px] font-bold">M</div>
+                                        MDCAT Papers
                                     </h2>
                                     <p className="text-sm text-slate-500 font-medium">Category-wise past papers for MDCAT exams.</p>
                                 </div>
 
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4 mb-3 w-full">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 w-full">
                                     {loading ? (
-                                        [1, 2, 3, 4].map(i => <div key={i} className="amazing-card h-[140px] md:h-[170px] rounded-2xl animate-pulse bg-slate-100" />)
+                                        [1, 2, 3, 4].map(i => <div key={i} className="amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100" />)
                                     ) : (
                                         subjectsList.map(subject => {
                                             const count = getPaperCount("MDCAT", subject.name);
@@ -298,15 +517,13 @@ export default function Dashboard() {
                                                 <button
                                                     key={`mdcat-${subject.name}`}
                                                     onClick={() => setSelectedSubjectInfo({ exam: "MDCAT", subject: subject.name })}
-                                                    className="bg-white border border-slate-200/80 rounded-2xl p-5 md:p-6 text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex flex-col justify-between min-h-[140px] md:min-h-[170px]"
+                                                    className="bg-white border border-slate-200 rounded-2xl p-8 min-h-[160px] text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group"
                                                 >
-                                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-50 text-blue-600 flex shrink-0 items-center justify-center mb-4 shadow-sm border border-blue-100/50">
-                                                        <subject.icon size={18} className="md:w-[22px] md:h-[22px]" />
+                                                    <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 shadow-sm border border-blue-100/50">
+                                                        <FileText size={24} />
                                                     </div>
-                                                    <div>
-                                                        <h3 className="font-extrabold text-sm md:text-lg text-slate-900 tracking-tight line-clamp-1">{subject.name}</h3>
-                                                        <p className="text-[10px] md:text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">{count === 0 ? "No Papers" : `${count} Papers`}</p>
-                                                    </div>
+                                                    <h3 className="font-bold text-xl text-slate-900">{subject.name}</h3>
+                                                    <p className="text-sm font-medium text-slate-400 mt-1.5">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
                                                 </button>
                                             );
                                         })
@@ -317,18 +534,16 @@ export default function Dashboard() {
                             {/* Exam Row 2: NUMS */}
                             <div className="space-y-2 relative pt-2 w-full">
                                 <div className="mb-2 w-full">
-                                    <h2 className="text-lg md:text-2xl font-bold flex items-center gap-3 text-slate-900 mb-1">
-                                        <div className="w-7 h-7 md:w-8 md:h-8 bg-brand-secondary/10 rounded-lg flex items-center justify-center text-brand-secondary shadow-inner">
-                                            <BookOpen size={16} />
-                                        </div>
-                                        NUMS Preparation
+                                    <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
+                                        <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-[10px] font-bold">N</div>
+                                        NUMS Papers
                                     </h2>
                                     <p className="text-sm text-slate-500 font-medium">Category-wise past papers for NUMS medical college entrance.</p>
                                 </div>
 
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 md:gap-4 mb-3 w-full">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 w-full">
                                     {loading ? (
-                                        [1, 2, 3, 4].map(i => <div key={i} className="amazing-card h-[140px] md:h-[170px] rounded-2xl animate-pulse bg-slate-100" />)
+                                        [1, 2, 3, 4].map(i => <div key={i} className="amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100" />)
                                     ) : (
                                         subjectsList.map(subject => {
                                             const count = getPaperCount("NUMS", subject.name);
@@ -336,15 +551,13 @@ export default function Dashboard() {
                                                 <button
                                                     key={`nums-${subject.name}`}
                                                     onClick={() => setSelectedSubjectInfo({ exam: "NUMS", subject: subject.name })}
-                                                    className="bg-white border border-slate-200/80 rounded-2xl p-5 md:p-6 text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex flex-col justify-between min-h-[140px] md:min-h-[170px]"
+                                                    className="bg-white border border-slate-200 rounded-2xl p-8 min-h-[160px] text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group"
                                                 >
-                                                    <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl bg-blue-50 text-blue-600 flex shrink-0 items-center justify-center mb-4 shadow-sm border border-blue-100/50">
-                                                        <subject.icon size={18} className="md:w-[22px] md:h-[22px]" />
+                                                    <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 shadow-sm border border-blue-100/50">
+                                                        <FileText size={24} />
                                                     </div>
-                                                    <div>
-                                                        <h3 className="font-extrabold text-sm md:text-lg text-slate-900 tracking-tight line-clamp-1">{subject.name}</h3>
-                                                        <p className="text-[10px] md:text-xs font-bold text-slate-400 mt-1 uppercase tracking-wider">{count === 0 ? "No Papers" : `${count} Papers`}</p>
-                                                    </div>
+                                                    <h3 className="font-bold text-xl text-slate-900">{subject.name}</h3>
+                                                    <p className="text-sm font-medium text-slate-400 mt-1.5">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
                                                 </button>
                                             );
                                         })
@@ -407,6 +620,7 @@ export default function Dashboard() {
                                                 onClick={() => {
                                                     setSelectedPaperForViewing(paper);
                                                     logActivity();
+                                                    logPaperOpened();
                                                 }}
                                             >
                                                         <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -442,6 +656,8 @@ export default function Dashboard() {
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
                                                                     setSelectedPaperForViewing(paper);
+                                                                    logActivity();
+                                                                    logPaperOpened();
                                                                 }}
                                                                 className="text-xs md:text-sm font-semibold text-blue-600 hover:text-white flex items-center justify-center gap-1.5 transition-colors bg-blue-50 hover:bg-blue-600 px-3 md:px-4 py-2 md:py-2.5 rounded-lg border border-transparent"
                                                             >
@@ -532,6 +748,40 @@ export default function Dashboard() {
                                     })}
                                 </div>
                             </div>
+
+                            {/* Monthly Activity Tracker */}
+                            <div className="bg-white border border-slate-100 rounded-2xl p-5 md:p-6 hover:shadow-md transition-all mt-6">
+                                <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
+                                    <Clock size={18} className="text-blue-500" />
+                                    Monthly Activity Tracker
+                                </h3>
+                                <div className="flex justify-center w-full">
+                                    <div className="grid grid-cols-7 gap-1.5 md:gap-2">
+                                        {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                                            <div key={`head-${i}`} className="text-center text-[10px] md:text-xs font-bold text-slate-400 mb-2">{d}</div>
+                                        ))}
+                                        
+                                        {/* Offset for the first day of the month */}
+                                        {Array.from({ length: new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay() }).map((_, i) => (
+                                            <div key={`empty-${i}`} className="w-8 h-8 md:w-10 md:h-10 rounded-lg bg-transparent" />
+                                        ))}
+                                        
+                                        {monthDays.map((dayData, i) => (
+                                            <div key={`day-${i}`} className="group relative w-8 h-8 md:w-10 md:h-10 flex items-center justify-center">
+                                                <div className={`w-full h-full rounded-lg transition-all duration-300 flex items-center justify-center text-[10px] md:text-xs font-bold ${
+                                                    dayData.isCompleted 
+                                                    ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30 ring-2 ring-blue-600/20 ring-offset-1 scale-105' 
+                                                    : dayData.isToday 
+                                                        ? 'bg-blue-50 text-blue-600 ring-2 ring-blue-200 ring-offset-1' 
+                                                        : 'bg-slate-50 text-slate-400 hover:bg-slate-100 hover:scale-110'
+                                                }`}>
+                                                    {dayData.day}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     )}
 
@@ -571,6 +821,7 @@ export default function Dashboard() {
                                                 onClick={() => {
                                                     setSelectedPaperForViewing(paper);
                                                     logActivity();
+                                                    logPaperOpened();
                                                 }}
                                             >
                                                 <div className="flex items-center gap-3 min-w-0 pr-2">
@@ -588,6 +839,8 @@ export default function Dashboard() {
                                                         onClick={(e) => {
                                                             e.stopPropagation();
                                                             setSelectedPaperForViewing(paper);
+                                                            logActivity();
+                                                            logPaperOpened();
                                                         }}
                                                         className="text-xs md:text-sm font-semibold text-blue-600 hover:text-white flex items-center justify-center gap-1.5 transition-colors bg-blue-50 hover:bg-blue-600 px-3 md:px-4 py-2 md:py-2.5 rounded-lg border border-transparent"
                                                     >
@@ -611,6 +864,120 @@ export default function Dashboard() {
                         </div>
                     )}
 
+                    {/* AI Tutor Tab */}
+                    {activeTab === "AI Tutor" && (
+                        <div className="flex flex-col h-[calc(100vh-140px)] w-full max-w-4xl mx-auto bg-white border border-slate-100 rounded-2xl shadow-sm overflow-hidden relative">
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-4 border-b border-slate-100 bg-white z-10 shrink-0">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-xl flex items-center justify-center">
+                                        <Bot size={20} />
+                                    </div>
+                                    <div>
+                                        <h2 className="font-bold text-slate-900">AI Tutor</h2>
+                                        <p className="text-xs text-slate-500 font-medium">Powered by Groq</p>
+                                    </div>
+                                </div>
+                                <button 
+                                    onClick={() => setChatMessages([])}
+                                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                                >
+                                    <RefreshCw size={14} /> <span className="hidden sm:inline">New Chat</span>
+                                </button>
+                            </div>
+
+                            {/* Chat Messages Area */}
+                            <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 bg-slate-50/50">
+                                {chatMessages.length === 0 ? (
+                                    <div className="h-full flex flex-col items-center justify-center text-center max-w-md mx-auto space-y-4">
+                                        <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center shadow-inner mb-2">
+                                            <Bot size={32} />
+                                        </div>
+                                        <h3 className="text-xl font-bold text-slate-900">How can I help you study?</h3>
+                                        <p className="text-slate-500 text-sm font-medium">I'm your personal AI tutor. Ask me to explain a concept, solve a problem, or test your knowledge.</p>
+                                    </div>
+                                ) : (
+                                    chatMessages.map((msg, i) => {
+                                        if (msg.role === 'assistant' && msg.content === '' && isChatLoading) return null;
+                                        return (
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            key={msg.id} 
+                                            className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                        >
+                                            <div className={`max-w-[85%] flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-slate-900 text-white' : 'bg-blue-600 text-white'}`}>
+                                                    {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                                                </div>
+                                                <div className={`group relative p-4 rounded-2xl ${
+                                                    msg.role === 'user' 
+                                                    ? 'bg-slate-900 text-white rounded-tr-sm' 
+                                                    : 'bg-white border border-slate-100 text-slate-700 rounded-tl-sm shadow-sm'
+                                                }`}>
+                                                    <div className="prose prose-sm max-w-none prose-p:leading-relaxed prose-pre:my-0" dangerouslySetInnerHTML={{ __html: formatMarkdown(msg.content) }} />
+                                                    
+                                                    {msg.role === 'assistant' && (
+                                                        <button 
+                                                            onClick={() => handleCopy(msg.content, msg.id)}
+                                                            className="absolute -right-10 top-2 p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-md opacity-0 group-hover:opacity-100 transition-all"
+                                                            title="Copy text"
+                                                        >
+                                                            {copiedId === msg.id ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )})
+                                )}
+                                {isChatLoading && (
+                                    <div className="flex justify-start">
+                                        <div className="flex gap-3 max-w-[85%]">
+                                            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0">
+                                                <Bot size={14} />
+                                            </div>
+                                            <div className="p-4 bg-white border border-slate-100 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1.5 h-[52px]">
+                                                <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} className="w-2 h-2 bg-blue-400 rounded-full" />
+                                                <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} className="w-2 h-2 bg-blue-400 rounded-full" />
+                                                <motion.div animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} className="w-2 h-2 bg-blue-400 rounded-full" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                                <div ref={chatBottomRef} />
+                            </div>
+
+                            {/* Input Area */}
+                            <div className="p-4 bg-white border-t border-slate-100 shrink-0">
+                                <div className="relative flex items-end gap-2 bg-slate-50 border border-slate-200 rounded-2xl focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all p-1.5 pr-2">
+                                    <textarea
+                                        ref={chatInputRef}
+                                        value={chatInput}
+                                        onChange={(e) => setChatInput(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter' && !e.shiftKey) {
+                                                e.preventDefault();
+                                                handleSendMessage();
+                                            }
+                                        }}
+                                        placeholder="Ask your tutor anything... (Shift+Enter for new line)"
+                                        className="w-full max-h-32 min-h-[44px] bg-transparent resize-none outline-none text-slate-700 text-sm py-2.5 px-3 placeholder:text-slate-400"
+                                        rows={1}
+                                    />
+                                    <button
+                                        onClick={handleSendMessage}
+                                        disabled={!chatInput.trim() || isChatLoading}
+                                        className="mb-1 w-9 h-9 shrink-0 flex items-center justify-center bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    >
+                                        <Send size={16} className="ml-0.5" />
+                                    </button>
+                                </div>
+                                <p className="text-center text-[10px] text-slate-400 mt-2 font-medium">AI can make mistakes. Verify important information.</p>
+                            </div>
+                        </div>
+                    )}
+
 
 
                     </div>
@@ -622,7 +989,8 @@ export default function Dashboard() {
                 {[
                     { icon: LayoutDashboard, label: "Home" },
                     { icon: TrendingUp, label: "My Progress" },
-                    { icon: Star, label: "Saved Papers" }
+                    { icon: Star, label: "Saved Papers" },
+                    { icon: Bot, label: "AI Tutor" }
                 ].map((item, i) => (
                     <button
                         key={i}

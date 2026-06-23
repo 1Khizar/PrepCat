@@ -33,6 +33,11 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<{ exam: string; subject: string } | null>(null);
 
+  const [selectedUserStats, setSelectedUserStats] = useState<any>(null);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [filterDate, setFilterDate] = useState("");
+
   const subjects = ["Biology", "Physics", "Chemistry", "English"];
 
   const categoryPapers = selectedCategory
@@ -110,6 +115,20 @@ export default function AdminDashboard() {
       console.error("Failed to fetch users", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const openUserStats = async (user: any) => {
+    setSelectedUserStats({ ...user, stats: null });
+    setShowStatsModal(true);
+    setStatsLoading(true);
+    try {
+      const response = await api.get(`/auth/admin/users/${user.id}/stats`);
+      setSelectedUserStats({ ...user, stats: response.data });
+    } catch (err) {
+      console.error("Failed to load user stats", err);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -300,11 +319,15 @@ export default function AdminDashboard() {
     p.subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredUsers = users.filter(u =>
-    u.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = u.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.username.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesDate = filterDate ? new Date(u.created_at).toISOString().split('T')[0] === filterDate : true;
+
+    return matchesSearch && matchesDate;
+  });
 
   return (
     <main className="min-h-screen bg-slate-50 flex text-slate-900 font-sans selection:bg-slate-900 selection:text-white">
@@ -496,14 +519,25 @@ export default function AdminDashboard() {
                   <h1 className="text-3xl font-bold mb-2">User Management</h1>
                   <p className="text-slate-500 font-medium text-sm">Monitor and manage user accounts and export data.</p>
                 </div>
-                <button
-                  onClick={exportUsersToCSV}
-                  disabled={users.length === 0}
-                  className="bg-white border-2 border-slate-200 text-slate-900 hover:bg-slate-50 py-3 px-6 rounded-xl flex items-center gap-2 font-bold text-sm transition-all disabled:opacity-50"
-                >
-                  <Download size={18} />
-                  Export CSV
-                </button>
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Filter by Date</label>
+                    <input 
+                      type="date" 
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      className="bg-white border-2 border-slate-200 text-slate-900 rounded-xl px-4 py-2 text-sm font-bold outline-none h-[42px]"
+                    />
+                  </div>
+                  <button
+                    onClick={exportUsersToCSV}
+                    disabled={users.length === 0}
+                    className="bg-white border-2 border-slate-200 text-slate-900 hover:bg-slate-50 px-6 rounded-xl flex items-center gap-2 font-bold text-sm transition-all disabled:opacity-50 h-[42px] self-end"
+                  >
+                    <Download size={18} />
+                    Export CSV
+                  </button>
+                </div>
               </div>
               <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
                 <div className="p-8 border-b border-slate-100 flex justify-between items-center">
@@ -541,7 +575,13 @@ export default function AdminDashboard() {
                               </span>
                             )}
                           </td>
-                          <td className="px-8 py-6">
+                          <td className="px-8 py-6 flex gap-2">
+                            <button
+                              onClick={() => openUserStats(u)}
+                              className="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            >
+                              Insights
+                            </button>
                             <button
                               onClick={() => toggleUserBlock(u)}
                               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${u.is_blocked ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
@@ -737,6 +777,94 @@ export default function AdminDashboard() {
                   <button type="button" onClick={() => { setShowAddModal(false); setDriveFile(null); }} className="px-8 py-4 font-bold text-slate-500 hover:text-slate-950 transition-colors">Cancel</button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* User Stats Modal */}
+      <AnimatePresence>
+        {showStatsModal && selectedUserStats && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 pb-20 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowStatsModal(false)}
+              className="fixed inset-0 bg-slate-900/40"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden"
+            >
+              <div className="p-8 border-b border-slate-100 flex justify-between items-center text-slate-950 bg-slate-50/50">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl">
+                    {selectedUserStats.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">{selectedUserStats.full_name}</h2>
+                    <p className="text-slate-500 font-bold text-xs">@{selectedUserStats.username}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowStatsModal(false)} className="p-2 bg-slate-200/50 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-all">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-8">
+                {statsLoading ? (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
+                    <p className="text-slate-500 font-bold text-sm">Loading insights...</p>
+                  </div>
+                ) : selectedUserStats.stats ? (
+                  <div className="space-y-6">
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-500">
+                        <Calendar size={20} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Account Created</div>
+                        <div className="font-bold text-slate-900 mt-0.5">{new Date(selectedUserStats.stats.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                        <div className="text-xs font-bold text-blue-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Current Streak
+                        </div>
+                        <div className="text-3xl font-black text-blue-600">
+                          {selectedUserStats.stats.current_streak} <span className="text-sm">Days</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                        <div className="text-xs font-bold text-emerald-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Papers Opened
+                        </div>
+                        <div className="text-3xl font-black text-emerald-600">
+                          {selectedUserStats.stats.papers_opened} <span className="text-sm">Total</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                        <div className="text-xs font-bold text-amber-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Saved Papers
+                        </div>
+                        <div className="text-3xl font-black text-amber-600">
+                          {selectedUserStats.stats.saved_papers || 0} <span className="text-sm">Total</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-red-500 font-bold py-10">Failed to load statistics.</div>
+                )}
+              </div>
             </motion.div>
           </div>
         )}
