@@ -68,11 +68,11 @@ app.add_middleware(
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://prepbuddy-tau.vercel.app",
-        "https://prep-buddy-theta.vercel.app",
-        "https://prep-buddy-6pna8ak59-khizarishtiaq89-8994s-projects.vercel.app"
+        "https://prep-buddy-theta.vercel.app"
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 
