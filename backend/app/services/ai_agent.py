@@ -101,14 +101,15 @@ async def stream_agent_response(
     Streams the AI response as SSE-formatted data chunks.
     The agent decides autonomously whether to use DuckDuckGo.
     """
-    llm = get_llm(streaming=True)
-    search_tool = get_search_tool()
-    llm_with_tools = llm.bind_tools([search_tool])
-
     system = build_system_prompt(memory_context)
-    messages = build_messages(system, session_history, message)
-
+    
     try:
+        llm = get_llm(streaming=True)
+        search_tool = get_search_tool()
+        llm_with_tools = llm.bind_tools([search_tool])
+
+        messages = build_messages(system, session_history, message)
+
         # ── Phase 1: Stream first LLM response ──────────────────────────────
         collected_chunks = []
         tool_calls_accumulator = {}  # id → {name, args_str}
