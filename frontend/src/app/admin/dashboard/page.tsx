@@ -20,7 +20,15 @@ import {
   ShieldBan,
   ShieldCheck,
   Filter,
-  ChevronLeft
+  ChevronLeft,
+  Bot,
+  Key,
+  Zap,
+  Activity,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Save
 } from "lucide-react";
 import api from "@/lib/api";
 
@@ -38,7 +46,19 @@ export default function AdminDashboard() {
   const [statsLoading, setStatsLoading] = useState(false);
   const [filterDate, setFilterDate] = useState("");
 
-  const subjects = ["Biology", "Physics", "Chemistry", "English"];
+  // AI Tutor Admin State
+  const [aiConfig, setAIConfig] = useState<{ model: string; api_key_masked: string; api_key_set: boolean } | null>(null);
+  const [aiConfigLoading, setAIConfigLoading] = useState(false);
+  const [aiHealth, setAIHealth] = useState<{ status: string; model: string; response_time_ms: number | null; snippet?: string; error?: string } | null>(null);
+  const [aiHealthLoading, setAIHealthLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("");
+  const [customModel, setCustomModel] = useState("");
+  const [useCustomModel, setUseCustomModel] = useState(false);
+  const [newApiKey, setNewApiKey] = useState("");
+  const [showNewKey, setShowNewKey] = useState(false);
+  const [aiSaveStatus, setAISaveStatus] = useState<{ model?: string; key?: string }>({});
+
+  const subjects = ["Biology", "Physics", "Chemistry", "English", "Full Papers"];
 
   const categoryPapers = selectedCategory
     ? papers.filter(p => p.exam_type === selectedCategory.exam && p.subject === selectedCategory.subject)
@@ -81,6 +101,7 @@ export default function AdminDashboard() {
 
     if (activeTab === "Past Papers") fetchPapers();
     if (activeTab === "User Management") fetchUsers();
+    if (activeTab === "AI Tutor") fetchAIConfig();
 
     // Load Google Scripts
     const script1 = document.createElement("script");
@@ -115,6 +136,60 @@ export default function AdminDashboard() {
       console.error("Failed to fetch users", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAIConfig = async () => {
+    setAIConfigLoading(true);
+    try {
+      const res = await api.get("/ai/admin/config");
+      setAIConfig(res.data);
+      setSelectedModel(res.data.model);
+    } catch (err) {
+      console.error("Failed to fetch AI config", err);
+    } finally {
+      setAIConfigLoading(false);
+    }
+  };
+
+  const runAIHealthCheck = async () => {
+    setAIHealthLoading(true);
+    setAIHealth(null);
+    try {
+      const res = await api.post("/ai/admin/health");
+      setAIHealth(res.data);
+    } catch (err: any) {
+      setAIHealth({ status: "error", model: aiConfig?.model || "", response_time_ms: null, error: err.message });
+    } finally {
+      setAIHealthLoading(false);
+    }
+  };
+
+  const saveAIModel = async () => {
+    const modelToSave = useCustomModel ? customModel.trim() : selectedModel;
+    if (!modelToSave) return;
+    try {
+      await api.post("/ai/admin/config", { model: modelToSave });
+      setAISaveStatus(s => ({ ...s, model: "saved" }));
+      fetchAIConfig();
+      setTimeout(() => setAISaveStatus(s => ({ ...s, model: undefined })), 3000);
+    } catch (err: any) {
+      setAISaveStatus(s => ({ ...s, model: "error" }));
+      setTimeout(() => setAISaveStatus(s => ({ ...s, model: undefined })), 3000);
+    }
+  };
+
+  const saveAIKey = async () => {
+    if (!newApiKey.trim()) return;
+    try {
+      await api.post("/ai/admin/config", { api_key: newApiKey.trim() });
+      setAISaveStatus(s => ({ ...s, key: "saved" }));
+      setNewApiKey("");
+      fetchAIConfig();
+      setTimeout(() => setAISaveStatus(s => ({ ...s, key: undefined })), 3000);
+    } catch (err: any) {
+      setAISaveStatus(s => ({ ...s, key: "error" }));
+      setTimeout(() => setAISaveStatus(s => ({ ...s, key: undefined })), 3000);
     }
   };
 
@@ -346,6 +421,7 @@ export default function AdminDashboard() {
             {[
               { name: "Past Papers", icon: Layers },
               { name: "User Management", icon: Users },
+              { name: "AI Tutor", icon: Bot },
               { name: "Integrations", icon: Settings },
             ].map((item) => (
               <button
@@ -601,6 +677,178 @@ export default function AdminDashboard() {
                 </div>
               </div>
             </div>
+          ) : activeTab === "AI Tutor" ? (
+            <div className="max-w-3xl space-y-6">
+              <div>
+                <h1 className="text-3xl font-bold mb-1 text-slate-950">AI Tutor Control</h1>
+                <p className="text-slate-500 font-medium text-sm">Monitor and configure the AI tutor engine from here.</p>
+              </div>
+
+              {/* Health Check Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                      <Activity size={22} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900">Health Check</h3>
+                      <p className="text-slate-500 text-sm font-medium">Test if the AI is responding correctly.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={runAIHealthCheck}
+                    disabled={aiHealthLoading}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 active:scale-95"
+                  >
+                    {aiHealthLoading ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
+                    {aiHealthLoading ? "Testing..." : "Run Health Check"}
+                  </button>
+                </div>
+
+                {aiHealth && (
+                  <div className={`rounded-xl p-5 border ${aiHealth.status === "ok" ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"}`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      {aiHealth.status === "ok" ? (
+                        <><CheckCircle size={18} className="text-emerald-600" /><span className="font-bold text-emerald-700">Online — AI is working</span></>
+                      ) : (
+                        <><AlertCircle size={18} className="text-red-600" /><span className="font-bold text-red-700">Error — AI is down</span></>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Model Used</div>
+                        <div className="font-bold text-slate-900 font-mono text-xs">{aiHealth.model}</div>
+                      </div>
+                      <div className="bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Response Time</div>
+                        <div className="font-bold text-slate-900">{aiHealth.response_time_ms != null ? `${aiHealth.response_time_ms} ms` : "—"}</div>
+                      </div>
+                    </div>
+                    {aiHealth.snippet && (
+                      <div className="mt-3 bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">AI Response Snippet</div>
+                        <div className="font-medium text-slate-700 text-sm italic">"{aiHealth.snippet}"</div>
+                      </div>
+                    )}
+                    {aiHealth.error && (
+                      <div className="mt-3 bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-red-400 mb-1">Error</div>
+                        <div className="font-mono text-red-700 text-xs">{aiHealth.error}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Model Settings Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-violet-50 border border-violet-100 rounded-xl flex items-center justify-center text-violet-600">
+                    <Bot size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Model Settings</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Current: <span className="font-mono font-bold text-slate-800">{aiConfigLoading ? "Loading..." : (aiConfig?.model || "—")}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Toggle between dropdown and custom */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setUseCustomModel(false)}
+                      className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${!useCustomModel ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >
+                      Select Preset
+                    </button>
+                    <button
+                      onClick={() => setUseCustomModel(true)}
+                      className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${useCustomModel ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >
+                      Custom Model
+                    </button>
+                  </div>
+
+                  {!useCustomModel ? (
+                    <select
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                      className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-900 font-mono font-bold text-sm outline-none focus:border-violet-500 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                      <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+                      <option value="llama3-8b-8192">llama3-8b-8192</option>
+                      <option value="gemma2-9b-it">gemma2-9b-it</option>
+                      <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+                      <option value="llama-3.1-70b-versatile">llama-3.1-70b-versatile</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={customModel}
+                      onChange={(e) => setCustomModel(e.target.value)}
+                      placeholder="e.g. llama-3.1-405b-reasoning"
+                      className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-900 font-mono font-bold text-sm outline-none focus:border-violet-500 transition-all placeholder:text-slate-300"
+                    />
+                  )}
+
+                  <button
+                    onClick={saveAIModel}
+                    disabled={useCustomModel ? !customModel.trim() : !selectedModel}
+                    className="flex items-center gap-2 px-6 py-3 bg-violet-600 text-white font-bold text-sm rounded-xl hover:bg-violet-700 transition-all disabled:opacity-40 active:scale-95"
+                  >
+                    <Save size={15} />
+                    {aiSaveStatus.model === "saved" ? "✓ Saved!" : aiSaveStatus.model === "error" ? "✗ Failed" : "Save Model"}
+                  </button>
+                </div>
+              </div>
+
+              {/* API Key Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                    <Key size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Groq API Key</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Current key: <span className="font-mono font-bold text-slate-700">{aiConfigLoading ? "Loading..." : (aiConfig?.api_key_masked || "Not set")}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type={showNewKey ? "text" : "password"}
+                      value={newApiKey}
+                      onChange={(e) => setNewApiKey(e.target.value)}
+                      placeholder="Enter new Groq API key..."
+                      className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-4 pr-12 text-slate-900 font-mono text-sm outline-none focus:border-amber-500 transition-all placeholder:text-slate-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewKey(!showNewKey)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showNewKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={saveAIKey}
+                    disabled={!newApiKey.trim()}
+                    className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-bold text-sm rounded-xl hover:bg-amber-600 transition-all disabled:opacity-40 active:scale-95"
+                  >
+                    <Key size={15} />
+                    {aiSaveStatus.key === "saved" ? "✓ Key Updated!" : aiSaveStatus.key === "error" ? "✗ Failed" : "Update API Key"}
+                  </button>
+                </div>
+              </div>
+            </div>
           ) : activeTab === "Integrations" ? (
             <div className="max-w-4xl space-y-6">
               <div>
@@ -700,6 +948,7 @@ export default function AdminDashboard() {
                       <option value="Physics">Physics</option>
                       <option value="Chemistry">Chemistry</option>
                       <option value="English">English</option>
+                      <option value="Full Papers">Full Papers</option>
                     </select>
                   </div>
                 </div>
