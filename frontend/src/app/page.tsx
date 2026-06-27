@@ -18,7 +18,12 @@ import {
   Sparkles,
   Play,
   Globe,
-  MessageSquare
+  MessageSquare,
+  Bot,
+  Flame,
+  BookOpen,
+  TrendingUp,
+  Bookmark
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -51,17 +56,12 @@ export default function Home() {
 
       <main>
         {/* SECTION 1: PREMIUM FULL-SCREEN HERO */}
-        <section className="relative overflow-hidden bg-white min-h-screen">
+        <section className="relative overflow-hidden bg-white pt-24 lg:h-screen flex items-center">
           {/* Clean White Background (no blobs) */}
 
-          {/* Full-height column */}
-          <div className="relative z-10 flex flex-col min-h-screen">
-
-            {/* Top spacing — generous gap below navbar on mobile */}
-            <div className="h-24 md:h-32 lg:h-24 flex-shrink-0" />
-
+          <div className="relative z-10 w-full">
             {/* Main hero content */}
-            <div className="flex-1 flex flex-col justify-center container">
+            <div className="container">
 
               {/* Desktop: 2-col grid; Mobile: single col */}
               <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -73,10 +73,12 @@ export default function Home() {
                     initial={{ opacity: 1, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
-                    className="eyebrow-amazing mb-8 md:mb-5"
+                    className="flex items-center gap-3 mb-6 md:mb-4"
                   >
-                    <Sparkles size={12} className="animate-pulse" />
-                    Official Past Papers &amp; Topic-Wise MCQs
+                    <div className="w-8 h-[2px] bg-blue-600 rounded-full"></div>
+                    <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-blue-600">
+                      MDCAT &amp; NUMS Past Papers + AI Tutor
+                    </span>
                   </motion.div>
 
                   {/* Main heading */}
@@ -86,8 +88,8 @@ export default function Home() {
                     transition={{ duration: 0.6, delay: 0.1 }}
                     className="text-[2.5rem] sm:text-5xl lg:text-7xl font-extrabold leading-[1.08] tracking-tight text-slate-900 mb-8 md:mb-5 mt-0"
                   >
-                    Master the<br />
-                    MDCAT{" "}<span className="text-blue-600 italic">Smarter.</span>
+                    Study Smarter.<br />
+                    <span className="text-blue-600">Score Higher.</span>
                   </motion.h1>
 
                   {/* Subtitle */}
@@ -97,7 +99,7 @@ export default function Home() {
                     transition={{ duration: 0.6, delay: 0.2 }}
                     className="text-base md:text-xl text-slate-500 font-medium leading-relaxed mb-7 max-w-sm md:max-w-lg"
                   >
-                    Stop wasting time on disorganized PDFs. Get structured practice and instant explanations.
+                    Practice real past papers from MDCAT & NUMS. Get instant answers from your AI Tutor whenever you&apos;re stuck.
                   </motion.p>
 
                   {/* CTA Buttons */}
@@ -115,50 +117,76 @@ export default function Home() {
                     </Link>
                   </motion.div>
 
-                  {/* Social proof */}
-                  <motion.div
-                    initial={{ opacity: 1 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.45 }}
-                    className="flex items-center gap-2 mb-8"
-                  >
-                    <div className="flex -space-x-2">
-                      {[1,2,3].map(i => (
-                        <div key={i} className="w-7 h-7 rounded-full border-2 border-white bg-blue-100 flex items-center justify-center text-[9px] shadow-sm">👨‍⚕️</div>
-                      ))}
-                    </div>
-                    <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400">Trusted by 200+ Students</span>
-                  </motion.div>
 
                   {/* Animated stat pills — mobile only - REMOVED */}
                 </div>
 
-                {/* Right col — desktop image only */}
-                <motion.div
-                  initial={{ opacity: 1, scale: 0.85, rotate: 4 }}
-                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
-                  transition={{ duration: 1, type: "spring" }}
-                  className="relative hidden lg:block"
-                >
-                  <div className="relative z-10 animate-bop shadow-2xl rounded-[2.5rem] overflow-hidden border-4 border-white max-w-[500px] ml-auto">
-                    <Image src="/hero-mdcat.png" alt="PrepCat MDCAT Study Visual" width={500} height={500} className="w-full h-auto" />
-                  </div>
-                  <motion.div
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ duration: 5, repeat: Infinity }}
-                    className="absolute -bottom-6 -right-6 amazing-card !p-4 shadow-xl z-20"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
-                        <Star size={20} fill="currentColor" />
+                {/* Right col — product mockup */}
+                <div className="relative hidden lg:block">
+                  {/* Browser chrome */}
+                  <div className="relative z-10 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-w-[480px] ml-auto">
+                    {/* Browser top bar */}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 border-b border-slate-200">
+                      <div className="flex gap-1.5">
+                        <div className="w-2 h-2 rounded-full bg-red-400" />
+                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                        <div className="w-2 h-2 rounded-full bg-green-400" />
                       </div>
-                      <div>
-                        <div className="text-lg font-bold italic tracking-tighter">20,000+</div>
-                        <div className="text-[8px] font-bold uppercase tracking-widest text-slate-400">Solved MCQs</div>
+                      <div className="flex-1 mx-3 bg-white border border-slate-200 rounded-md px-3 py-0.5 text-[10px] text-slate-400 font-medium">
+                        prepcat.app/practice
                       </div>
                     </div>
-                  </motion.div>
-                </motion.div>
+
+                    {/* App content */}
+                    <div className="p-4 bg-slate-50">
+                      {/* Header row */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                          <div className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center">
+                            <FileText size={10} className="text-white" />
+                          </div>
+                          <span className="text-xs font-black text-slate-700">MDCAT 2023 — Biology</span>
+                        </div>
+                        <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-lg border border-slate-200">Q 14 / 220</span>
+                      </div>
+
+                      {/* Question card */}
+                      <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm mb-2">
+                        <p className="text-xs font-bold text-slate-800 leading-snug mb-3">
+                          Which of the following best describes the role of ATP synthase during oxidative phosphorylation?
+                        </p>
+                        <div className="space-y-1.5">
+                          {[
+                            { id: "A", text: "Transfers electrons to oxygen" },
+                            { id: "B", text: "Synthesizes ATP using proton gradient", correct: true },
+                            { id: "C", text: "Breaks down glucose into pyruvate" },
+                            { id: "D", text: "Pumps sodium ions across membrane" },
+                          ].map((opt) => (
+                            <div
+                              key={opt.id}
+                              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold ${
+                                opt.correct
+                                  ? "bg-blue-600 border-blue-600 text-white"
+                                  : "bg-slate-50 border-slate-200 text-slate-600"
+                              }`}
+                            >
+                              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black flex-shrink-0 ${opt.correct ? "bg-white text-blue-600" : "bg-white text-slate-500 border border-slate-200"}`}>{opt.id}</span>
+                              {opt.text}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Explanation strip */}
+                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex gap-2 items-start">
+                        <CheckCircle2 size={13} className="text-blue-600 mt-0.5 flex-shrink-0" />
+                        <p className="text-[11px] text-blue-800 font-medium leading-relaxed">
+                          <strong>Correct!</strong> ATP synthase uses the proton gradient across the inner mitochondrial membrane to drive ATP synthesis.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
               </div>
             </div>
@@ -181,16 +209,15 @@ export default function Home() {
 
           </div>
         </section>
-
-        {/* SECTION 2: COMPACT STATS GRID (MOBILE-READY) */}
-        <section className="py-6 md:py-10 relative bg-white border-y border-slate-50">
+        {/* SECTION 2: CORE FEATURES GRID */}
+        <section id="features" className="py-6 md:py-10 relative bg-white border-y border-slate-100">
           <div className="container">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
               {[
-                { title: "15 Years", subtitle: "Archive", icon: FileText, color: "text-blue-600", bg: "bg-blue-50" },
-                { title: "20,000+", subtitle: "Questions", icon: Brain, color: "text-blue-700", bg: "bg-blue-50" },
-                { title: "98% Reach", subtitle: "Accuracy", icon: Award, color: "text-blue-500", bg: "bg-blue-50" },
-                { title: "Real-time", subtitle: "Analytics", icon: Zap, color: "text-blue-800", bg: "bg-blue-50" }
+                { title: "Past Papers", subtitle: "MDCAT & NUMS", icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50" },
+                { title: "AI Tutor", subtitle: "Instant Answers", icon: Bot, color: "text-indigo-600", bg: "bg-indigo-50" },
+                { title: "Daily Streak", subtitle: "Build Habits", icon: Flame, color: "text-orange-500", bg: "bg-orange-50" },
+                { title: "My Progress", subtitle: "Track Growth", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" }
               ].map((stat, i) => (
                 <motion.div
                   initial={{ opacity: 1, y: 20 }}
@@ -199,20 +226,19 @@ export default function Home() {
                   key={i}
                   className="amazing-card !p-4 md:!p-8 text-center hover:-translate-y-2 transition-all duration-300 shadow-sm hover:shadow-xl border border-slate-100 group"
                 >
-                  <div className={`w-12 h-12 md:w-16 md:h-16 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-4 md:mb-6 group-hover:rotate-6 transition-transform shadow-inner`}>
-                    <stat.icon size={24} className="md:w-8 md:h-8" />
+                  <div className={`w-12 h-12 md:w-16 md:h-16 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-5 group-hover:scale-110 transition-transform`}>
+                    <stat.icon size={22} strokeWidth={2} />
                   </div>
-                  <h3 className="text-xl md:text-2xl font-bold text-slate-900 italic tracking-tighter mb-1">{stat.title}</h3>
-                  <p className="text-[10px] md:text-xs font-bold uppercase tracking-widest text-slate-400">{stat.subtitle}</p>
+                  <h3 className="text-base md:text-xl font-black text-slate-900 mb-1">{stat.title}</h3>
+                  <p className="text-[11px] md:text-xs font-bold text-slate-500">{stat.subtitle}</p>
                 </motion.div>
               ))}
             </div>
           </div>
         </section>
 
-
         {/* SECTION 4: THE PREPARATION GAP (STRATEGY) */}
-        <section className="py-10 md:py-12 bg-slate-50 relative">
+        <section id="why-us" className="py-10 md:py-12 bg-slate-50 relative">
           <div className="container">
             <div className="grid lg:grid-cols-2 gap-12 items-center">
               <div className="space-y-6 lg:pl-10">
@@ -285,26 +311,124 @@ export default function Home() {
                 { name: "Physics", count: "4,800+ MCQs", icon: Zap, color: "from-blue-400/20 to-blue-400/0", border: "hover:border-blue-400/50" },
                 { name: "English", count: "1,500+ MCQs", icon: FileText, color: "from-blue-700/20 to-blue-700/0", border: "hover:border-blue-700/50" }
               ].map((subject, i) => (
-                <motion.div
-                  key={i}
-                  whileHover={{ y: -5 }}
-                  className={`amazing-card !p-4 md:!p-6 border-2 border-transparent transition-all cursor-pointer relative overflow-hidden group ${subject.border}`}
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${subject.color} opacity-0 group-hover:opacity-100 transition-opacity`} />
-                  <div className="relative z-10 space-y-3 md:space-y-4">
-                    <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-900 group-hover:bg-white transition-colors shadow-sm">
-                      <subject.icon size={20} className="md:w-6 md:h-6" />
+                <Link href="/register" key={i}>
+                  <motion.div
+                    whileHover={{ y: -5 }}
+                    className={`amazing-card !p-4 md:!p-6 border-2 border-transparent transition-all cursor-pointer relative overflow-hidden group ${subject.border} h-full`}
+                  >
+                    <div className={`absolute inset-0 bg-gradient-to-br ${subject.color} opacity-0 group-hover:opacity-100 transition-opacity`} />
+                    <div className="relative z-10 space-y-3 md:space-y-4">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-slate-50 rounded-xl flex items-center justify-center text-slate-900 group-hover:bg-white transition-colors shadow-sm">
+                        <subject.icon size={20} className="md:w-6 md:h-6" />
+                      </div>
+                      <div className="space-y-0.5 md:space-y-1">
+                        <h3 className="text-base md:text-xl font-bold">{subject.name}</h3>
+                        <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{subject.count}</p>
+                      </div>
+                      <div className="flex items-center gap-1 md:gap-2 text-blue-600 font-bold text-[10px] md:text-xs">
+                        Explore Topics <ChevronRight size={12} className="md:w-3.5 md:h-3.5" />
+                      </div>
                     </div>
-                    <div className="space-y-0.5 md:space-y-1">
-                      <h3 className="text-base md:text-xl font-bold">{subject.name}</h3>
-                      <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{subject.count}</p>
+                  </motion.div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* SECTION 5B: AI TUTOR SHOWCASE */}
+        <section id="ai-tutor" className="py-16 md:py-24 relative bg-slate-50 text-slate-900 overflow-hidden">
+          {/* Subtle radial glow */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,rgba(37,99,235,0.05),transparent_60%)]" />
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,rgba(99,102,241,0.05),transparent_60%)]" />
+
+          <div className="container relative z-10">
+            <div className="grid lg:grid-cols-2 gap-16 items-center">
+
+              {/* Left: Copy */}
+              <div className="space-y-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-[2px] bg-blue-600 rounded-full"></div>
+                  <span className="text-xs font-bold uppercase tracking-widest text-blue-600">PrepCat AI Tutor</span>
+                </div>
+                <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-slate-900">
+                  Your personal <span className="text-blue-600">MDCAT guide.</span>
+                </h2>
+                <p className="text-lg text-slate-500 font-medium leading-relaxed max-w-md">
+                  Ask anything — Biology, Chemistry, Physics, or English. PrepCat AI searches the web and gives you clear, instant answers to help you prepare for MDCAT.
+                </p>
+
+                <div className="flex flex-col gap-3 pt-2">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 size={18} className="text-blue-600 flex-shrink-0" />
+                    <span className="font-bold text-slate-600 text-sm">Searches the web in real-time for the most accurate answers</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle2 size={18} className="text-blue-600 flex-shrink-0" />
+                    <span className="font-bold text-slate-600 text-sm">Available 24/7 — get help whenever you need it</span>
+                  </div>
+                </div>
+
+                <Link href="/register" className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black px-6 py-3 rounded-xl transition-all text-sm shadow-sm">
+                  Try AI Tutor Free <ChevronRight size={16} />
+                </Link>
+              </div>
+
+              {/* Right: Chat UI mockup */}
+              <div className="relative">
+                <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl">
+                  {/* Chat header */}
+                  <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
+                    <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+                      <Bot size={16} className="text-white" />
                     </div>
-                    <div className="flex items-center gap-1 md:gap-2 text-blue-600 font-bold text-[10px] md:text-xs">
-                      Explore Topics <ChevronRight size={12} className="md:w-3.5 md:h-3.5" />
+                    <div>
+                      <p className="text-sm font-black text-slate-900">PrepCat AI Tutor</p>
+                      <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
+                        Online
+                      </p>
                     </div>
                   </div>
-                </motion.div>
-              ))}
+
+                  {/* Messages */}
+                  <div className="p-5 space-y-4">
+                    {/* User message */}
+                    <div className="flex justify-end">
+                      <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm font-semibold max-w-[78%] leading-relaxed shadow-sm">
+                        What is the role of ATP in muscle contraction?
+                      </div>
+                    </div>
+
+                    {/* AI response */}
+                    <div className="flex gap-3 items-start">
+                      <div className="w-7 h-7 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                        <Bot size={14} className="text-blue-600" />
+                      </div>
+                      <div className="bg-slate-50 border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-slate-700 font-medium max-w-[85%] leading-relaxed space-y-2">
+                        <p>ATP powers the <strong className="text-slate-900">myosin cross-bridge cycle</strong> in three ways:</p>
+                        <ol className="list-decimal list-inside space-y-1 text-slate-600 text-xs">
+                          <li>Energizes myosin head to bind actin</li>
+                          <li>Detaches the head after the power stroke</li>
+                          <li>Pumps Ca²⁺ back into the SR to relax muscle</li>
+                        </ol>
+                        <p className="text-[11px] text-blue-600 font-bold pt-1">📌 MDCAT Tip: Without ATP, muscles stay locked — this is rigor mortis!</p>
+                      </div>
+                    </div>
+
+                    {/* Input box */}
+                    <div className="flex items-center gap-2 mt-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                      <span className="text-slate-400 text-sm flex-1 font-medium">Ask anything about MDCAT...</span>
+                      <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
+                        <ChevronRight size={14} className="text-white" />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+
             </div>
           </div>
         </section>

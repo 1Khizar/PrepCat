@@ -1,12 +1,14 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy import insert
 from pydantic import BaseModel
-from typing import List
+from typing import List, Optional
 import json
 import logging
+import os
+import time
 
 from app.db.session import get_db
 from app.models.ai_memory import UserMemory
@@ -15,7 +17,9 @@ from app.api.auth import get_current_user
 from app.services.ai_agent import (
     stream_agent_response,
     extract_memory_from_message,
+    get_llm,
 )
+from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/ai", tags=["AI Tutor"])
@@ -128,3 +132,79 @@ def clear_memory(
     db.query(UserMemory).filter(UserMemory.user_id == current_user.id).delete()
     db.commit()
     return {"message": "Memory cleared"}
+
+
+# ---------------------------------------------------------------------------
+# Admin — AI Tutor Config & Health
+# ---------------------------------------------------------------------------
+
+class AIConfigUpdate(BaseModel):
+    model: Optional[str] = None
+    api_key: Optional[str] = None
+
+
+def require_admin(current_user: UserModel = Depends(get_current_user)):
+    role = current_user.role
+    # role is stored as a plain string in DB; handle both str and enum
+    role_str = role.value if hasattr(role, "value") else str(role)
+    if role_str != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return current_user
+
+
+@router.get("/admin/config")
+def get_ai_config(current_user: UserModel = Depends(require_admin)):
+    """Return the current active Groq model and a masked API key."""
+    api_key = os.getenv("GROQ_API_KEY", "")
+    masked = f"{'*' * (len(api_key) - 4)}{api_key[-4:]}" if len(api_key) > 4 else "****"
+    return {
+        "model": os.getenv("GROQ_Model", "llama-3.3-70b-versatile"),
+        "api_key_masked": masked,
+        "api_key_set": bool(api_key),
+    }
+
+
+@router.post("/admin/config")
+def update_ai_config(
+    config: AIConfigUpdate,
+    current_user: UserModel = Depends(require_admin),
+):
+    """Update the active Groq model and/or API key at runtime (in-memory)."""
+    updated = []
+    if config.model:
+        os.environ["GROQ_Model"] = config.model
+        updated.append(f"model → {config.model}")
+    if config.api_key:
+        os.environ["GROQ_API_KEY"] = config.api_key
+        updated.append("api_key → updated")
+    if not updated:
+        raise HTTPException(status_code=400, detail="No fields provided to update")
+    return {"message": "Config updated", "changes": updated}
+
+
+@router.post("/admin/health")
+async def ai_health_check(current_user: UserModel = Depends(require_admin)):
+    """
+    Sends a short test message to the configured Groq model.
+    Returns status, response_time_ms, model used, and a snippet.
+    """
+    model = os.getenv("GROQ_Model", "llama-3.3-70b-versatile")
+    try:
+        llm = get_llm(streaming=False)
+        start = time.time()
+        result = await llm.ainvoke([HumanMessage(content="Reply with only the word: OK")])
+        elapsed_ms = int((time.time() - start) * 1000)
+        snippet = result.content[:200] if result.content else "(empty response)"
+        return {
+            "status": "ok",
+            "model": model,
+            "response_time_ms": elapsed_ms,
+            "snippet": snippet,
+        }
+    except Exception as e:
+        return {
+            "status": "error",
+            "model": model,
+            "response_time_ms": None,
+            "error": str(e),
+        }

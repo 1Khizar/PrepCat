@@ -28,7 +28,8 @@ import {
     Send,
     RefreshCw,
     Copy,
-    Check
+    Check,
+    Library
 } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -217,7 +218,8 @@ export default function Dashboard() {
         { name: "Biology", icon: Dna },
         { name: "Physics", icon: Zap },
         { name: "Chemistry", icon: Beaker },
-        { name: "English", icon: BookOpenText }
+        { name: "English", icon: BookOpenText },
+        { name: "Full Papers", icon: Library }
     ];
 
     // Generate data for Monthly Activity Tracker
@@ -482,17 +484,19 @@ export default function Dashboard() {
                     </div>
                 </header>
 
-                <main className="p-4 md:p-6 space-y-4 flex-1 overflow-y-auto overflow-x-hidden w-full pb-24 lg:pb-6">
+                <main className="px-4 md:px-6 pb-4 md:pb-6 pt-0 space-y-4 flex-1 overflow-y-auto overflow-x-hidden w-full lg:pb-6">
                     <div className="max-w-6xl mx-auto flex flex-col w-full relative">
 
                     {/* Dynamic Tab Content */}
                     {activeTab === "Home" && !selectedSubjectInfo && (
                         <>
                             {/* Simple Greeting Area */}
-                            <div className="mb-2 md:mb-4 w-full">
-                                <h1 className="text-3xl font-bold mb-1 text-slate-950">PrepCat Academy</h1>
-                                <p className="text-sm text-slate-500 font-medium">
-                                    Welcome, <span className="text-blue-600 font-bold">{userName.replace(/^Admin\s+/i, "")}</span>. Your personalized curriculum awaits.
+                            <div className="mb-4 md:mb-6 w-full">
+                                <h1 className="text-2xl md:text-3xl font-bold mb-1.5 text-slate-900 flex items-center gap-2">
+                                    Welcome back, <span className="text-blue-600">{userName.replace(/^Admin\s+/i, "")}</span> <span className="text-2xl">👋</span>
+                                </h1>
+                                <p className="text-slate-500 font-medium">
+                                    Your personalized curriculum awaits. Let's crush your goals today!
                                 </p>
                             </div>
 
@@ -501,16 +505,16 @@ export default function Dashboard() {
                                 <div className="absolute -top-10 right-0 w-72 h-72 bg-brand-primary/5 rounded-full blur-[100px] -z-10" />
 
                                 <div className="mb-2 w-full">
-                                    <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
-                                        <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-[10px] font-bold">M</div>
+                                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 mb-1">
+                                        <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center text-white text-xs font-bold">M</div>
                                         MDCAT Papers
                                     </h2>
                                     <p className="text-sm text-slate-500 font-medium">Category-wise past papers for MDCAT exams.</p>
                                 </div>
 
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 w-full">
+                                <div className="flex lg:grid lg:grid-cols-5 gap-4 lg:gap-5 w-full overflow-x-auto pb-6 lg:pb-0 snap-x lg:snap-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                     {loading ? (
-                                        [1, 2, 3, 4].map(i => <div key={i} className="amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100" />)
+                                        [1, 2, 3, 4, 5].map(i => <div key={i} className="min-w-[220px] lg:min-w-0 amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100 snap-start lg:snap-none" />)
                                     ) : (
                                         subjectsList.map(subject => {
                                             const count = getPaperCount("MDCAT", subject.name);
@@ -518,13 +522,13 @@ export default function Dashboard() {
                                                 <button
                                                     key={`mdcat-${subject.name}`}
                                                     onClick={() => setSelectedSubjectInfo({ exam: "MDCAT", subject: subject.name })}
-                                                    className="bg-white border border-slate-200 rounded-2xl p-8 min-h-[160px] text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group"
+                                                    className="min-w-[220px] lg:min-w-0 snap-start lg:snap-none bg-white border border-slate-200 rounded-2xl p-6 lg:p-6 aspect-square text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex-1 flex flex-col justify-between"
                                                 >
-                                                    <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 shadow-sm border border-blue-100/50">
+                                                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 lg:mb-5 shadow-sm border border-blue-100/50">
                                                         <FileText size={24} />
                                                     </div>
-                                                    <h3 className="font-bold text-xl text-slate-900">{subject.name}</h3>
-                                                    <p className="text-sm font-medium text-slate-400 mt-1.5">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
+                                                    <h3 className="font-bold text-lg lg:text-xl text-slate-900">{subject.name}</h3>
+                                                    <p className="text-xs lg:text-sm font-medium text-slate-400 mt-1 lg:mt-1.5">{count === 0 ? "0 papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
                                                 </button>
                                             );
                                         })
@@ -535,16 +539,16 @@ export default function Dashboard() {
                             {/* Exam Row 2: NUMS */}
                             <div className="space-y-2 relative pt-2 w-full">
                                 <div className="mb-2 w-full">
-                                    <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-1">
-                                        <div className="w-7 h-7 bg-blue-600 rounded-md flex items-center justify-center text-white text-[10px] font-bold">N</div>
+                                    <h2 className="text-xl md:text-2xl font-bold text-slate-900 flex items-center gap-2 mb-1">
+                                        <div className="w-8 h-8 bg-blue-600 rounded-md flex items-center justify-center text-white text-xs font-bold">N</div>
                                         NUMS Papers
                                     </h2>
                                     <p className="text-sm text-slate-500 font-medium">Category-wise past papers for NUMS medical college entrance.</p>
                                 </div>
 
-                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-5 w-full">
+                                <div className="flex lg:grid lg:grid-cols-5 gap-4 lg:gap-5 w-full overflow-x-auto pb-6 lg:pb-0 snap-x lg:snap-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                     {loading ? (
-                                        [1, 2, 3, 4].map(i => <div key={i} className="amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100" />)
+                                        [1, 2, 3, 4, 5].map(i => <div key={i} className="min-w-[220px] lg:min-w-0 amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100 snap-start lg:snap-none" />)
                                     ) : (
                                         subjectsList.map(subject => {
                                             const count = getPaperCount("NUMS", subject.name);
@@ -552,13 +556,13 @@ export default function Dashboard() {
                                                 <button
                                                     key={`nums-${subject.name}`}
                                                     onClick={() => setSelectedSubjectInfo({ exam: "NUMS", subject: subject.name })}
-                                                    className="bg-white border border-slate-200 rounded-2xl p-8 min-h-[160px] text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group"
+                                                    className="min-w-[220px] lg:min-w-0 snap-start lg:snap-none bg-white border border-slate-200 rounded-2xl p-6 lg:p-6 aspect-square text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex-1 flex flex-col justify-between"
                                                 >
-                                                    <div className="w-14 h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-5 shadow-sm border border-blue-100/50">
+                                                    <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 lg:mb-5 shadow-sm border border-blue-100/50">
                                                         <FileText size={24} />
                                                     </div>
-                                                    <h3 className="font-bold text-xl text-slate-900">{subject.name}</h3>
-                                                    <p className="text-sm font-medium text-slate-400 mt-1.5">{count === 0 ? "No papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
+                                                    <h3 className="font-bold text-lg lg:text-xl text-slate-900">{subject.name}</h3>
+                                                    <p className="text-xs lg:text-sm font-medium text-slate-400 mt-1 lg:mt-1.5">{count === 0 ? "0 papers uploaded" : `${count} paper${count > 1 ? 's' : ''} uploaded`}</p>
                                                 </button>
                                             );
                                         })
@@ -877,7 +881,6 @@ export default function Dashboard() {
                                     </div>
                                     <div>
                                         <h2 className="font-bold text-slate-900">AI Tutor</h2>
-                                        <p className="text-xs text-slate-500 font-medium">Powered by Groq</p>
                                     </div>
                                 </div>
                                 <button 
@@ -963,7 +966,7 @@ export default function Dashboard() {
                                                 handleSendMessage();
                                             }
                                         }}
-                                        placeholder="Ask your tutor anything... (Shift+Enter for new line)"
+                                        placeholder="Message your AI tutor..."
                                         className="w-full max-h-32 min-h-[44px] bg-transparent resize-none outline-none text-slate-700 text-sm py-2.5 px-3 placeholder:text-slate-400"
                                         rows={1}
                                     />
