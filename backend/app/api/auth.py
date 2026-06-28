@@ -266,5 +266,3 @@ def get_user_stats(user_id: int, db: Session = Depends(get_db), admin: UserModel
         "ai_days_used": ai_days_used,
         "ai_last_used": ai_last_used
     }
-    }
-
