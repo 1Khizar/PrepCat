@@ -66,7 +66,7 @@ export default function AdminDashboard() {
   const [showNewKey, setShowNewKey] = useState(false);
   const [aiSaveStatus, setAISaveStatus] = useState<{ model?: string; key?: string; config?: string }>({});
   
-  // New config state
+  // New config state with solid defaults
   const [localConfig, setLocalConfig] = useState({
     temperature: 0.3,
     max_tokens: 600,
@@ -931,14 +931,14 @@ export default function AdminDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Temperature</label>
-                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.temperature.toFixed(2)}</span>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{(localConfig.temperature ?? 0.3).toFixed(2)}</span>
                     </div>
                     <input
                       type="range"
                       min="0"
                       max="2"
                       step="0.1"
-                      value={localConfig.temperature}
+                      value={localConfig.temperature ?? 0.3}
                       onChange={(e) => setLocalConfig({ ...localConfig, temperature: parseFloat(e.target.value) })}
                       className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
                     />
@@ -949,14 +949,14 @@ export default function AdminDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Max Tokens</label>
-                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.max_tokens}</span>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.max_tokens ?? 600}</span>
                     </div>
                     <input
                       type="range"
                       min="100"
                       max="4000"
                       step="100"
-                      value={localConfig.max_tokens}
+                      value={localConfig.max_tokens ?? 600}
                       onChange={(e) => setLocalConfig({ ...localConfig, max_tokens: parseInt(e.target.value) })}
                       className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
                     />
@@ -967,14 +967,14 @@ export default function AdminDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
                       <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Top P</label>
-                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.top_p.toFixed(2)}</span>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{(localConfig.top_p ?? 0.8).toFixed(2)}</span>
                     </div>
                     <input
                       type="range"
                       min="0"
                       max="1"
                       step="0.05"
-                      value={localConfig.top_p}
+                      value={localConfig.top_p ?? 0.8}
                       onChange={(e) => setLocalConfig({ ...localConfig, top_p: parseFloat(e.target.value) })}
                       className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
                     />
