@@ -2,13 +2,43 @@ import re
 import os
 import json
 import logging
-from typing import AsyncGenerator
+import random
+from typing import AsyncGenerator, Optional
 
 from langchain_groq import ChatGroq
 from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage, ToolMessage
 
 logger = logging.getLogger(__name__)
+
+# Greeting detection and responses
+GREETING_PATTERNS = [
+    r'^(hi|hello|hey|howdy|greetings|good\s+(morning|afternoon|evening))\b',
+    r'^(assalamu\s+alaikum|salam|wa\s+alaikum\s+assalam)\b',
+    r'^hi\s+there\b',
+    r'^hey\s+there\b',
+    r'^hello\s+there\b',
+]
+
+GREETING_RESPONSES = [
+    "Hello! I'm PrepCat AI, your friendly tutor for MDCAT and NUMS preparation. How can I help you study today? 😊",
+    "Hi there! Welcome to PrepCat. I'm here to help you with Biology, Physics, Chemistry, and English for your medical entrance exams. What would you like to learn? 📚",
+    "Hey! Great to see you. I'm PrepCat AI, ready to assist you with your MDCAT/NUMS preparation. What subject are we working on today? ✨",
+    "Assalamu Alaikum! I'm PrepCat AI, here to help you excel in your MDCAT and NUMS exams. How can I support your studies today? 🎯",
+    "Hello! Welcome to PrepCat. I'm your AI tutor for medical entrance preparation. What would you like to explore today? 💪",
+]
+
+def is_greeting(message: str) -> bool:
+    """Check if the message is a greeting."""
+    message_lower = message.strip().lower()
+    for pattern in GREETING_PATTERNS:
+        if re.search(pattern, message_lower):
+            return True
+    return False
+
+def get_greeting_response() -> str:
+    """Get a random friendly greeting response."""
+    return random.choice(GREETING_RESPONSES)
 
 # ---------------------------------------------------------------------------
 # Memory extraction — pure regex, zero extra LLM calls
@@ -51,7 +81,9 @@ def get_llm(streaming: bool = True) -> ChatGroq:
     return ChatGroq(
         model=os.getenv("GROQ_Model", "llama-3.3-70b-versatile"),
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        max_tokens=800,
+        max_tokens=600,
+        temperature=0.3,
+        top_p=0.8,
         streaming=streaming,
     )
 
@@ -63,17 +95,23 @@ def get_search_tool() -> DuckDuckGoSearchRun:
 def build_system_prompt(memory_context: str) -> str:
     base = (
         "You are PrepCat AI, an expert tutor for Pakistani medical entrance exams (MDCAT and NUMS). "
-        "You are STRICTLY LIMITED to answering questions related to the following topics ONLY:\n"
+        "You are friendly, welcoming, encouraging, and provide PRECISE, CONCISE, and ACCURATE answers.\n\n"
+        "You are LIMITED to answering questions related to the following topics ONLY:\n"
         "- MDCAT and NUMS exams (format, dates, advice, structure)\n"
         "- Biology\n- Physics\n- Chemistry\n- English\n\n"
-        "If a user asks a question that is NOT related to these topics, YOU MUST NOT ANSWER IT. "
-        "Instead, politely decline and reply exactly with: "
+        "If a user greets you, respond warmly as PrepCat AI and invite them to ask questions about their studies.\n\n"
+        "If a user asks a question that is NOT related to these topics, politely decline and reply exactly with: "
         "'I can only answer questions related to MDCAT, NUMS, and their subjects (Biology, Physics, Chemistry, and English). "
         "Do you have a concept or question related to those?'\n\n"
-        "For relevant questions, be friendly, patient, and educational. "
-        "Explain concepts step by step with clear examples. Use simple language. "
-        "When you need current or real-time information, use the search tool. "
-        "Never make up facts. Always encourage the student."
+        "GUIDELINES FOR ANSWERING:\n"
+        "1. Be PRECISE and CONCISE - get to the point quickly\n"
+        "2. Use clear, simple language\n"
+        "3. Focus on accuracy and facts\n"
+        "4. Explain concepts step by step with relevant examples when necessary\n"
+        "5. Avoid unnecessary fluff or verbose introductions\n"
+        "6. When you need current or real-time information, use the search tool\n"
+        "7. Never make up facts\n"
+        "8. Always encourage the student and keep a positive, supportive tone"
     )
     if memory_context:
         base += f"\n\nAbout this student:\n{memory_context}"
@@ -108,6 +146,15 @@ async def stream_agent_response(
     Streams the AI response as SSE-formatted data chunks.
     The agent decides autonomously whether to use DuckDuckGo.
     """
+    # Check if it's a greeting first
+    if is_greeting(message) and len(session_history) == 0:
+        greeting_response = get_greeting_response()
+        # Stream the greeting response character by character for better UX
+        for char in greeting_response:
+            yield f"data: {json.dumps({'type': 'content', 'data': char})}\n\n"
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+        return
+    
     system = build_system_prompt(memory_context)
     
     try:

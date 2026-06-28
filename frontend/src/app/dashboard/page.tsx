@@ -72,7 +72,7 @@ export default function Dashboard() {
             setStreakData(res.data);
         }).catch(err => console.error(err));
 
-        // Real-time security check: Poll every 2 seconds to see if admin blocked this user
+        // Real-time security check: Poll every 1 second to see if admin blocked/deleted this user
         const securityInterval = setInterval(async () => {
             try {
                 // Ensure we only poll if we have a token
@@ -81,15 +81,10 @@ export default function Dashboard() {
                     await api.get("/auth/me");
                 }
             } catch (err: any) {
-                if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-                    clearInterval(securityInterval);
-                    alert("Your account has been blocked by the administrator.");
-                    localStorage.removeItem("token");
-                    localStorage.removeItem("prepcat_user");
-                    router.push("/login");
-                }
+                // The API interceptor will handle the actual logout and redirect
+                clearInterval(securityInterval);
             }
-        }, 2000);
+        }, 1000);
 
         return () => clearInterval(securityInterval);
     }, []);
@@ -110,12 +105,7 @@ export default function Dashboard() {
             setUserInfo({ email: res.data.email, username: res.data.username });
         } catch (err: any) {
             console.error("Auth check failed.", err);
-            if (err.response && (err.response.status === 401 || err.response.status === 403)) {
-                alert(err.response.data.detail || "Session expired or account blocked.");
-                localStorage.removeItem("token");
-                localStorage.removeItem("prepcat_user");
-                router.push("/login");
-            }
+            // API interceptor will handle the logout and redirect
         }
     };
 

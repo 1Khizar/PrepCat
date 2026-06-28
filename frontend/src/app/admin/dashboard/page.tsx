@@ -357,10 +357,28 @@ export default function AdminDashboard() {
     const action = user.is_blocked ? "unblock" : "block";
     if (!confirm(`Are you sure you want to ${action} ${user.username}?`)) return;
     try {
+      console.log("API Base URL:", process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000'));
       await api.patch(`/auth/admin/users/${user.id}/${action}`);
       fetchUsers();
-    } catch (err) {
-      alert(`Failed to ${action} user`);
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      const message = detail || `Failed to ${action} user`;
+      alert(message);
+      console.error("Error blocking/unblocking user:", err.response?.data || err);
+      console.error("Full error:", err);
+    }
+  };
+
+  const deleteUser = async (user: any) => {
+    if (!confirm(`Are you sure you want to DELETE ${user.username}? This action cannot be undone.`)) return;
+    try {
+      await api.delete(`/auth/admin/users/${user.id}`);
+      fetchUsers();
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      const message = detail || "Failed to delete user";
+      alert(message);
+      console.error("Error deleting user:", err.response?.data || err);
     }
   };
 
@@ -663,6 +681,12 @@ export default function AdminDashboard() {
                               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${u.is_blocked ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
                             >
                               {u.is_blocked ? "Unblock" : "Block User"}
+                            </button>
+                            <button
+                              onClick={() => deleteUser(u)}
+                              className="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-red-100 text-red-600 hover:bg-red-200"
+                            >
+                              Delete
                             </button>
                           </td>
                         </tr>
@@ -1106,6 +1130,45 @@ export default function AdminDashboard() {
                         </div>
                         <div className="text-3xl font-black text-amber-600">
                           {selectedUserStats.stats.saved_papers || 0} <span className="text-sm">Total</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* AI Tutor Stats */}
+                    <div className="border-t border-slate-200 pt-6">
+                      <h3 className="text-lg font-bold text-slate-950 mb-4 flex items-center gap-2">
+                        <Bot size={20} className="text-purple-600" />
+                        AI Tutor Usage
+                      </h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-purple-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Questions Asked
+                          </div>
+                          <div className="text-3xl font-black text-purple-600">
+                            {selectedUserStats.stats.ai_questions_asked || 0} <span className="text-sm">Total</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-fuchsia-50 border border-fuchsia-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-fuchsia-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Days Used
+                          </div>
+                          <div className="text-3xl font-black text-fuchsia-600">
+                            {selectedUserStats.stats.ai_days_used || 0} <span className="text-sm">Total</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-violet-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Last Used
+                          </div>
+                          <div className="text-lg font-bold text-violet-600 mt-1">
+                            {selectedUserStats.stats.ai_last_used 
+                              ? new Date(selectedUserStats.stats.ai_last_used).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                              : 'Never'
+                            }
+                          </div>
                         </div>
                       </div>
                     </div>
