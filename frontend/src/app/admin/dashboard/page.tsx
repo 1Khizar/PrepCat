@@ -47,7 +47,15 @@ export default function AdminDashboard() {
   const [filterDate, setFilterDate] = useState("");
 
   // AI Tutor Admin State
-  const [aiConfig, setAIConfig] = useState<{ model: string; api_key_masked: string; api_key_set: boolean } | null>(null);
+  const [aiConfig, setAIConfig] = useState<{ 
+    model: string; 
+    api_key_masked: string; 
+    api_key_set: boolean;
+    temperature: number;
+    max_tokens: number;
+    top_p: number;
+    system_prompt: string;
+  } | null>(null);
   const [aiConfigLoading, setAIConfigLoading] = useState(false);
   const [aiHealth, setAIHealth] = useState<{ status: string; model: string; response_time_ms: number | null; snippet?: string; error?: string } | null>(null);
   const [aiHealthLoading, setAIHealthLoading] = useState(false);
@@ -56,7 +64,15 @@ export default function AdminDashboard() {
   const [useCustomModel, setUseCustomModel] = useState(false);
   const [newApiKey, setNewApiKey] = useState("");
   const [showNewKey, setShowNewKey] = useState(false);
-  const [aiSaveStatus, setAISaveStatus] = useState<{ model?: string; key?: string }>({});
+  const [aiSaveStatus, setAISaveStatus] = useState<{ model?: string; key?: string; config?: string }>({});
+  
+  // New config state
+  const [localConfig, setLocalConfig] = useState({
+    temperature: 0.3,
+    max_tokens: 600,
+    top_p: 0.8,
+    system_prompt: ""
+  });
 
   const subjects = ["Biology", "Physics", "Chemistry", "English", "Full Papers"];
 
@@ -145,6 +161,12 @@ export default function AdminDashboard() {
       const res = await api.get("/ai/admin/config");
       setAIConfig(res.data);
       setSelectedModel(res.data.model);
+      setLocalConfig({
+        temperature: res.data.temperature,
+        max_tokens: res.data.max_tokens,
+        top_p: res.data.top_p,
+        system_prompt: res.data.system_prompt
+      });
     } catch (err) {
       console.error("Failed to fetch AI config", err);
     } finally {
@@ -190,6 +212,23 @@ export default function AdminDashboard() {
     } catch (err: any) {
       setAISaveStatus(s => ({ ...s, key: "error" }));
       setTimeout(() => setAISaveStatus(s => ({ ...s, key: undefined })), 3000);
+    }
+  };
+
+  const saveAIParams = async () => {
+    try {
+      await api.post("/ai/admin/config", {
+        temperature: localConfig.temperature,
+        max_tokens: localConfig.max_tokens,
+        top_p: localConfig.top_p,
+        system_prompt: localConfig.system_prompt
+      });
+      setAISaveStatus(s => ({ ...s, config: "saved" }));
+      fetchAIConfig();
+      setTimeout(() => setAISaveStatus(s => ({ ...s, config: undefined })), 3000);
+    } catch (err: any) {
+      setAISaveStatus(s => ({ ...s, config: "error" }));
+      setTimeout(() => setAISaveStatus(s => ({ ...s, config: undefined })), 3000);
     }
   };
 
@@ -869,6 +908,118 @@ export default function AdminDashboard() {
                   >
                     <Key size={15} />
                     {aiSaveStatus.key === "saved" ? "✓ Key Updated!" : aiSaveStatus.key === "error" ? "✗ Failed" : "Update API Key"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Model Parameters Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-cyan-50 border border-cyan-100 rounded-xl flex items-center justify-center text-cyan-600">
+                    <Settings size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Model Parameters</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Configure temperature, token limits, and sampling parameters.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Temperature */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Temperature</label>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.temperature.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={localConfig.temperature}
+                      onChange={(e) => setLocalConfig({ ...localConfig, temperature: parseFloat(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    />
+                    <p className="text-xs text-slate-500">Controls randomness: 0 = deterministic, 2 = highly creative</p>
+                  </div>
+
+                  {/* Max Tokens */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Max Tokens</label>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.max_tokens}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="100"
+                      max="4000"
+                      step="100"
+                      value={localConfig.max_tokens}
+                      onChange={(e) => setLocalConfig({ ...localConfig, max_tokens: parseInt(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    />
+                    <p className="text-xs text-slate-500">Maximum response length in tokens</p>
+                  </div>
+
+                  {/* Top P */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Top P</label>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.top_p.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={localConfig.top_p}
+                      onChange={(e) => setLocalConfig({ ...localConfig, top_p: parseFloat(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    />
+                    <p className="text-xs text-slate-500">Nucleus sampling threshold: 1 = disabled, 0.9 = common</p>
+                  </div>
+
+                  <button
+                    onClick={saveAIParams}
+                    className="flex items-center gap-2 px-6 py-3 bg-cyan-500 text-white font-bold text-sm rounded-xl hover:bg-cyan-600 transition-all active:scale-95"
+                  >
+                    <Save size={15} />
+                    {aiSaveStatus.config === "saved" ? "✓ Params Saved!" : aiSaveStatus.config === "error" ? "✗ Failed" : "Save Parameters"}
+                  </button>
+                </div>
+              </div>
+
+              {/* System Prompt Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                    <Bot size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">System Prompt</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Define the AI tutor's personality and behavior.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <textarea
+                    value={localConfig.system_prompt}
+                    onChange={(e) => setLocalConfig({ ...localConfig, system_prompt: e.target.value })}
+                    placeholder="Enter system prompt..."
+                    rows={12}
+                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-900 font-medium text-sm outline-none focus:border-emerald-500 transition-all placeholder:text-slate-300 resize-y"
+                  />
+
+                  <button
+                    onClick={saveAIParams}
+                    className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-bold text-sm rounded-xl hover:bg-emerald-600 transition-all active:scale-95"
+                  >
+                    <Save size={15} />
+                    {aiSaveStatus.config === "saved" ? "✓ Prompt Saved!" : aiSaveStatus.config === "error" ? "✗ Failed" : "Save System Prompt"}
                   </button>
                 </div>
               </div>

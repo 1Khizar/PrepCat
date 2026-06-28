@@ -13,6 +13,7 @@ import time
 from app.db.session import get_db
 from app.models.ai_memory import UserMemory, AIInteraction
 from app.models.user import User as UserModel
+from app.models.config import AIConfiguration
 from app.api.auth import get_current_user
 from app.services.ai_agent import (
     stream_agent_response,
@@ -150,7 +151,7 @@ async def chat(
     history = [{"role": m.role, "content": m.content} for m in request.session_history]
 
     # 4. Get stream generator
-    stream_gen = stream_agent_response(request.message, history, memory_context)
+    stream_gen = stream_agent_response(request.message, history, memory_context, db)
 
     # 5. Stream and track
     return StreamingResponse(
@@ -198,6 +199,10 @@ def clear_memory(
 class AIConfigUpdate(BaseModel):
     model: Optional[str] = None
     api_key: Optional[str] = None
+    temperature: Optional[float] = None
+    max_tokens: Optional[int] = None
+    top_p: Optional[float] = None
+    system_prompt: Optional[str] = None
 
 
 def require_admin(current_user: UserModel = Depends(get_current_user)):
@@ -210,44 +215,86 @@ def require_admin(current_user: UserModel = Depends(get_current_user)):
 
 
 @router.get("/admin/config")
-def get_ai_config(current_user: UserModel = Depends(require_admin)):
-    """Return the current active Groq model and a masked API key."""
+def get_ai_config(db: Session = Depends(get_db), current_user: UserModel = Depends(require_admin)):
+    """Return the current active Groq model, masked API key, and database config."""
     api_key = os.getenv("GROQ_API_KEY", "")
     masked = f"{'*' * (len(api_key) - 4)}{api_key[-4:]}" if len(api_key) > 4 else "****"
+    
+    # Get database config
+    config = db.query(AIConfiguration).first()
+    if not config:
+        config = AIConfiguration()
+        db.add(config)
+        db.commit()
+        db.refresh(config)
+    
     return {
         "model": os.getenv("GROQ_Model", "llama-3.3-70b-versatile"),
         "api_key_masked": masked,
         "api_key_set": bool(api_key),
+        "temperature": config.temperature,
+        "max_tokens": config.max_tokens,
+        "top_p": config.top_p,
+        "system_prompt": config.system_prompt
     }
 
 
 @router.post("/admin/config")
 def update_ai_config(
     config: AIConfigUpdate,
+    db: Session = Depends(get_db),
     current_user: UserModel = Depends(require_admin),
 ):
-    """Update the active Groq model and/or API key at runtime (in-memory)."""
+    """Update the active Groq model, API key, and/or database config."""
     updated = []
+    
+    # Update env vars
     if config.model:
         os.environ["GROQ_Model"] = config.model
         updated.append(f"model → {config.model}")
     if config.api_key:
         os.environ["GROQ_API_KEY"] = config.api_key
         updated.append("api_key → updated")
+    
+    # Update database config
+    db_config = db.query(AIConfiguration).first()
+    if not db_config:
+        db_config = AIConfiguration()
+        db.add(db_config)
+    
+    if config.temperature is not None:
+        db_config.temperature = config.temperature
+        updated.append(f"temperature → {config.temperature}")
+    if config.max_tokens is not None:
+        db_config.max_tokens = config.max_tokens
+        updated.append(f"max_tokens → {config.max_tokens}")
+    if config.top_p is not None:
+        db_config.top_p = config.top_p
+        updated.append(f"top_p → {config.top_p}")
+    if config.system_prompt is not None:
+        db_config.system_prompt = config.system_prompt
+        updated.append("system_prompt → updated")
+    
+    db.commit()
+    
     if not updated:
         raise HTTPException(status_code=400, detail="No fields provided to update")
     return {"message": "Config updated", "changes": updated}
 
 
 @router.post("/admin/health")
-async def ai_health_check(current_user: UserModel = Depends(require_admin)):
+async def ai_health_check(db: Session = Depends(get_db), current_user: UserModel = Depends(require_admin)):
     """
     Sends a short test message to the configured Groq model.
     Returns status, response_time_ms, model used, and a snippet.
     """
     model = os.getenv("GROQ_Model", "llama-3.3-70b-versatile")
+    
+    # Get database config
+    config = db.query(AIConfiguration).first()
+    
     try:
-        llm = get_llm(streaming=False)
+        llm = get_llm(streaming=False, config=config)
         start = time.time()
         result = await llm.ainvoke([HumanMessage(content="Reply with only the word: OK")])
         elapsed_ms = int((time.time() - start) * 1000)

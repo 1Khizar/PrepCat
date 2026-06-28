@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 from app.api import questions, auth, papers, ai_tutor
 
 from app.db.session import Base, engine, SessionLocal
-from app.models import engagement, user, ai_memory
+from app.models import engagement, user, ai_memory, config
 from app.models.user import User as UserModel, UserRole
 from app.core.security import get_password_hash
 

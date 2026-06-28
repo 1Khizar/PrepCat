@@ -4,6 +4,8 @@ import json
 import logging
 import random
 from typing import AsyncGenerator, Optional
+from app.models.config import AIConfiguration
+from sqlalchemy.orm import Session
 
 from langchain_groq import ChatGroq
 from langchain_community.tools import DuckDuckGoSearchRun
@@ -77,13 +79,17 @@ def extract_memory_from_message(message: str) -> dict:
 # LLM + Tool Setup
 # ---------------------------------------------------------------------------
 
-def get_llm(streaming: bool = True) -> ChatGroq:
+def get_llm(streaming: bool = True, config: AIConfiguration = None) -> ChatGroq:
+    temp = config.temperature if config else 0.3
+    tokens = config.max_tokens if config else 600
+    top_p = config.top_p if config else 0.8
+    
     return ChatGroq(
         model=os.getenv("GROQ_Model", "llama-3.3-70b-versatile"),
         groq_api_key=os.getenv("GROQ_API_KEY"),
-        max_tokens=600,
-        temperature=0.3,
-        top_p=0.8,
+        max_tokens=tokens,
+        temperature=temp,
+        top_p=top_p,
         streaming=streaming,
     )
 
@@ -92,27 +98,30 @@ def get_search_tool() -> DuckDuckGoSearchRun:
     return DuckDuckGoSearchRun(max_results=3)
 
 
-def build_system_prompt(memory_context: str) -> str:
-    base = (
-        "You are PrepCat AI, an expert tutor for Pakistani medical entrance exams (MDCAT and NUMS). "
-        "You are friendly, welcoming, encouraging, and provide PRECISE, CONCISE, and ACCURATE answers.\n\n"
-        "You are LIMITED to answering questions related to the following topics ONLY:\n"
-        "- MDCAT and NUMS exams (format, dates, advice, structure)\n"
-        "- Biology\n- Physics\n- Chemistry\n- English\n\n"
-        "If a user greets you, respond warmly as PrepCat AI and invite them to ask questions about their studies.\n\n"
-        "If a user asks a question that is NOT related to these topics, politely decline and reply exactly with: "
-        "'I can only answer questions related to MDCAT, NUMS, and their subjects (Biology, Physics, Chemistry, and English). "
-        "Do you have a concept or question related to those?'\n\n"
-        "GUIDELINES FOR ANSWERING:\n"
-        "1. Be PRECISE and CONCISE - get to the point quickly\n"
-        "2. Use clear, simple language\n"
-        "3. Focus on accuracy and facts\n"
-        "4. Explain concepts step by step with relevant examples when necessary\n"
-        "5. Avoid unnecessary fluff or verbose introductions\n"
-        "6. When you need current or real-time information, use the search tool\n"
-        "7. Never make up facts\n"
-        "8. Always encourage the student and keep a positive, supportive tone"
-    )
+def build_system_prompt(memory_context: str, config: AIConfiguration = None) -> str:
+    if config and config.system_prompt:
+        base = config.system_prompt
+    else:
+        base = (
+            "You are PrepCat AI, an expert tutor for Pakistani medical entrance exams (MDCAT and NUMS). "
+            "You are friendly, welcoming, encouraging, and provide PRECISE, CONCISE, and ACCURATE answers.\n\n"
+            "You are LIMITED to answering questions related to the following topics ONLY:\n"
+            "- MDCAT and NUMS exams (format, dates, advice, structure)\n"
+            "- Biology\n- Physics\n- Chemistry\n- English\n\n"
+            "If a user greets you, respond warmly as PrepCat AI and invite them to ask questions about their studies.\n\n"
+            "If a user asks a question that is NOT related to these topics, politely decline and reply exactly with: "
+            "'I can only answer questions related to MDCAT, NUMS, and their subjects (Biology, Physics, Chemistry, and English). "
+            "Do you have a concept or question related to those?'\n\n"
+            "GUIDELINES FOR ANSWERING:\n"
+            "1. Be PRECISE and CONCISE - get to the point quickly\n"
+            "2. Use clear, simple language\n"
+            "3. Focus on accuracy and facts\n"
+            "4. Explain concepts step by step with relevant examples when necessary\n"
+            "5. Avoid unnecessary fluff or verbose introductions\n"
+            "6. When you need current or real-time information, use the search tool\n"
+            "7. Never make up facts\n"
+            "8. Always encourage the student and keep a positive, supportive tone"
+        )
     if memory_context:
         base += f"\n\nAbout this student:\n{memory_context}"
     return base
@@ -141,6 +150,7 @@ async def stream_agent_response(
     message: str,
     session_history: list,
     memory_context: str,
+    db: Session = None,
 ) -> AsyncGenerator[str, None]:
     """
     Streams the AI response as SSE-formatted data chunks.
@@ -155,10 +165,15 @@ async def stream_agent_response(
         yield f"data: {json.dumps({'type': 'done'})}\n\n"
         return
     
-    system = build_system_prompt(memory_context)
+    # Fetch config if db is provided
+    config = None
+    if db:
+        config = db.query(AIConfiguration).first()
+    
+    system = build_system_prompt(memory_context, config)
     
     try:
-        llm = get_llm(streaming=True)
+        llm = get_llm(streaming=True, config=config)
         search_tool = get_search_tool()
         llm_with_tools = llm.bind_tools([search_tool])
 
@@ -218,7 +233,7 @@ async def stream_agent_response(
                 )
 
             # Stream the final answer after tool use
-            plain_llm = get_llm(streaming=True)
+            plain_llm = get_llm(streaming=True, config=config)
             async for chunk in plain_llm.astream(messages):
                 if chunk.content:
                     yield f"data: {json.dumps({'type': 'content', 'data': chunk.content})}\n\n"
@@ -231,7 +246,7 @@ async def stream_agent_response(
             status_data = '\n\n_Note: Search is currently unavailable, answering from memory..._\n\n'
             status_json = json.dumps({'type': 'status', 'data': status_data})
             yield f"data: {status_json}\n\n"
-            plain_llm = get_llm(streaming=True)
+            plain_llm = get_llm(streaming=True, config=config)
             fallback_msgs = build_messages(system, session_history, message)
             async for chunk in plain_llm.astream(fallback_msgs):
                 if chunk.content:
