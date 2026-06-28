@@ -12,3 +12,7 @@ alembic
 cors
 httpx
 supabase
+langchain-groq
+langchain-community
+langchain-core
+ddgs>=9.14.0

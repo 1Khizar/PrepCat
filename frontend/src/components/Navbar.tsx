@@ -28,6 +28,21 @@ const Navbar = () => {
           </span>
         </Link>
 
+        {/* Desktop Nav Links */}
+        <div className="hidden lg:flex items-center gap-8">
+          <Link href="#features" className="text-[15px] font-bold text-slate-800 hover:text-blue-600 transition-colors">
+            Features
+          </Link>
+          <Link href="#why-us" className="text-[15px] font-bold text-slate-800 hover:text-blue-600 transition-colors">
+            Why PrepCat
+          </Link>
+          <Link href="#ai-tutor" className="text-[15px] font-bold text-slate-800 hover:text-blue-600 transition-colors">
+            AI Tutor
+          </Link>
+          <Link href="#demo" className="text-[15px] font-bold text-slate-800 hover:text-blue-600 transition-colors">
+            Demo
+          </Link>
+        </div>
         {/* Auth Buttons */}
         <div className="flex items-center gap-4 md:gap-8">
           <Link href="/login" className="px-4 md:px-5 py-2 md:py-2.5 text-[14px] md:text-[15px] font-bold text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 transition-all rounded-lg md:rounded-xl shadow-sm active:scale-95">

@@ -1,6 +1,6 @@
-import axios from 'axios';
+import axios from "axios";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -20,15 +20,24 @@ api.interceptors.request.use(
   }
 );
 
-// Add a response interceptor to handle token expiration
+// Add a response interceptor to handle token expiration and blocked users
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
+      // Handle 401 (Unauthorized) or 403 (Forbidden - blocked/deleted)
+      if (error.response?.status === 401 || error.response?.status === 403) {
         localStorage.removeItem('token');
-        // Optional: Redirect to login
-        // window.location.href = '/login';
+        localStorage.removeItem('prepcat_user');
+        
+        // Check if the error is about being blocked or deleted
+        const detail = error.response?.data?.detail;
+        if (detail && (detail.includes('blocked') || detail.includes('deleted'))) {
+          alert('Your account has been blocked or deleted. Please contact admin.');
+        }
+        
+        // Redirect to login
+        window.location.href = '/login';
       }
     }
     return Promise.reject(error);

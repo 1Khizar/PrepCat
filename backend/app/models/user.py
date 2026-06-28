@@ -19,10 +19,12 @@ class User(Base):
     phone_number = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     is_blocked = Column(Boolean, default=False)
+    is_deleted = Column(Boolean, default=False)
     role = Column(String, default=UserRole.STUDENT)
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    papers_opened_count = Column(Integer, default=0)
 
     # Relationships - Using strings to avoid circular imports
     attempts = relationship("QuizAttempt", back_populates="user")

@@ -20,7 +20,15 @@ import {
   ShieldBan,
   ShieldCheck,
   Filter,
-  ChevronLeft
+  ChevronLeft,
+  Bot,
+  Key,
+  Zap,
+  Activity,
+  Eye,
+  EyeOff,
+  RefreshCw,
+  Save
 } from "lucide-react";
 import api from "@/lib/api";
 
@@ -33,7 +41,40 @@ export default function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<{ exam: string; subject: string } | null>(null);
 
-  const subjects = ["Biology", "Physics", "Chemistry", "English"];
+  const [selectedUserStats, setSelectedUserStats] = useState<any>(null);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [filterDate, setFilterDate] = useState("");
+
+  // AI Tutor Admin State
+  const [aiConfig, setAIConfig] = useState<{ 
+    model: string; 
+    api_key_masked: string; 
+    api_key_set: boolean;
+    temperature: number;
+    max_tokens: number;
+    top_p: number;
+    system_prompt: string;
+  } | null>(null);
+  const [aiConfigLoading, setAIConfigLoading] = useState(false);
+  const [aiHealth, setAIHealth] = useState<{ status: string; model: string; response_time_ms: number | null; snippet?: string; error?: string } | null>(null);
+  const [aiHealthLoading, setAIHealthLoading] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("");
+  const [customModel, setCustomModel] = useState("");
+  const [useCustomModel, setUseCustomModel] = useState(false);
+  const [newApiKey, setNewApiKey] = useState("");
+  const [showNewKey, setShowNewKey] = useState(false);
+  const [aiSaveStatus, setAISaveStatus] = useState<{ model?: string; key?: string; config?: string }>({});
+  
+  // New config state
+  const [localConfig, setLocalConfig] = useState({
+    temperature: 0.3,
+    max_tokens: 600,
+    top_p: 0.8,
+    system_prompt: ""
+  });
+
+  const subjects = ["Biology", "Physics", "Chemistry", "English", "Full Papers"];
 
   const categoryPapers = selectedCategory
     ? papers.filter(p => p.exam_type === selectedCategory.exam && p.subject === selectedCategory.subject)
@@ -76,6 +117,7 @@ export default function AdminDashboard() {
 
     if (activeTab === "Past Papers") fetchPapers();
     if (activeTab === "User Management") fetchUsers();
+    if (activeTab === "AI Tutor") fetchAIConfig();
 
     // Load Google Scripts
     const script1 = document.createElement("script");
@@ -110,6 +152,97 @@ export default function AdminDashboard() {
       console.error("Failed to fetch users", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAIConfig = async () => {
+    setAIConfigLoading(true);
+    try {
+      const res = await api.get("/ai/admin/config");
+      setAIConfig(res.data);
+      setSelectedModel(res.data.model);
+      setLocalConfig({
+        temperature: res.data.temperature,
+        max_tokens: res.data.max_tokens,
+        top_p: res.data.top_p,
+        system_prompt: res.data.system_prompt
+      });
+    } catch (err) {
+      console.error("Failed to fetch AI config", err);
+    } finally {
+      setAIConfigLoading(false);
+    }
+  };
+
+  const runAIHealthCheck = async () => {
+    setAIHealthLoading(true);
+    setAIHealth(null);
+    try {
+      const res = await api.post("/ai/admin/health");
+      setAIHealth(res.data);
+    } catch (err: any) {
+      setAIHealth({ status: "error", model: aiConfig?.model || "", response_time_ms: null, error: err.message });
+    } finally {
+      setAIHealthLoading(false);
+    }
+  };
+
+  const saveAIModel = async () => {
+    const modelToSave = useCustomModel ? customModel.trim() : selectedModel;
+    if (!modelToSave) return;
+    try {
+      await api.post("/ai/admin/config", { model: modelToSave });
+      setAISaveStatus(s => ({ ...s, model: "saved" }));
+      fetchAIConfig();
+      setTimeout(() => setAISaveStatus(s => ({ ...s, model: undefined })), 3000);
+    } catch (err: any) {
+      setAISaveStatus(s => ({ ...s, model: "error" }));
+      setTimeout(() => setAISaveStatus(s => ({ ...s, model: undefined })), 3000);
+    }
+  };
+
+  const saveAIKey = async () => {
+    if (!newApiKey.trim()) return;
+    try {
+      await api.post("/ai/admin/config", { api_key: newApiKey.trim() });
+      setAISaveStatus(s => ({ ...s, key: "saved" }));
+      setNewApiKey("");
+      fetchAIConfig();
+      setTimeout(() => setAISaveStatus(s => ({ ...s, key: undefined })), 3000);
+    } catch (err: any) {
+      setAISaveStatus(s => ({ ...s, key: "error" }));
+      setTimeout(() => setAISaveStatus(s => ({ ...s, key: undefined })), 3000);
+    }
+  };
+
+  const saveAIParams = async () => {
+    try {
+      await api.post("/ai/admin/config", {
+        temperature: localConfig.temperature,
+        max_tokens: localConfig.max_tokens,
+        top_p: localConfig.top_p,
+        system_prompt: localConfig.system_prompt
+      });
+      setAISaveStatus(s => ({ ...s, config: "saved" }));
+      fetchAIConfig();
+      setTimeout(() => setAISaveStatus(s => ({ ...s, config: undefined })), 3000);
+    } catch (err: any) {
+      setAISaveStatus(s => ({ ...s, config: "error" }));
+      setTimeout(() => setAISaveStatus(s => ({ ...s, config: undefined })), 3000);
+    }
+  };
+
+  const openUserStats = async (user: any) => {
+    setSelectedUserStats({ ...user, stats: null });
+    setShowStatsModal(true);
+    setStatsLoading(true);
+    try {
+      const response = await api.get(`/auth/admin/users/${user.id}/stats`);
+      setSelectedUserStats({ ...user, stats: response.data });
+    } catch (err) {
+      console.error("Failed to load user stats", err);
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -263,10 +396,28 @@ export default function AdminDashboard() {
     const action = user.is_blocked ? "unblock" : "block";
     if (!confirm(`Are you sure you want to ${action} ${user.username}?`)) return;
     try {
+      console.log("API Base URL:", process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000'));
       await api.patch(`/auth/admin/users/${user.id}/${action}`);
       fetchUsers();
-    } catch (err) {
-      alert(`Failed to ${action} user`);
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      const message = detail || `Failed to ${action} user`;
+      alert(message);
+      console.error("Error blocking/unblocking user:", err.response?.data || err);
+      console.error("Full error:", err);
+    }
+  };
+
+  const deleteUser = async (user: any) => {
+    if (!confirm(`Are you sure you want to DELETE ${user.username}? This action cannot be undone.`)) return;
+    try {
+      await api.delete(`/auth/admin/users/${user.id}`);
+      fetchUsers();
+    } catch (err: any) {
+      const detail = err.response?.data?.detail;
+      const message = detail || "Failed to delete user";
+      alert(message);
+      console.error("Error deleting user:", err.response?.data || err);
     }
   };
 
@@ -300,11 +451,15 @@ export default function AdminDashboard() {
     p.subject.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredUsers = users.filter(u =>
-    u.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    u.username.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = users.filter(u => {
+    const matchesSearch = u.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.username.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    const matchesDate = filterDate ? new Date(u.created_at).toISOString().split('T')[0] === filterDate : true;
+
+    return matchesSearch && matchesDate;
+  });
 
   return (
     <main className="min-h-screen bg-slate-50 flex text-slate-900 font-sans selection:bg-slate-900 selection:text-white">
@@ -323,6 +478,7 @@ export default function AdminDashboard() {
             {[
               { name: "Past Papers", icon: Layers },
               { name: "User Management", icon: Users },
+              { name: "AI Tutor", icon: Bot },
               { name: "Integrations", icon: Settings },
             ].map((item) => (
               <button
@@ -466,7 +622,7 @@ export default function AdminDashboard() {
                             <td className="px-8 py-5 text-[15px] font-medium text-slate-600">{p.year}</td>
                             <td className="px-8 py-5">
                               {p.file_url ? (
-                                <a href={`http://localhost:8000${p.file_url}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1.5">
+                                <a href={`${process.env.NEXT_PUBLIC_API_URL || (process.env.NODE_ENV === 'production' ? 'https://prepbuddy-backend-8fxn.onrender.com' : 'http://localhost:8000')}${p.file_url}`} target="_blank" rel="noreferrer" className="text-sm font-semibold text-blue-600 hover:underline flex items-center gap-1.5">
                                   <Download size={16} /> Download
                                 </a>
                               ) : <span className="text-xs text-slate-300">—</span>}
@@ -496,14 +652,25 @@ export default function AdminDashboard() {
                   <h1 className="text-3xl font-bold mb-2">User Management</h1>
                   <p className="text-slate-500 font-medium text-sm">Monitor and manage user accounts and export data.</p>
                 </div>
-                <button
-                  onClick={exportUsersToCSV}
-                  disabled={users.length === 0}
-                  className="bg-white border-2 border-slate-200 text-slate-900 hover:bg-slate-50 py-3 px-6 rounded-xl flex items-center gap-2 font-bold text-sm transition-all disabled:opacity-50"
-                >
-                  <Download size={18} />
-                  Export CSV
-                </button>
+                <div className="flex items-center gap-4">
+                  <div className="flex flex-col gap-1">
+                    <label className="text-[10px] font-bold uppercase tracking-widest text-slate-400">Filter by Date</label>
+                    <input 
+                      type="date" 
+                      value={filterDate}
+                      onChange={(e) => setFilterDate(e.target.value)}
+                      className="bg-white border-2 border-slate-200 text-slate-900 rounded-xl px-4 py-2 text-sm font-bold outline-none h-[42px]"
+                    />
+                  </div>
+                  <button
+                    onClick={exportUsersToCSV}
+                    disabled={users.length === 0}
+                    className="bg-white border-2 border-slate-200 text-slate-900 hover:bg-slate-50 px-6 rounded-xl flex items-center gap-2 font-bold text-sm transition-all disabled:opacity-50 h-[42px] self-end"
+                  >
+                    <Download size={18} />
+                    Export CSV
+                  </button>
+                </div>
               </div>
               <div className="bg-white border border-slate-100 rounded-2xl overflow-hidden">
                 <div className="p-8 border-b border-slate-100 flex justify-between items-center">
@@ -541,12 +708,24 @@ export default function AdminDashboard() {
                               </span>
                             )}
                           </td>
-                          <td className="px-8 py-6">
+                          <td className="px-8 py-6 flex gap-2">
+                            <button
+                              onClick={() => openUserStats(u)}
+                              className="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-slate-100 text-slate-700 hover:bg-slate-200"
+                            >
+                              Insights
+                            </button>
                             <button
                               onClick={() => toggleUserBlock(u)}
                               className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${u.is_blocked ? 'bg-blue-50 text-blue-600 hover:bg-blue-100' : 'bg-rose-50 text-rose-600 hover:bg-rose-100'}`}
                             >
                               {u.is_blocked ? "Unblock" : "Block User"}
+                            </button>
+                            <button
+                              onClick={() => deleteUser(u)}
+                              className="px-4 py-2 rounded-lg text-xs font-bold transition-all bg-red-100 text-red-600 hover:bg-red-200"
+                            >
+                              Delete
                             </button>
                           </td>
                         </tr>
@@ -558,6 +737,290 @@ export default function AdminDashboard() {
                       )}
                     </tbody>
                   </table>
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "AI Tutor" ? (
+            <div className="max-w-3xl space-y-6">
+              <div>
+                <h1 className="text-3xl font-bold mb-1 text-slate-950">AI Tutor Control</h1>
+                <p className="text-slate-500 font-medium text-sm">Monitor and configure the AI tutor engine from here.</p>
+              </div>
+
+              {/* Health Check Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-50 border border-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                      <Activity size={22} />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-900">Health Check</h3>
+                      <p className="text-slate-500 text-sm font-medium">Test if the AI is responding correctly.</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={runAIHealthCheck}
+                    disabled={aiHealthLoading}
+                    className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white font-bold text-sm rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 active:scale-95"
+                  >
+                    {aiHealthLoading ? <Loader2 size={16} className="animate-spin" /> : <Zap size={16} />}
+                    {aiHealthLoading ? "Testing..." : "Run Health Check"}
+                  </button>
+                </div>
+
+                {aiHealth && (
+                  <div className={`rounded-xl p-5 border ${aiHealth.status === "ok" ? "bg-emerald-50 border-emerald-100" : "bg-red-50 border-red-100"}`}>
+                    <div className="flex items-center gap-3 mb-3">
+                      {aiHealth.status === "ok" ? (
+                        <><CheckCircle size={18} className="text-emerald-600" /><span className="font-bold text-emerald-700">Online — AI is working</span></>
+                      ) : (
+                        <><AlertCircle size={18} className="text-red-600" /><span className="font-bold text-red-700">Error — AI is down</span></>
+                      )}
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Model Used</div>
+                        <div className="font-bold text-slate-900 font-mono text-xs">{aiHealth.model}</div>
+                      </div>
+                      <div className="bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Response Time</div>
+                        <div className="font-bold text-slate-900">{aiHealth.response_time_ms != null ? `${aiHealth.response_time_ms} ms` : "—"}</div>
+                      </div>
+                    </div>
+                    {aiHealth.snippet && (
+                      <div className="mt-3 bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">AI Response Snippet</div>
+                        <div className="font-medium text-slate-700 text-sm italic">"{aiHealth.snippet}"</div>
+                      </div>
+                    )}
+                    {aiHealth.error && (
+                      <div className="mt-3 bg-white/60 rounded-lg p-3">
+                        <div className="text-[10px] font-bold uppercase tracking-widest text-red-400 mb-1">Error</div>
+                        <div className="font-mono text-red-700 text-xs">{aiHealth.error}</div>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Model Settings Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-violet-50 border border-violet-100 rounded-xl flex items-center justify-center text-violet-600">
+                    <Bot size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Model Settings</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Current: <span className="font-mono font-bold text-slate-800">{aiConfigLoading ? "Loading..." : (aiConfig?.model || "—")}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Toggle between dropdown and custom */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setUseCustomModel(false)}
+                      className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${!useCustomModel ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >
+                      Select Preset
+                    </button>
+                    <button
+                      onClick={() => setUseCustomModel(true)}
+                      className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${useCustomModel ? "bg-violet-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"}`}
+                    >
+                      Custom Model
+                    </button>
+                  </div>
+
+                  {!useCustomModel ? (
+                    <select
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                      className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-900 font-mono font-bold text-sm outline-none focus:border-violet-500 transition-all appearance-none cursor-pointer"
+                    >
+                      <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile</option>
+                      <option value="llama-3.1-8b-instant">llama-3.1-8b-instant</option>
+                      <option value="llama3-8b-8192">llama3-8b-8192</option>
+                      <option value="gemma2-9b-it">gemma2-9b-it</option>
+                      <option value="mixtral-8x7b-32768">mixtral-8x7b-32768</option>
+                      <option value="llama-3.1-70b-versatile">llama-3.1-70b-versatile</option>
+                    </select>
+                  ) : (
+                    <input
+                      type="text"
+                      value={customModel}
+                      onChange={(e) => setCustomModel(e.target.value)}
+                      placeholder="e.g. llama-3.1-405b-reasoning"
+                      className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-900 font-mono font-bold text-sm outline-none focus:border-violet-500 transition-all placeholder:text-slate-300"
+                    />
+                  )}
+
+                  <button
+                    onClick={saveAIModel}
+                    disabled={useCustomModel ? !customModel.trim() : !selectedModel}
+                    className="flex items-center gap-2 px-6 py-3 bg-violet-600 text-white font-bold text-sm rounded-xl hover:bg-violet-700 transition-all disabled:opacity-40 active:scale-95"
+                  >
+                    <Save size={15} />
+                    {aiSaveStatus.model === "saved" ? "✓ Saved!" : aiSaveStatus.model === "error" ? "✗ Failed" : "Save Model"}
+                  </button>
+                </div>
+              </div>
+
+              {/* API Key Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center text-amber-600">
+                    <Key size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Groq API Key</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Current key: <span className="font-mono font-bold text-slate-700">{aiConfigLoading ? "Loading..." : (aiConfig?.api_key_masked || "Not set")}</span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="relative">
+                    <input
+                      type={showNewKey ? "text" : "password"}
+                      value={newApiKey}
+                      onChange={(e) => setNewApiKey(e.target.value)}
+                      placeholder="Enter new Groq API key..."
+                      className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 pl-4 pr-12 text-slate-900 font-mono text-sm outline-none focus:border-amber-500 transition-all placeholder:text-slate-300"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewKey(!showNewKey)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    >
+                      {showNewKey ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+
+                  <button
+                    onClick={saveAIKey}
+                    disabled={!newApiKey.trim()}
+                    className="flex items-center gap-2 px-6 py-3 bg-amber-500 text-white font-bold text-sm rounded-xl hover:bg-amber-600 transition-all disabled:opacity-40 active:scale-95"
+                  >
+                    <Key size={15} />
+                    {aiSaveStatus.key === "saved" ? "✓ Key Updated!" : aiSaveStatus.key === "error" ? "✗ Failed" : "Update API Key"}
+                  </button>
+                </div>
+              </div>
+
+              {/* Model Parameters Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-cyan-50 border border-cyan-100 rounded-xl flex items-center justify-center text-cyan-600">
+                    <Settings size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">Model Parameters</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Configure temperature, token limits, and sampling parameters.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  {/* Temperature */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Temperature</label>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.temperature.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="2"
+                      step="0.1"
+                      value={localConfig.temperature}
+                      onChange={(e) => setLocalConfig({ ...localConfig, temperature: parseFloat(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    />
+                    <p className="text-xs text-slate-500">Controls randomness: 0 = deterministic, 2 = highly creative</p>
+                  </div>
+
+                  {/* Max Tokens */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Max Tokens</label>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.max_tokens}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="100"
+                      max="4000"
+                      step="100"
+                      value={localConfig.max_tokens}
+                      onChange={(e) => setLocalConfig({ ...localConfig, max_tokens: parseInt(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    />
+                    <p className="text-xs text-slate-500">Maximum response length in tokens</p>
+                  </div>
+
+                  {/* Top P */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Top P</label>
+                      <span className="text-sm font-bold text-cyan-600 font-mono">{localConfig.top_p.toFixed(2)}</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="1"
+                      step="0.05"
+                      value={localConfig.top_p}
+                      onChange={(e) => setLocalConfig({ ...localConfig, top_p: parseFloat(e.target.value) })}
+                      className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500"
+                    />
+                    <p className="text-xs text-slate-500">Nucleus sampling threshold: 1 = disabled, 0.9 = common</p>
+                  </div>
+
+                  <button
+                    onClick={saveAIParams}
+                    className="flex items-center gap-2 px-6 py-3 bg-cyan-500 text-white font-bold text-sm rounded-xl hover:bg-cyan-600 transition-all active:scale-95"
+                  >
+                    <Save size={15} />
+                    {aiSaveStatus.config === "saved" ? "✓ Params Saved!" : aiSaveStatus.config === "error" ? "✗ Failed" : "Save Parameters"}
+                  </button>
+                </div>
+              </div>
+
+              {/* System Prompt Panel */}
+              <div className="bg-white border border-slate-200 rounded-2xl p-8 shadow-sm">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 bg-emerald-50 border border-emerald-100 rounded-xl flex items-center justify-center text-emerald-600">
+                    <Bot size={22} />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-slate-900">System Prompt</h3>
+                    <p className="text-slate-500 text-sm font-medium">
+                      Define the AI tutor's personality and behavior.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <textarea
+                    value={localConfig.system_prompt}
+                    onChange={(e) => setLocalConfig({ ...localConfig, system_prompt: e.target.value })}
+                    placeholder="Enter system prompt..."
+                    rows={12}
+                    className="w-full bg-slate-50 border-2 border-slate-200 rounded-xl py-3 px-4 text-slate-900 font-medium text-sm outline-none focus:border-emerald-500 transition-all placeholder:text-slate-300 resize-y"
+                  />
+
+                  <button
+                    onClick={saveAIParams}
+                    className="flex items-center gap-2 px-6 py-3 bg-emerald-500 text-white font-bold text-sm rounded-xl hover:bg-emerald-600 transition-all active:scale-95"
+                  >
+                    <Save size={15} />
+                    {aiSaveStatus.config === "saved" ? "✓ Prompt Saved!" : aiSaveStatus.config === "error" ? "✗ Failed" : "Save System Prompt"}
+                  </button>
                 </div>
               </div>
             </div>
@@ -660,6 +1123,7 @@ export default function AdminDashboard() {
                       <option value="Physics">Physics</option>
                       <option value="Chemistry">Chemistry</option>
                       <option value="English">English</option>
+                      <option value="Full Papers">Full Papers</option>
                     </select>
                   </div>
                 </div>
@@ -737,6 +1201,133 @@ export default function AdminDashboard() {
                   <button type="button" onClick={() => { setShowAddModal(false); setDriveFile(null); }} className="px-8 py-4 font-bold text-slate-500 hover:text-slate-950 transition-colors">Cancel</button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* User Stats Modal */}
+      <AnimatePresence>
+        {showStatsModal && selectedUserStats && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 pb-20 overflow-y-auto">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowStatsModal(false)}
+              className="fixed inset-0 bg-slate-900/40"
+            />
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white w-full max-w-2xl rounded-[2.5rem] shadow-2xl relative z-10 overflow-hidden"
+            >
+              <div className="p-8 border-b border-slate-100 flex justify-between items-center text-slate-950 bg-slate-50/50">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold text-xl">
+                    {selectedUserStats.username.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold">{selectedUserStats.full_name}</h2>
+                    <p className="text-slate-500 font-bold text-xs">@{selectedUserStats.username}</p>
+                  </div>
+                </div>
+                <button onClick={() => setShowStatsModal(false)} className="p-2 bg-slate-200/50 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-200 transition-all">
+                  <X size={20} />
+                </button>
+              </div>
+
+              <div className="p-8">
+                {statsLoading ? (
+                  <div className="flex flex-col items-center justify-center py-10">
+                    <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
+                    <p className="text-slate-500 font-bold text-sm">Loading insights...</p>
+                  </div>
+                ) : selectedUserStats.stats ? (
+                  <div className="space-y-6">
+                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex items-center gap-4">
+                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-500">
+                        <Calendar size={20} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Account Created</div>
+                        <div className="font-bold text-slate-900 mt-0.5">{new Date(selectedUserStats.stats.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-4">
+                      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                        <div className="text-xs font-bold text-blue-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Current Streak
+                        </div>
+                        <div className="text-3xl font-black text-blue-600">
+                          {selectedUserStats.stats.current_streak} <span className="text-sm">Days</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                        <div className="text-xs font-bold text-emerald-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Papers Opened
+                        </div>
+                        <div className="text-3xl font-black text-emerald-600">
+                          {selectedUserStats.stats.papers_opened} <span className="text-sm">Total</span>
+                        </div>
+                      </div>
+
+                      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                        <div className="text-xs font-bold text-amber-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                          Saved Papers
+                        </div>
+                        <div className="text-3xl font-black text-amber-600">
+                          {selectedUserStats.stats.saved_papers || 0} <span className="text-sm">Total</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* AI Tutor Stats */}
+                    <div className="border-t border-slate-200 pt-6">
+                      <h3 className="text-lg font-bold text-slate-950 mb-4 flex items-center gap-2">
+                        <Bot size={20} className="text-purple-600" />
+                        AI Tutor Usage
+                      </h3>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-purple-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Questions Asked
+                          </div>
+                          <div className="text-3xl font-black text-purple-600">
+                            {selectedUserStats.stats.ai_questions_asked || 0} <span className="text-sm">Total</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-fuchsia-50 border border-fuchsia-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-fuchsia-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Days Used
+                          </div>
+                          <div className="text-3xl font-black text-fuchsia-600">
+                            {selectedUserStats.stats.ai_days_used || 0} <span className="text-sm">Total</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-violet-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Last Used
+                          </div>
+                          <div className="text-lg font-bold text-violet-600 mt-1">
+                            {selectedUserStats.stats.ai_last_used 
+                              ? new Date(selectedUserStats.stats.ai_last_used).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                              : 'Never'
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center text-red-500 font-bold py-10">Failed to load statistics.</div>
+                )}
+              </div>
             </motion.div>
           </div>
         )}

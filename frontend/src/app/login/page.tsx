@@ -8,7 +8,9 @@ import {
   Lock,
   ShieldCheck,
   AlertCircle,
-  Loader2
+  Loader2,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -22,6 +24,7 @@ export default function LoginPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -112,12 +115,19 @@ export default function LoginPage() {
                 <div className="relative">
                   <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     placeholder="Password"
-                    className="amazing-input !pl-14 !py-3.5"
+                    className="amazing-input !pl-14 !pr-12 !py-3.5"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                  </button>
                 </div>
               </div>
 

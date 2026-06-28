@@ -4,10 +4,10 @@ from fastapi.staticfiles import StaticFiles
 import os
 from contextlib import asynccontextmanager
 
-from app.api import questions, auth, papers
+from app.api import questions, auth, papers, ai_tutor
 
 from app.db.session import Base, engine, SessionLocal
-from app.models import engagement, user
+from app.models import engagement, user, ai_memory, config
 from app.models.user import User as UserModel, UserRole
 from app.core.security import get_password_hash
 
@@ -15,7 +15,7 @@ Base.metadata.create_all(bind=engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup: Seed Admin
+    # Startup: Seed/Update Admin
     db = SessionLocal()
     try:
         admin_email = os.getenv("ADMIN_EMAIL")
@@ -23,8 +23,21 @@ async def lifespan(app: FastAPI):
         admin_name = os.getenv("ADMIN_FULL_NAME", "Admin")
         
         if admin_email and admin_pass:
-            admin_user = db.query(UserModel).filter(UserModel.email == admin_email).first()
-            if not admin_user:
+            # First, find any existing admin user (by role)
+            existing_admin = db.query(UserModel).filter(UserModel.role == UserRole.ADMIN).first()
+            
+            if existing_admin:
+                # Update existing admin with latest credentials
+                existing_admin.email = admin_email
+                existing_admin.hashed_password = get_password_hash(admin_pass)
+                existing_admin.full_name = admin_name
+                existing_admin.is_active = True
+                existing_admin.is_blocked = False
+                existing_admin.is_deleted = False
+                db.commit()
+                print("Successfully updated admin user")
+            else:
+                # Create new admin
                 new_admin = UserModel(
                     email=admin_email,
                     username="admin",
@@ -38,6 +51,7 @@ async def lifespan(app: FastAPI):
                 print("Successfully seeded admin user")
     except Exception as e:
         print(f"Error seeding admin: {e}")
+        db.rollback()
     finally:
         db.close()
     yield
@@ -53,6 +67,7 @@ app = FastAPI(
 app.include_router(auth.router)
 app.include_router(questions.router)
 app.include_router(papers.router)
+app.include_router(ai_tutor.router)
 
 # Mount uploads directory
 UPLOAD_DIR = "uploads"
@@ -69,8 +84,9 @@ app.add_middleware(
         "https://prepbuddy-tau.vercel.app",
         "https://prep-buddy-theta.vercel.app"
     ],
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

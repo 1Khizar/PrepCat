@@ -10,11 +10,33 @@ import {
   User,
   Phone,
   Rocket,
-  AlertCircle
+  AlertCircle,
+  Eye,
+  EyeOff
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+
+// Calculate password strength (max 3 levels based on requirements)
+const getPasswordStrength = (password: string) => {
+  if (password.length === 0) return 0;
+  
+  let strength = 0;
+  if (password.length >= 6) strength += 1;
+  if (/[a-z]/.test(password)) strength += 1;
+  if (/[A-Z]/.test(password)) strength += 1;
+  
+  return strength;
+};
+
+// Get strength color and label
+const getStrengthInfo = (strength: number) => {
+  if (strength === 0) return { label: "Enter a password", color: "bg-slate-200" };
+  if (strength === 1) return { label: "Weak", color: "bg-red-500" };
+  if (strength === 2) return { label: "Good", color: "bg-amber-500" };
+  return { label: "Strong", color: "bg-emerald-500" };
+};
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -26,6 +48,7 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,6 +62,16 @@ export default function RegisterPage() {
 
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (!/[a-z]/.test(formData.password)) {
+      setError("Password must contain at least one lowercase letter.");
+      return;
+    }
+
+    if (!/[A-Z]/.test(formData.password)) {
+      setError("Password must contain at least one uppercase letter.");
       return;
     }
 
@@ -132,13 +165,60 @@ export default function RegisterPage() {
                   <div className="relative">
                     <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={16} />
                     <input
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       placeholder="Password"
-                      className="amazing-input !pl-14 !py-3.5"
+                      className="amazing-input !pl-14 !pr-12 !py-3.5"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus:outline-none"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
                   </div>
+                  {/* Password Strength Meter */}
+                  {formData.password.length > 0 && (
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <motion.div
+                            className={`h-full ${getStrengthInfo(getPasswordStrength(formData.password)).color}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(getPasswordStrength(formData.password) / 3) * 100}%` }}
+                            transition={{ duration: 0.3 }}
+                          />
+                        </div>
+                        <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                          getPasswordStrength(formData.password) === 1 ? 'text-red-500' :
+                          getPasswordStrength(formData.password) === 2 ? 'text-amber-500' : 'text-emerald-500'
+                        }`}>
+                          {getStrengthInfo(getPasswordStrength(formData.password)).label}
+                        </span>
+                      </div>
+                      {/* Password Requirements */}
+                      <div className="grid grid-cols-1 gap-1">
+                        {[
+                          { regex: /.{6,}/, label: "At least 6 characters" },
+                          { regex: /[a-z]/, label: "Lowercase letter" },
+                          { regex: /[A-Z]/, label: "Uppercase letter" },
+                        ].map((req, i) => (
+                          <div key={i} className={`flex items-center gap-1.5 text-[10px] font-medium ${
+                            req.regex.test(formData.password) ? 'text-emerald-600' : 'text-slate-400'
+                          }`}>
+                            {req.regex.test(formData.password) ? (
+                              <ShieldCheck size={12} />
+                            ) : (
+                              <div className="w-3 h-3 rounded-full border-2 border-slate-300" />
+                            )}
+                            {req.label}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
