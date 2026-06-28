@@ -502,9 +502,9 @@ export default function Dashboard() {
                                     <p className="text-sm text-slate-500 font-medium">Category-wise past papers for MDCAT exams.</p>
                                 </div>
 
-                                <div className="flex lg:grid lg:grid-cols-5 gap-4 lg:gap-5 w-full overflow-x-auto pb-6 lg:pb-0 snap-x lg:snap-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 w-full">
                                     {loading ? (
-                                        [1, 2, 3, 4, 5].map(i => <div key={i} className="min-w-[220px] lg:min-w-0 amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100 snap-start lg:snap-none" />)
+                                        [1, 2, 3, 4, 5].map(i => <div key={i} className="amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100" />)
                                     ) : (
                                         subjectsList.map(subject => {
                                             const count = getPaperCount("MDCAT", subject.name);
@@ -512,7 +512,7 @@ export default function Dashboard() {
                                                 <button
                                                     key={`mdcat-${subject.name}`}
                                                     onClick={() => setSelectedSubjectInfo({ exam: "MDCAT", subject: subject.name })}
-                                                    className="min-w-[220px] lg:min-w-0 snap-start lg:snap-none bg-white border border-slate-200 rounded-2xl p-6 lg:p-6 aspect-square text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex-1 flex flex-col justify-between"
+                                                    className="bg-white border border-slate-200 rounded-2xl p-6 lg:p-6 aspect-square text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex-1 flex flex-col justify-between"
                                                 >
                                                     <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 lg:mb-5 shadow-sm border border-blue-100/50">
                                                         <FileText size={24} />
@@ -536,9 +536,9 @@ export default function Dashboard() {
                                     <p className="text-sm text-slate-500 font-medium">Category-wise past papers for NUMS medical college entrance.</p>
                                 </div>
 
-                                <div className="flex lg:grid lg:grid-cols-5 gap-4 lg:gap-5 w-full overflow-x-auto pb-6 lg:pb-0 snap-x lg:snap-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 lg:gap-5 w-full">
                                     {loading ? (
-                                        [1, 2, 3, 4, 5].map(i => <div key={i} className="min-w-[220px] lg:min-w-0 amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100 snap-start lg:snap-none" />)
+                                        [1, 2, 3, 4, 5].map(i => <div key={i} className="amazing-card min-h-[160px] rounded-2xl animate-pulse bg-slate-100" />)
                                     ) : (
                                         subjectsList.map(subject => {
                                             const count = getPaperCount("NUMS", subject.name);
@@ -546,7 +546,7 @@ export default function Dashboard() {
                                                 <button
                                                     key={`nums-${subject.name}`}
                                                     onClick={() => setSelectedSubjectInfo({ exam: "NUMS", subject: subject.name })}
-                                                    className="min-w-[220px] lg:min-w-0 snap-start lg:snap-none bg-white border border-slate-200 rounded-2xl p-6 lg:p-6 aspect-square text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex-1 flex flex-col justify-between"
+                                                    className="bg-white border border-slate-200 rounded-2xl p-6 lg:p-6 aspect-square text-left hover:shadow-xl hover:scale-[1.03] hover:border-blue-300 transition-all duration-300 group flex-1 flex flex-col justify-between"
                                                 >
                                                     <div className="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-4 lg:mb-5 shadow-sm border border-blue-100/50">
                                                         <FileText size={24} />
