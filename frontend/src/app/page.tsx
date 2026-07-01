@@ -449,7 +449,7 @@ export default function Home() {
 
                         <div className="min-h-[190px] flex-1">
                           <AnimatePresence mode="wait">
-                            {aiTutorStage === 1 ? (
+                            {aiTutorStage === "thinking" ? (
                               <motion.div
                                 key="thinking"
                                 initial={{ opacity: 0, y: 10 }}
