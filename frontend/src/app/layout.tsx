@@ -13,12 +13,24 @@ export const metadata: Metadata = {
   },
 };
 
-import { Nunito } from "next/font/google";
+import { Inter, Plus_Jakarta_Sans, Bricolage_Grotesque } from "next/font/google";
 
-const nunito = Nunito({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-nunito',
+  variable: '--font-inter',
+});
+
+const plusJakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-plus-jakarta',
+});
+
+const bricolage = Bricolage_Grotesque({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-bricolage',
 });
 
 export default function RootLayout({
@@ -32,7 +44,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
       </head>
-      <body className={`${nunito.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className={`${inter.variable} ${plusJakarta.variable} ${bricolage.variable} font-sans antialiased`} suppressHydrationWarning>
         {children}
         <Analytics />
       </body>
