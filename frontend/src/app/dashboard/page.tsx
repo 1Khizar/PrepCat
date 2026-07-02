@@ -62,6 +62,7 @@ export default function Dashboard() {
     const [copiedId, setCopiedId] = useState<string | null>(null);
     const chatBottomRef = useRef<HTMLDivElement>(null);
     const chatInputRef = useRef<HTMLTextAreaElement>(null);
+    const [aiLimitStatus, setAiLimitStatus] = useState<{used: number, limit: number, remaining: number} | null>(null);
 
     useEffect(() => {
         fetchUserInfo();
@@ -264,11 +265,19 @@ export default function Dashboard() {
     useEffect(() => {
         if (activeTab === "AI Tutor") {
             scrollToBottom();
+            // Fetch limit status when opening AI Tutor
+            api.get("/ai/limit-status").then(res => setAiLimitStatus(res.data)).catch(() => {});
         }
     }, [chatMessages, activeTab, scrollToBottom]);
 
     const handleSendMessage = async () => {
         if (!chatInput.trim() || isChatLoading) return;
+        
+        // Check limit before sending
+        if (aiLimitStatus && aiLimitStatus.limit !== -1 && aiLimitStatus.remaining <= 0) {
+            setChatMessages(prev => [...prev, { role: 'assistant', content: '⚠️ **Monthly Limit Reached.** You have used all your AI Tutor messages for this month. Please contact support or wait until next month.', id: Date.now().toString() }]);
+            return;
+        }
         
         const userMsg = chatInput.trim();
         setChatInput('');
@@ -332,12 +341,18 @@ export default function Dashboard() {
                     }
                 }
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error("Chat Error:", error);
-            setChatMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', id: Date.now().toString() }]);
+            if (error?.message?.includes("403") || (error?.response?.status === 403)) {
+                setChatMessages(prev => [...prev, { role: 'assistant', content: '⚠️ **Monthly Limit Reached.** You have used all your AI Tutor messages for this month.', id: Date.now().toString() }]);
+            } else {
+                setChatMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.', id: Date.now().toString() }]);
+            }
         } finally {
             setIsChatLoading(false);
             chatInputRef.current?.focus();
+            // Refresh limit status after sending
+            api.get("/ai/limit-status").then(res => setAiLimitStatus(res.data)).catch(() => {});
         }
     };
 
@@ -871,6 +886,25 @@ export default function Dashboard() {
                                     </div>
                                     <div>
                                         <h2 className="font-bold text-slate-900">AI Tutor</h2>
+                                        {aiLimitStatus && aiLimitStatus.limit !== -1 && (
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                <div className="w-24 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                                                    <div
+                                                        className={`h-full rounded-full transition-all ${
+                                                            aiLimitStatus.remaining === 0 ? 'bg-red-500' :
+                                                            aiLimitStatus.remaining <= aiLimitStatus.limit * 0.2 ? 'bg-amber-500' : 'bg-blue-500'
+                                                        }`}
+                                                        style={{ width: `${Math.max(0, (aiLimitStatus.remaining / aiLimitStatus.limit) * 100)}%` }}
+                                                    />
+                                                </div>
+                                                <span className={`text-[10px] font-bold ${
+                                                    aiLimitStatus.remaining === 0 ? 'text-red-500' :
+                                                    aiLimitStatus.remaining <= aiLimitStatus.limit * 0.2 ? 'text-amber-500' : 'text-slate-400'
+                                                }`}>
+                                                    {aiLimitStatus.remaining === 0 ? 'Limit reached' : `${aiLimitStatus.used}/${aiLimitStatus.limit} msgs used`}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <button 
