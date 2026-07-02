@@ -70,7 +70,7 @@ export default function AnimatedMCQMockup() {
   }, []);
 
   return (
-    <div className="w-full max-w-xl mx-auto drop-shadow-2xl">
+    <div className="w-full max-w-lg mx-auto drop-shadow-2xl">
       {/* Browser Frame */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden flex flex-col">
         {/* Browser Top Bar */}
@@ -86,7 +86,7 @@ export default function AnimatedMCQMockup() {
         </div>
 
         {/* Content Area */}
-        <div className="p-5 bg-white relative h-[480px]">
+        <div className="p-4 bg-white relative h-[420px]">
           <AnimatePresence mode="wait">
             <motion.div
               key={currentIndex}
@@ -94,7 +94,7 @@ export default function AnimatedMCQMockup() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.5, ease: "easeInOut" }}
-              className="absolute inset-0 p-5 flex flex-col"
+              className="absolute inset-0 p-4 flex flex-col"
             >
               {/* Exam Header */}
               <div className="flex justify-between items-center mb-4">
@@ -112,20 +112,20 @@ export default function AnimatedMCQMockup() {
               </div>
 
               {/* Question Card */}
-              <div className="border border-slate-100 shadow-sm rounded-xl p-4 flex-1 flex flex-col">
-                <p className="text-slate-800 font-bold text-sm leading-relaxed mb-4">
+              <div className="border border-slate-100 shadow-sm rounded-xl p-3 flex-1 flex flex-col">
+                <p className="text-slate-800 font-bold text-sm leading-relaxed mb-3">
                   {mcqs[currentIndex].question}
                 </p>
 
                 {/* Options */}
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1.5">
                   {mcqs[currentIndex].options.map((opt, i) => (
                     <motion.div
                       key={i}
                       initial={opt.isCorrect ? { backgroundColor: "#ffffff", color: "#334155", borderColor: "#e2e8f0" } : {}}
                       animate={opt.isCorrect ? { backgroundColor: "#2563EB", color: "#ffffff", borderColor: "#2563EB" } : {}}
                       transition={{ delay: 1.5, duration: 0.4 }}
-                      className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${
+                      className={`flex items-center gap-2.5 px-3 py-1.5 rounded-lg border ${
                         !opt.isCorrect ? "border-slate-200 bg-white text-slate-700" : ""
                       }`}
                     >
@@ -133,7 +133,7 @@ export default function AnimatedMCQMockup() {
                         initial={opt.isCorrect ? { backgroundColor: "#f1f5f9", color: "#64748b" } : {}}
                         animate={opt.isCorrect ? { backgroundColor: "#ffffff", color: "#2563EB" } : {}}
                         transition={{ delay: 1.5, duration: 0.4 }}
-                        className={`w-7 h-7 flex items-center justify-center rounded bg-slate-100 text-slate-500 font-bold text-xs ${!opt.isCorrect ? "" : ""}`}
+                        className={`w-6 h-6 flex items-center justify-center rounded bg-slate-100 text-slate-500 font-bold text-xs ${!opt.isCorrect ? "" : ""}`}
                       >
                         {opt.letter}
                       </motion.div>
@@ -148,7 +148,7 @@ export default function AnimatedMCQMockup() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 2.2, duration: 0.5 }}
-                className="mt-3 bg-blue-50 border border-blue-100 rounded-xl p-3 flex gap-2"
+                className="mt-2 bg-blue-50 border border-blue-100 rounded-xl p-2.5 flex gap-2"
               >
                 <CheckCircle2 className="text-blue-600 shrink-0 mt-0.5" size={16} />
                 <p className="text-xs text-blue-800 leading-relaxed font-medium">
