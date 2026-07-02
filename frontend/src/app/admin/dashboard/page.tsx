@@ -71,8 +71,17 @@ export default function AdminDashboard() {
     temperature: 0.3,
     max_tokens: 600,
     top_p: 0.8,
-    system_prompt: ""
+    system_prompt: "",
+    default_monthly_message_limit: 30
   });
+
+  // User AI limit override state
+  const [userAiLimitInput, setUserAiLimitInput] = useState<string>("");
+  const [userAiLimitSaving, setUserAiLimitSaving] = useState(false);
+  const [userAiLimitStatus, setUserAiLimitStatus] = useState<"" | "saved" | "error">("" );
+  const [userAiPrompts, setUserAiPrompts] = useState<any[]>([]);
+  const [userAiPromptsLoading, setUserAiPromptsLoading] = useState(false);
+  const [insightsTab, setInsightsTab] = useState<"stats" | "prompts">("stats");
 
   const subjects = ["Biology", "Physics", "Chemistry", "English", "Full Papers"];
 
@@ -165,7 +174,8 @@ export default function AdminDashboard() {
         temperature: res.data.temperature,
         max_tokens: res.data.max_tokens,
         top_p: res.data.top_p,
-        system_prompt: res.data.system_prompt
+        system_prompt: res.data.system_prompt,
+        default_monthly_message_limit: res.data.default_monthly_message_limit ?? 30
       });
     } catch (err) {
       console.error("Failed to fetch AI config", err);
@@ -221,7 +231,8 @@ export default function AdminDashboard() {
         temperature: localConfig.temperature,
         max_tokens: localConfig.max_tokens,
         top_p: localConfig.top_p,
-        system_prompt: localConfig.system_prompt
+        system_prompt: localConfig.system_prompt,
+        default_monthly_message_limit: localConfig.default_monthly_message_limit
       });
       setAISaveStatus(s => ({ ...s, config: "saved" }));
       fetchAIConfig();
@@ -236,6 +247,10 @@ export default function AdminDashboard() {
     setSelectedUserStats({ ...user, stats: null });
     setShowStatsModal(true);
     setStatsLoading(true);
+    setInsightsTab("stats");
+    setUserAiPrompts([]);
+    setUserAiLimitInput(user.ai_message_limit_override != null ? String(user.ai_message_limit_override) : "");
+    setUserAiLimitStatus("");
     try {
       const response = await api.get(`/auth/admin/users/${user.id}/stats`);
       setSelectedUserStats({ ...user, stats: response.data });
@@ -243,6 +258,36 @@ export default function AdminDashboard() {
       console.error("Failed to load user stats", err);
     } finally {
       setStatsLoading(false);
+    }
+  };
+
+  const fetchUserAiPrompts = async (userId: number) => {
+    setUserAiPromptsLoading(true);
+    try {
+      const res = await api.get(`/ai/admin/users/${userId}/ai-prompts`);
+      setUserAiPrompts(res.data);
+    } catch (err) {
+      console.error("Failed to load user AI prompts", err);
+    } finally {
+      setUserAiPromptsLoading(false);
+    }
+  };
+
+  const saveUserAiLimit = async (userId: number) => {
+    setUserAiLimitSaving(true);
+    try {
+      const limit = userAiLimitInput === "" ? null : parseInt(userAiLimitInput);
+      await api.post(`/ai/admin/users/${userId}/ai-limit`, { limit });
+      setUserAiLimitStatus("saved");
+      // Update local user list
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, ai_message_limit_override: limit } : u));
+      setSelectedUserStats((prev: any) => ({ ...prev, ai_message_limit_override: limit }));
+      setTimeout(() => setUserAiLimitStatus(""), 3000);
+    } catch (err) {
+      setUserAiLimitStatus("error");
+      setTimeout(() => setUserAiLimitStatus(""), 3000);
+    } finally {
+      setUserAiLimitSaving(false);
     }
   };
 
@@ -927,6 +972,27 @@ export default function AdminDashboard() {
                 </div>
 
                 <div className="space-y-6">
+                  {/* Global Message Limit */}
+                  <div className="space-y-2">
+                    <label className="text-[11px] font-bold uppercase tracking-widest text-slate-900">Monthly AI Message Limit (per user)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="1"
+                        value={localConfig.default_monthly_message_limit ?? 30}
+                        onChange={(e) => {
+                          const val = parseInt(e.target.value);
+                          if (!isNaN(val) && val >= 1) {
+                            setLocalConfig({ ...localConfig, default_monthly_message_limit: val });
+                          }
+                        }}
+                        className="w-40 bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 px-4 text-slate-900 font-bold font-mono text-sm outline-none focus:border-cyan-500 transition-all"
+                      />
+                      <span className="text-sm font-semibold text-slate-500">messages / month</span>
+                    </div>
+                    <p className="text-xs text-slate-500">Enter any number. This applies globally to all users without a custom override.</p>
+                  </div>
+
                   {/* Temperature */}
                   <div className="space-y-2">
                     <div className="flex justify-between items-center">
@@ -1206,7 +1272,6 @@ export default function AdminDashboard() {
         )}
       </AnimatePresence>
 
-      {/* User Stats Modal */}
       <AnimatePresence>
         {showStatsModal && selectedUserStats && (
           <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 pb-20 overflow-y-auto">
@@ -1238,94 +1303,191 @@ export default function AdminDashboard() {
                 </button>
               </div>
 
-              <div className="p-8">
-                {statsLoading ? (
-                  <div className="flex flex-col items-center justify-center py-10">
-                    <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
-                    <p className="text-slate-500 font-bold text-sm">Loading insights...</p>
-                  </div>
-                ) : selectedUserStats.stats ? (
-                  <div className="space-y-6">
-                    <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex items-center gap-4">
-                      <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-500">
-                        <Calendar size={20} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Account Created</div>
-                        <div className="font-bold text-slate-900 mt-0.5">{new Date(selectedUserStats.stats.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</div>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
-                        <div className="text-xs font-bold text-blue-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                          Current Streak
-                        </div>
-                        <div className="text-3xl font-black text-blue-600">
-                          {selectedUserStats.stats.current_streak} <span className="text-sm">Days</span>
-                        </div>
-                      </div>
+              {/* Tab Bar */}
+              <div className="flex gap-1 px-8 pt-6">
+                {(["stats", "prompts"] as const).map(tab => (
+                  <button
+                    key={tab}
+                    onClick={() => {
+                      setInsightsTab(tab);
+                      if (tab === "prompts" && userAiPrompts.length === 0) {
+                        fetchUserAiPrompts(selectedUserStats.id);
+                      }
+                    }}
+                    className={`px-5 py-2 rounded-xl text-xs font-bold transition-all capitalize ${
+                      insightsTab === tab ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {tab === "stats" ? "📊 Stats" : "💬 AI Prompts"}
+                  </button>
+                ))}
+              </div>
 
-                      <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
-                        <div className="text-xs font-bold text-emerald-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                          Papers Opened
-                        </div>
-                        <div className="text-3xl font-black text-emerald-600">
-                          {selectedUserStats.stats.papers_opened} <span className="text-sm">Total</span>
-                        </div>
-                      </div>
-
-                      <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
-                        <div className="text-xs font-bold text-amber-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                          Saved Papers
-                        </div>
-                        <div className="text-3xl font-black text-amber-600">
-                          {selectedUserStats.stats.saved_papers || 0} <span className="text-sm">Total</span>
-                        </div>
-                      </div>
+              <div className="p-8 max-h-[65vh] overflow-y-auto">
+                {insightsTab === "stats" ? (
+                  statsLoading ? (
+                    <div className="flex flex-col items-center justify-center py-10">
+                      <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
+                      <p className="text-slate-500 font-bold text-sm">Loading insights...</p>
                     </div>
-                    
-                    {/* AI Tutor Stats */}
-                    <div className="border-t border-slate-200 pt-6">
-                      <h3 className="text-lg font-bold text-slate-950 mb-4 flex items-center gap-2">
-                        <Bot size={20} className="text-purple-600" />
-                        AI Tutor Usage
-                      </h3>
+                  ) : selectedUserStats.stats ? (
+                    <div className="space-y-6">
+                      <div className="bg-slate-50 border border-slate-100 rounded-2xl p-5 flex items-center gap-4">
+                        <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-slate-500">
+                          <Calendar size={20} />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-slate-400 uppercase tracking-widest">Account Created</div>
+                          <div className="font-bold text-slate-900 mt-0.5">{new Date(selectedUserStats.stats.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</div>
+                        </div>
+                      </div>
+                      
                       <div className="grid grid-cols-3 gap-4">
-                        <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
-                          <div className="text-xs font-bold text-purple-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                            Questions Asked
+                        <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-blue-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Current Streak
                           </div>
-                          <div className="text-3xl font-black text-purple-600">
-                            {selectedUserStats.stats.ai_questions_asked || 0} <span className="text-sm">Total</span>
-                          </div>
-                        </div>
-
-                        <div className="bg-fuchsia-50 border border-fuchsia-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
-                          <div className="text-xs font-bold text-fuchsia-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                            Days Used
-                          </div>
-                          <div className="text-3xl font-black text-fuchsia-600">
-                            {selectedUserStats.stats.ai_days_used || 0} <span className="text-sm">Total</span>
+                          <div className="text-3xl font-black text-blue-600">
+                            {selectedUserStats.stats.current_streak} <span className="text-sm">Days</span>
                           </div>
                         </div>
 
-                        <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
-                          <div className="text-xs font-bold text-violet-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
-                            Last Used
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-emerald-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Papers Opened
                           </div>
-                          <div className="text-lg font-bold text-violet-600 mt-1">
-                            {selectedUserStats.stats.ai_last_used 
-                              ? new Date(selectedUserStats.stats.ai_last_used).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-                              : 'Never'
-                            }
+                          <div className="text-3xl font-black text-emerald-600">
+                            {selectedUserStats.stats.papers_opened} <span className="text-sm">Total</span>
+                          </div>
+                        </div>
+
+                        <div className="bg-amber-50 border border-amber-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                          <div className="text-xs font-bold text-amber-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                            Saved Papers
+                          </div>
+                          <div className="text-3xl font-black text-amber-600">
+                            {selectedUserStats.stats.saved_papers || 0} <span className="text-sm">Total</span>
                           </div>
                         </div>
                       </div>
+                      
+                      {/* AI Tutor Stats */}
+                      <div className="border-t border-slate-200 pt-6">
+                        <h3 className="text-lg font-bold text-slate-950 mb-4 flex items-center gap-2">
+                          <Bot size={20} className="text-purple-600" />
+                          AI Tutor Usage
+                        </h3>
+                        <div className="grid grid-cols-3 gap-4">
+                          <div className="bg-purple-50 border border-purple-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                            <div className="text-xs font-bold text-purple-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                              Questions Asked
+                            </div>
+                            <div className="text-3xl font-black text-purple-600">
+                              {selectedUserStats.stats.ai_questions_asked || 0} <span className="text-sm">Total</span>
+                            </div>
+                          </div>
+
+                          <div className="bg-fuchsia-50 border border-fuchsia-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                            <div className="text-xs font-bold text-fuchsia-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                              Days Used
+                            </div>
+                            <div className="text-3xl font-black text-fuchsia-600">
+                              {selectedUserStats.stats.ai_days_used || 0} <span className="text-sm">Total</span>
+                            </div>
+                          </div>
+
+                          <div className="bg-violet-50 border border-violet-100 rounded-2xl p-5 hover:scale-[1.02] transition-transform">
+                            <div className="text-xs font-bold text-violet-500/70 uppercase tracking-widest mb-2 flex items-center gap-2">
+                              Last Used
+                            </div>
+                            <div className="text-lg font-bold text-violet-600 mt-1">
+                              {selectedUserStats.stats.ai_last_used 
+                                ? new Date(selectedUserStats.stats.ai_last_used).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+                                : 'Never'
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* AI Limit Override */}
+                      <div className="border-t border-slate-200 pt-6">
+                        <h3 className="text-base font-bold text-slate-950 mb-3 flex items-center gap-2">
+                          <Bot size={17} className="text-cyan-600" />
+                          Monthly AI Message Limit Override
+                        </h3>
+                        <p className="text-xs text-slate-500 mb-4">Leave empty to use the global default. Set a number to override for this user only. Set to 0 to completely disable AI access.</p>
+                        <div className="flex gap-3 items-center">
+                          <input
+                            type="number"
+                            min="0"
+                            placeholder={`Global default (${aiConfig?.default_monthly_message_limit ?? 30})`}
+                            value={userAiLimitInput}
+                            onChange={(e) => setUserAiLimitInput(e.target.value)}
+                            className="flex-1 bg-slate-50 border-2 border-slate-200 rounded-xl py-2.5 px-4 text-slate-900 font-bold text-sm outline-none focus:border-cyan-500 transition-all placeholder:text-slate-300"
+                          />
+                          <button
+                            onClick={() => saveUserAiLimit(selectedUserStats.id)}
+                            disabled={userAiLimitSaving}
+                            className="flex items-center gap-2 px-5 py-2.5 bg-cyan-500 text-white font-bold text-sm rounded-xl hover:bg-cyan-600 transition-all disabled:opacity-40 active:scale-95"
+                          >
+                            {userAiLimitSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                            {userAiLimitStatus === "saved" ? "✓ Saved!" : userAiLimitStatus === "error" ? "✗ Error" : "Save Limit"}
+                          </button>
+                          {userAiLimitInput !== "" && (
+                            <button
+                              onClick={() => { setUserAiLimitInput(""); saveUserAiLimit(selectedUserStats.id); }}
+                              className="px-4 py-2.5 text-xs font-bold bg-slate-100 text-slate-500 rounded-xl hover:bg-slate-200 transition-all"
+                            >
+                              Reset to Global
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="text-center text-red-500 font-bold py-10">Failed to load statistics.</div>
+                  )
                 ) : (
-                  <div className="text-center text-red-500 font-bold py-10">Failed to load statistics.</div>
+                  /* Prompts Tab */
+                  <div>
+                    {userAiPromptsLoading ? (
+                      <div className="flex flex-col items-center justify-center py-10">
+                        <Loader2 className="animate-spin text-blue-600 mb-4" size={32} />
+                        <p className="text-slate-500 font-bold text-sm">Loading prompts...</p>
+                      </div>
+                    ) : userAiPrompts.length === 0 ? (
+                      <div className="text-center py-10">
+                        <Bot size={36} className="text-slate-300 mx-auto mb-3" />
+                        <p className="text-slate-400 font-bold">No AI prompts found for this user.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {userAiPrompts.map((p: any, i: number) => (
+                          <div key={i} className="border border-slate-100 rounded-2xl overflow-hidden">
+                            <div className="bg-slate-50 px-5 py-3 flex justify-between items-center">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">#{userAiPrompts.length - i}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-widest text-purple-500 bg-purple-50 px-2 py-0.5 rounded">{p.model_used}</span>
+                                {p.response_time_ms && <span className="text-[10px] text-slate-400">{p.response_time_ms}ms</span>}
+                              </div>
+                              <span className="text-[10px] text-slate-400">{new Date(p.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                            </div>
+                            <div className="p-5 space-y-3">
+                              <div>
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">Question</div>
+                                <p className="text-sm font-semibold text-slate-800">{p.question}</p>
+                              </div>
+                              <div>
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-1">AI Response</div>
+                                <p className="text-sm text-slate-600 leading-relaxed">{p.response.slice(0, 300)}{p.response.length > 300 ? '...' : ''}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </motion.div>

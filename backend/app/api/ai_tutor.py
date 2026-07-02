@@ -9,6 +9,7 @@ import json
 import logging
 import os
 import time
+from datetime import datetime
 
 from app.db.session import get_db
 from app.models.ai_memory import UserMemory, AIInteraction
@@ -137,6 +138,28 @@ async def chat(
     Streaming chat endpoint. Returns SSE text/event-stream.
     Each chunk: data: {"type": "content"|"status"|"done"|"error", "data": "..."}
     """
+    # 0. Check Usage Limit
+    if current_user.role != "admin":
+        # Get start of current month
+        today = datetime.now()
+        start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        # Count interactions this month
+        interactions_count = db.query(AIInteraction).filter(
+            AIInteraction.user_id == current_user.id,
+            AIInteraction.created_at >= start_of_month
+        ).count()
+        
+        # Get limit
+        if current_user.ai_message_limit_override is not None:
+            limit = current_user.ai_message_limit_override
+        else:
+            config = db.query(AIConfiguration).first()
+            limit = config.default_monthly_message_limit if config else 30
+            
+        if limit != -1 and interactions_count >= limit:
+            raise HTTPException(status_code=403, detail="Monthly AI message limit reached.")
+
     start_time = time.time()
     
     # 1. Extract memory from this message (cheap regex — no LLM call)
@@ -163,6 +186,36 @@ async def chat(
             "Connection": "keep-alive",
         },
     )
+
+
+@router.get("/limit-status")
+def get_limit_status(
+    db: Session = Depends(get_db),
+    current_user: UserModel = Depends(get_current_user),
+):
+    """Return the user's AI message limit status for the current month."""
+    if current_user.role == "admin":
+        return {"used": 0, "limit": -1, "remaining": -1}
+        
+    today = datetime.now()
+    start_of_month = today.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+    
+    used = db.query(AIInteraction).filter(
+        AIInteraction.user_id == current_user.id,
+        AIInteraction.created_at >= start_of_month
+    ).count()
+    
+    if current_user.ai_message_limit_override is not None:
+        limit = current_user.ai_message_limit_override
+    else:
+        config = db.query(AIConfiguration).first()
+        limit = config.default_monthly_message_limit if config else 30
+        
+    return {
+        "used": used,
+        "limit": limit,
+        "remaining": max(0, limit - used) if limit != -1 else -1
+    }
 
 
 @router.get("/memory")
@@ -203,6 +256,11 @@ class AIConfigUpdate(BaseModel):
     max_tokens: Optional[int] = None
     top_p: Optional[float] = None
     system_prompt: Optional[str] = None
+    default_monthly_message_limit: Optional[int] = None
+
+
+class UserLimitUpdate(BaseModel):
+    limit: Optional[int] = None
 
 
 def require_admin(current_user: UserModel = Depends(get_current_user)):
@@ -235,7 +293,8 @@ def get_ai_config(db: Session = Depends(get_db), current_user: UserModel = Depen
         "temperature": config.temperature,
         "max_tokens": config.max_tokens,
         "top_p": config.top_p,
-        "system_prompt": config.system_prompt
+        "system_prompt": config.system_prompt,
+        "default_monthly_message_limit": config.default_monthly_message_limit
     }
 
 
@@ -274,6 +333,9 @@ def update_ai_config(
     if config.system_prompt is not None:
         db_config.system_prompt = config.system_prompt
         updated.append("system_prompt → updated")
+    if config.default_monthly_message_limit is not None:
+        db_config.default_monthly_message_limit = config.default_monthly_message_limit
+        updated.append(f"default_monthly_message_limit → {config.default_monthly_message_limit}")
     
     db.commit()
     
@@ -312,3 +374,23 @@ async def ai_health_check(db: Session = Depends(get_db), current_user: UserModel
             "response_time_ms": None,
             "error": str(e),
         }
+
+
+@router.get("/admin/users/{user_id}/ai-prompts")
+def get_user_ai_prompts(user_id: int, db: Session = Depends(get_db), current_user: UserModel = Depends(require_admin)):
+    """Return the user's AI interaction history."""
+    interactions = db.query(AIInteraction).filter(AIInteraction.user_id == user_id).order_by(AIInteraction.created_at.desc()).limit(100).all()
+    return interactions
+
+
+@router.post("/admin/users/{user_id}/ai-limit")
+def update_user_ai_limit(user_id: int, request: UserLimitUpdate, db: Session = Depends(get_db), current_user: UserModel = Depends(require_admin)):
+    """Update a specific user's AI message limit override."""
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    user.ai_message_limit_override = request.limit
+    db.commit()
+    
+    return {"message": "User limit updated", "limit": request.limit}

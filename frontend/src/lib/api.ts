@@ -25,18 +25,23 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (typeof window !== 'undefined') {
-      // Handle 401 (Unauthorized) or 403 (Forbidden - blocked/deleted)
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      const status = error.response?.status;
+      const detail = error.response?.data?.detail;
+
+      // Handle 401 (Unauthorized - expired token)
+      if (status === 401) {
         localStorage.removeItem('token');
         localStorage.removeItem('prepcat_user');
-        
-        // Check if the error is about being blocked or deleted
-        const detail = error.response?.data?.detail;
-        if (detail && (detail.includes('blocked') || detail.includes('deleted'))) {
+        window.location.href = '/login';
+      }
+      
+      // Handle 403 only if it's about being blocked or deleted (not AI limits)
+      if (status === 403 && detail && (detail.includes('blocked') || detail.includes('deleted') || detail === 'Admin access required')) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('prepcat_user');
+        if (detail.includes('blocked') || detail.includes('deleted')) {
           alert('Your account has been blocked or deleted. Please contact admin.');
         }
-        
-        // Redirect to login
         window.location.href = '/login';
       }
     }

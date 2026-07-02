@@ -9,6 +9,7 @@ class AIConfiguration(Base):
     temperature = Column(Float, default=0.3)
     max_tokens = Column(Integer, default=600)
     top_p = Column(Float, default=0.8)
+    default_monthly_message_limit = Column(Integer, default=30)
     system_prompt = Column(Text, nullable=False, default=(
         "You are PrepCat AI, an expert tutor for Pakistani medical entrance exams (MDCAT and NUMS). "
         "You are friendly, welcoming, encouraging, and provide PRECISE, CONCISE, and ACCURATE answers.\n\n"
