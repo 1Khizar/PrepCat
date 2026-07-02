@@ -55,6 +55,7 @@ export default function AdminDashboard() {
     max_tokens: number;
     top_p: number;
     system_prompt: string;
+    default_monthly_message_limit: number;
   } | null>(null);
   const [aiConfigLoading, setAIConfigLoading] = useState(false);
   const [aiHealth, setAIHealth] = useState<{ status: string; model: string; response_time_ms: number | null; snippet?: string; error?: string } | null>(null);
