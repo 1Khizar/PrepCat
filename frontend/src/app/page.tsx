@@ -1,11 +1,13 @@
 "use client";
+import AnimatedMCQMockup from "@/components/AnimatedMCQMockup";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
   XCircle,
   ChevronRight,
+  ChevronDown,
   FileText,
   Brain,
   BarChart3,
@@ -26,12 +28,17 @@ import {
   Bookmark
 } from "lucide-react";
 import Link from "next/link";
-import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 
 export default function Home() {
   const [demoStep, setDemoStep] = useState(0); // 0: Question, 1: Result
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [aiTutorStage, setAiTutorStage] = useState<"typing-question" | "promoting-question" | "thinking" | "typing-answer" | "pausing">("typing-question");
+  const [aiTutorIndex, setAiTutorIndex] = useState(0);
+  const [aiTutorQuestion, setAiTutorQuestion] = useState("");
+  const [aiTutorAnswerText, setAiTutorAnswerText] = useState("");
+  const [faqOpenIndex, setFaqOpenIndex] = useState<number | null>(0);
 
   const mcqData = {
     question: "What is the primary function of Mitochondria in a human cell?",
@@ -45,6 +52,103 @@ export default function Home() {
     explanation: "Mitochondria are known as the 'powerhouse of the cell' because they generate most of the cell's supply of adenosine triphosphate (ATP), used as a source of chemical energy."
   };
 
+  const aiTutorThreads = [
+    {
+      question: "What is the role of ATP in muscle contraction?",
+      answer: [
+        "ATP powers the myosin cross-bridge cycle in three ways:",
+        "1. It energizes the myosin head so it can bind actin.",
+        "2. It detaches myosin after the power stroke.",
+        "3. It helps relax the muscle by pumping Ca²⁺ back into the SR.",
+        "📌 MDCAT Tip: Without ATP, muscles stay locked. That is rigor mortis."
+      ].join("\n")
+    },
+    {
+      question: "Why is the rough ER important in cells?",
+      answer: [
+        "The rough ER is studded with ribosomes and makes proteins for export.",
+        "1. It helps fold and transport newly made proteins.",
+        "2. It is abundant in secretory cells like pancreas cells.",
+        "📌 MDCAT Tip: Rough ER = protein factory for secretion."
+      ].join("\n")
+    },
+    {
+      question: "How does osmosis move water in a cell?",
+      answer: [
+        "Osmosis is the movement of water across a selectively permeable membrane.",
+        "1. Water moves from dilute solution to concentrated solution.",
+        "2. It continues until both sides are balanced.",
+        "📌 MDCAT Tip: Water follows the solute gradient."
+      ].join("\n")
+    },
+    {
+      question: "What is the function of hemoglobin?",
+      answer: [
+        "Hemoglobin transports oxygen from the lungs to body tissues.",
+        "1. Each molecule can carry four oxygen molecules.",
+        "2. It also helps carry a small amount of carbon dioxide.",
+        "📌 MDCAT Tip: Hemoglobin = oxygen transport protein in RBCs."
+      ].join("\n")
+    },
+    {
+      question: "Why do enzymes speed up reactions?",
+      answer: [
+        "Enzymes speed up reactions by lowering activation energy.",
+        "1. They make the reaction easier to start.",
+        "2. They are not used up in the reaction.",
+        "📌 MDCAT Tip: Enzymes are biological catalysts."
+      ].join("\n")
+    }
+  ];
+
+  const currentAiTutorThread = aiTutorThreads[aiTutorIndex];
+
+  useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    if (aiTutorStage === "typing-question") {
+      setAiTutorQuestion("");
+      setAiTutorAnswerText("");
+
+      const typeQuestion = (index: number) => {
+        setAiTutorQuestion(currentAiTutorThread.question.slice(0, index));
+
+        if (index < currentAiTutorThread.question.length) {
+          timers.push(setTimeout(() => typeQuestion(index + 1), 28));
+          return;
+        }
+
+        timers.push(setTimeout(() => setAiTutorStage("promoting-question"), 250));
+      };
+
+      timers.push(setTimeout(() => typeQuestion(1), 220));
+    } else if (aiTutorStage === "promoting-question") {
+      timers.push(setTimeout(() => setAiTutorStage("thinking"), 550));
+    } else if (aiTutorStage === "thinking") {
+      timers.push(setTimeout(() => setAiTutorStage("typing-answer"), 700));
+    } else if (aiTutorStage === "typing-answer") {
+      const typeAnswer = (index: number) => {
+        setAiTutorAnswerText(currentAiTutorThread.answer.slice(0, index));
+
+        if (index < currentAiTutorThread.answer.length) {
+          timers.push(setTimeout(() => typeAnswer(index + 1), 18));
+          return;
+        }
+
+        timers.push(setTimeout(() => setAiTutorStage("pausing"), 2200));
+      };
+
+      timers.push(setTimeout(() => typeAnswer(1), 180));
+    } else {
+      timers.push(setTimeout(() => {
+        setAiTutorIndex((value) => (value + 1) % aiTutorThreads.length);
+        setAiTutorStage("typing-question");
+      }, 900));
+    }
+
+    return () => timers.forEach(clearTimeout);
+  }, [aiTutorStage, aiTutorIndex]);
+
   const handleAnswer = (id: string) => {
     setSelectedOption(id);
     setDemoStep(1);
@@ -55,182 +159,106 @@ export default function Home() {
       <Navbar />
 
       <main>
-        {/* SECTION 1: PREMIUM FULL-SCREEN HERO */}
-        <section className="relative overflow-hidden bg-white pt-24 lg:h-screen flex items-center">
-          {/* Clean White Background (no blobs) */}
-
-          <div className="relative z-10 w-full">
-            {/* Main hero content */}
-            <div className="container">
-
-              {/* Desktop: 2-col grid; Mobile: single col */}
-              <div className="grid lg:grid-cols-2 gap-12 items-center">
-
-                {/* Left col — always visible */}
-                <div>
-                  {/* Eyebrow badge */}
-                  <motion.div
-                    initial={{ opacity: 1, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5 }}
-                    className="flex items-center gap-3 mb-6 md:mb-4"
-                  >
-                    <div className="w-8 h-[2px] bg-blue-600 rounded-full"></div>
-                    <span className="text-xs md:text-sm font-bold uppercase tracking-widest text-blue-600">
-                      MDCAT &amp; NUMS Past Papers + AI Tutor
-                    </span>
-                  </motion.div>
-
-                  {/* Main heading */}
-                  <motion.h1
-                    initial={{ opacity: 1, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.1 }}
-                    className="text-[2.5rem] sm:text-5xl lg:text-7xl font-extrabold leading-[1.08] tracking-tight text-slate-900 mb-8 md:mb-5 mt-0"
-                  >
-                    Study Smarter.<br />
-                    <span className="text-blue-600">Score Higher.</span>
-                  </motion.h1>
-
-                  {/* Subtitle */}
-                  <motion.p
-                    initial={{ opacity: 1, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.2 }}
-                    className="text-base md:text-xl text-slate-500 font-medium leading-relaxed mb-7 max-w-sm md:max-w-lg"
-                  >
-                    Practice real past papers from MDCAT & NUMS. Get instant answers from your AI Tutor whenever you&apos;re stuck.
-                  </motion.p>
-
-                  {/* CTA Buttons */}
-                  <motion.div
-                    initial={{ opacity: 1, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6, delay: 0.3 }}
-                    className="flex gap-3 mb-6"
-                  >
-                    <Link href="/register" className="btn-amazing !py-4 !px-5 flex-1 sm:flex-none sm:!px-10 text-center text-[15px]">
-                      Create Account
-                    </Link>
-                    <Link href="/login" className="btn-amazing-outline !py-4 !px-5 flex-1 sm:flex-none sm:!px-10 text-center text-[15px]">
-                      Login
-                    </Link>
-                  </motion.div>
-
-
-                  {/* Animated stat pills — mobile only - REMOVED */}
-                </div>
-
-                {/* Right col — product mockup */}
-                <div className="relative hidden lg:block">
-                  {/* Browser chrome */}
-                  <div className="relative z-10 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden max-w-[480px] ml-auto">
-                    {/* Browser top bar */}
-                    <div className="flex items-center gap-2 px-4 py-2 bg-slate-50 border-b border-slate-200">
-                      <div className="flex gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-red-400" />
-                        <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                        <div className="w-2 h-2 rounded-full bg-green-400" />
-                      </div>
-                      <div className="flex-1 mx-3 bg-white border border-slate-200 rounded-md px-3 py-0.5 text-[10px] text-slate-400 font-medium">
-                        prepcat.app/practice
-                      </div>
-                    </div>
-
-                    {/* App content */}
-                    <div className="p-4 bg-slate-50">
-                      {/* Header row */}
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-2">
-                          <div className="w-5 h-5 bg-blue-600 rounded-md flex items-center justify-center">
-                            <FileText size={10} className="text-white" />
-                          </div>
-                          <span className="text-xs font-black text-slate-700">MDCAT 2023 — Biology</span>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-400 bg-white px-2 py-0.5 rounded-lg border border-slate-200">Q 14 / 220</span>
-                      </div>
-
-                      {/* Question card */}
-                      <div className="bg-white rounded-xl p-3 border border-slate-200 shadow-sm mb-2">
-                        <p className="text-xs font-bold text-slate-800 leading-snug mb-3">
-                          Which of the following best describes the role of ATP synthase during oxidative phosphorylation?
-                        </p>
-                        <div className="space-y-1.5">
-                          {[
-                            { id: "A", text: "Transfers electrons to oxygen" },
-                            { id: "B", text: "Synthesizes ATP using proton gradient", correct: true },
-                            { id: "C", text: "Breaks down glucose into pyruvate" },
-                            { id: "D", text: "Pumps sodium ions across membrane" },
-                          ].map((opt) => (
-                            <div
-                              key={opt.id}
-                              className={`flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-xs font-semibold ${
-                                opt.correct
-                                  ? "bg-blue-600 border-blue-600 text-white"
-                                  : "bg-slate-50 border-slate-200 text-slate-600"
-                              }`}
-                            >
-                              <span className={`w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-black flex-shrink-0 ${opt.correct ? "bg-white text-blue-600" : "bg-white text-slate-500 border border-slate-200"}`}>{opt.id}</span>
-                              {opt.text}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Explanation strip */}
-                      <div className="bg-blue-50 border border-blue-200 rounded-xl p-2.5 flex gap-2 items-start">
-                        <CheckCircle2 size={13} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                        <p className="text-[11px] text-blue-800 font-medium leading-relaxed">
-                          <strong>Correct!</strong> ATP synthase uses the proton gradient across the inner mitochondrial membrane to drive ATP synthesis.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
-            </div>
-
-            {/* Scroll indicator — mobile only */}
-            <motion.div
-              animate={{ y: [0, 7, 0] }}
-              transition={{ duration: 1.6, repeat: Infinity }}
-              className="pb-5 flex flex-col items-center gap-1 lg:hidden"
-            >
-              <span className="text-[9px] font-bold uppercase tracking-widest text-slate-300">Scroll</span>
-              <div className="w-5 h-8 border-2 border-slate-200 rounded-full flex items-start justify-center pt-1">
+        {/* SECTION 1: ENGAGING SPLIT HERO */}
+        <section className="relative overflow-hidden bg-slate-50 pt-20 lg:pt-24 pb-10 lg:pb-16 flex items-center min-h-[85vh]">
+          {/* Enhanced Background Elements */}
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(37,99,235,0.04)_0%,transparent_50%),radial-gradient(circle_at_80%_80%,rgba(29,78,216,0.04)_0%,transparent_50%)]"></div>
+          
+          <div className="container relative z-10">
+            <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
+              
+              {/* Main Copy & CTAs */}
+              <div className="flex flex-col items-start text-left space-y-8 max-w-2xl">
+                {/* Eyebrow badge */}
                 <motion.div
-                  animate={{ y: [0, 12, 0] }}
-                  transition={{ duration: 1.6, repeat: Infinity }}
-                  className="w-1.5 h-1.5 bg-blue-600 rounded-full"
-                />
-              </div>
-            </motion.div>
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5 }}
+                  className="flex items-center gap-4"
+                >
+                  <div className="w-8 h-[2px] bg-blue-600"></div>
+                  <span className="text-[13px] font-black uppercase tracking-[0.15em] text-blue-600">
+                    MDCAT & NUMS PAST PAPERS + AI TUTOR
+                  </span>
+                </motion.div>
 
+                {/* Main heading */}
+                <motion.h1
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7, delay: 0.1 }}
+                  style={{ fontFamily: 'var(--font-bricolage)', fontWeight: 900, lineHeight: 1.05, letterSpacing: '-0.02em' }}
+                  className="text-[3.5rem] sm:text-[4rem] lg:text-[4.5rem] text-slate-900"
+                >
+                  Study Smarter.<br/>
+                  <span className="italic text-blue-600">
+                    Score Higher.
+                  </span>
+                </motion.h1>
+
+                {/* Subtitle */}
+                <motion.p
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.2 }}
+                  className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed max-w-lg"
+                >
+                  Practice real past papers from MDCAT & NUMS. Get instant answers from your AI Tutor whenever you're stuck.
+                </motion.p>
+
+                {/* CTA Buttons */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-start"
+                >
+                  <Link href="/register" className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3.5 rounded-2xl font-bold text-base transition-all shadow-lg shadow-blue-600/20 flex items-center justify-center gap-2 hover:-translate-y-0.5">
+                    Create Account
+                  </Link>
+                  <Link href="/login" className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-10 py-3.5 rounded-2xl font-bold text-base transition-all shadow-sm flex items-center justify-center gap-2 hover:-translate-y-0.5">
+                    Login
+                  </Link>
+                </motion.div>
+              </div>
+
+              {/* Animated Mockup on the Right */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="relative w-full flex items-center justify-center lg:justify-end"
+              >
+                <div className="w-full scale-90 sm:scale-95 lg:scale-90 origin-center lg:origin-right max-w-[600px]">
+                  <AnimatedMCQMockup />
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
         {/* SECTION 2: CORE FEATURES GRID */}
         <section id="features" className="py-6 md:py-10 relative bg-white border-y border-slate-100">
           <div className="container">
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
               {[
-                { title: "Past Papers", subtitle: "MDCAT & NUMS", icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50" },
-                { title: "AI Tutor", subtitle: "Instant Answers", icon: Bot, color: "text-indigo-600", bg: "bg-indigo-50" },
-                { title: "Daily Streak", subtitle: "Build Habits", icon: Flame, color: "text-orange-500", bg: "bg-orange-50" },
-                { title: "My Progress", subtitle: "Track Growth", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50" }
+                { title: "Past Papers", subtitle: "MDCAT & NUMS", icon: BookOpen, color: "text-blue-600", bg: "bg-blue-50/80" },
+                { title: "AI Tutor", subtitle: "Instant Answers", icon: Bot, color: "text-indigo-600", bg: "bg-indigo-50/80" },
+                { title: "Daily Streak", subtitle: "Build Habits", icon: Flame, color: "text-orange-500", bg: "bg-orange-50/80" },
+                { title: "My Progress", subtitle: "Track Growth", icon: TrendingUp, color: "text-emerald-600", bg: "bg-emerald-50/80" }
               ].map((stat, i) => (
                 <motion.div
-                  initial={{ opacity: 1, y: 20 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.1 }}
+                  transition={{ delay: i * 0.1, duration: 0.5 }}
+                  viewport={{ once: true }}
                   key={i}
-                  className="amazing-card !p-4 md:!p-8 text-center hover:-translate-y-2 transition-all duration-300 shadow-sm hover:shadow-xl border border-slate-100 group"
+                  className="bg-white p-6 md:p-8 rounded-[1.75rem] border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] text-center flex flex-col items-center hover:-translate-y-1.5 transition-all duration-300 hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] group"
                 >
-                  <div className={`w-12 h-12 md:w-16 md:h-16 ${stat.bg} ${stat.color} rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-5 group-hover:scale-110 transition-transform`}>
-                    <stat.icon size={22} strokeWidth={2} />
+                  <div className={`w-16 h-16 md:w-20 md:h-20 ${stat.bg} ${stat.color} rounded-2xl md:rounded-3xl flex items-center justify-center mb-5 md:mb-6 group-hover:scale-105 transition-transform duration-300`}>
+                    <stat.icon size={26} strokeWidth={2} />
                   </div>
-                  <h3 className="text-base md:text-xl font-black text-slate-900 mb-1">{stat.title}</h3>
-                  <p className="text-[11px] md:text-xs font-bold text-slate-500">{stat.subtitle}</p>
+                  <h3 className="text-lg md:text-xl font-extrabold text-slate-900 mb-1.5 tracking-tight">{stat.title}</h3>
+                  <p className="text-[13px] md:text-[14px] font-semibold text-slate-500">{stat.subtitle}</p>
                 </motion.div>
               ))}
             </div>
@@ -273,18 +301,22 @@ export default function Home() {
                   <div className="absolute top-0 right-0 w-32 h-32 bg-blue-600/10 blur-3xl rounded-full" />
 
                   <div className="space-y-6 relative z-10">
-                    <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                      <div className="flex items-center gap-3 mb-3 text-slate-400 font-bold text-[10px] uppercase tracking-widest">
-                        <XCircle size={12} /> The Old Way
+                    <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
+                      <div className="flex items-center gap-2 mb-3 text-slate-400 font-bold text-[11px] uppercase tracking-widest">
+                        <XCircle size={14} /> The Old Way
                       </div>
-                      <p className="text-slate-400 font-bold line-through italic text-sm">Expensive academies, heavy bags, and random PDFs with no proper keys.</p>
+                      <p className="text-slate-500 font-medium text-[15px] leading-relaxed">
+                        <span className="line-through decoration-slate-300">Expensive academies, heavy bags, and random PDFs with no proper keys.</span>
+                      </p>
                     </div>
 
-                    <div className="p-6 bg-blue-50 rounded-2xl border border-blue-600/20 animate-shimmer">
-                      <div className="flex items-center gap-3 mb-3 text-blue-600 font-bold text-[10px] uppercase tracking-widest">
-                        <Sparkles size={12} /> The PrepCat Way
+                    <div className="p-6 bg-blue-50/80 rounded-2xl border border-blue-100 shadow-[0_8px_30px_rgb(37,99,235,0.04)]">
+                      <div className="flex items-center gap-2 mb-3 text-blue-600 font-bold text-[11px] uppercase tracking-widest">
+                        <Sparkles size={14} /> The PrepCat Way
                       </div>
-                      <p className="text-blue-900 font-bold text-lg italic leading-tight">"All your preparation, tracked, analyzed, and perfected in one tiny browser tab."</p>
+                      <p className="text-blue-950 font-semibold text-[17px] leading-snug">
+                        "All your preparation, tracked, analyzed, and perfected in one tiny browser tab."
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -376,176 +408,101 @@ export default function Home() {
 
               {/* Right: Chat UI mockup */}
               <div className="relative">
-                <div className="bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-2xl">
-                  {/* Chat header */}
-                  <div className="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
-                    <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
-                      <Bot size={16} className="text-white" />
+                <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl">
+                  <div className="flex items-center justify-between gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center">
+                        <Bot size={16} className="text-white" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-black text-slate-900">PrepCat AI Tutor</p>
+                        <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
+                          Online and answering perfectly
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-sm font-black text-slate-900">PrepCat AI Tutor</p>
-                      <p className="text-[10px] text-emerald-500 font-bold flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full inline-block animate-pulse"></span>
-                        Online
-                      </p>
-                    </div>
+
+                    <span className="rounded-full border border-blue-100 bg-blue-50 px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-blue-600">
+                      Live demo
+                    </span>
                   </div>
 
-                  {/* Messages */}
-                  <div className="p-5 space-y-4">
-                    {/* User message */}
-                    <div className="flex justify-end">
-                      <div className="bg-blue-600 text-white rounded-2xl rounded-tr-sm px-4 py-3 text-sm font-semibold max-w-[78%] leading-relaxed shadow-sm">
-                        What is the role of ATP in muscle contraction?
+                  <div className="p-5 space-y-4 bg-gradient-to-b from-white via-blue-50/30 to-white">
+                      <div className="flex justify-end">
+                        {aiTutorStage !== "typing-question" ? (
+                          <motion.div
+                            initial={{ opacity: 0, y: 18, scale: 0.98 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            transition={{ duration: 0.35 }}
+                            className="max-w-[88%] rounded-2xl rounded-tr-sm bg-blue-600 px-4 py-3 text-sm font-semibold leading-relaxed text-white shadow-sm"
+                          >
+                            <span>{currentAiTutorThread.question}</span>
+                          </motion.div>
+                        ) : null}
                       </div>
-                    </div>
 
-                    {/* AI response */}
-                    <div className="flex gap-3 items-start">
-                      <div className="w-7 h-7 bg-blue-50 border border-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
-                        <Bot size={14} className="text-blue-600" />
-                      </div>
-                      <div className="bg-slate-50 border border-slate-200 rounded-2xl rounded-tl-sm px-4 py-3 text-sm text-slate-700 font-medium max-w-[85%] leading-relaxed space-y-2">
-                        <p>ATP powers the <strong className="text-slate-900">myosin cross-bridge cycle</strong> in three ways:</p>
-                        <ol className="list-decimal list-inside space-y-1 text-slate-600 text-xs">
-                          <li>Energizes myosin head to bind actin</li>
-                          <li>Detaches the head after the power stroke</li>
-                          <li>Pumps Ca²⁺ back into the SR to relax muscle</li>
-                        </ol>
-                        <p className="text-[11px] text-blue-600 font-bold pt-1">📌 MDCAT Tip: Without ATP, muscles stay locked — this is rigor mortis!</p>
-                      </div>
-                    </div>
+                      <div className="flex gap-3 items-start">
+                        <div className="mt-1 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-blue-50">
+                          <Bot size={14} className="text-blue-600" />
+                        </div>
 
-                    {/* Input box */}
-                    <div className="flex items-center gap-2 mt-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
-                      <span className="text-slate-400 text-sm flex-1 font-medium">Ask anything about MDCAT...</span>
-                      <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shadow-sm">
-                        <ChevronRight size={14} className="text-white" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                        <div className="min-h-[190px] flex-1">
+                          <AnimatePresence mode="wait">
+                            {aiTutorStage === "thinking" ? (
+                              <motion.div
+                                key="thinking"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="rounded-2xl rounded-tl-sm border border-slate-200 bg-white px-4 py-4 shadow-sm"
+                              >
+                                <div className="flex items-center gap-2 text-sm font-bold text-slate-500">
+                                  Thinking
+                                  <span className="flex items-center gap-1">
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.2s]" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce [animation-delay:-0.1s]" />
+                                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-bounce" />
+                                  </span>
+                                </div>
+                              </motion.div>
+                            ) : null}
 
-
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 6: INTERACTIVE DEMO */}
-        <section id="demo" className="py-8 md:py-16 relative overflow-hidden bg-white">
-          {/* Soft Background Accents */}
-          <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(37,99,235,0.05),transparent_70%)]" />
-
-          <div className="container relative z-10">
-            <div className="grid lg:grid-cols-2 gap-10 items-center">
-              <div className="space-y-4 text-left lg:text-left">
-                <div className="eyebrow-amazing !py-1 !px-3 !text-[10px]">Interactive Demo</div>
-                <h2 className="text-3xl md:text-5xl font-bold leading-tight text-gradient">Experience the <br /> <span className="text-blue-600">Clean Interface</span></h2>
-                <p className="text-base text-slate-500 font-medium leading-relaxed max-w-md mx-auto lg:mx-0">
-                  We stripped away the clutter. Focus entirely on the question, get the answer, and read the explanation.
-                </p>
-              </div>
-
-              <div className="amazing-card !bg-white !p-6 md:!p-10 shadow-[0_20px_80px_rgba(37,99,235,0.1)] border-2 border-blue-50">
-                <AnimatePresence mode="wait">
-                  {demoStep === 0 ? (
-                    <motion.div
-                      key="q"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="space-y-6"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Biology • Cell Structure</div>
-                        <div className="w-12 h-1 bg-slate-100 rounded-full overflow-hidden">
-                          <div className="w-1/3 h-full bg-blue-600" />
+                            {aiTutorStage === "typing-answer" || aiTutorStage === "pausing" ? (
+                              <motion.div
+                                key="answer"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                className="rounded-2xl rounded-tl-sm border border-blue-100 bg-blue-50/70 px-4 py-4 shadow-sm"
+                              >
+                                <pre className="whitespace-pre-wrap text-sm leading-relaxed text-slate-700 font-medium font-sans">{aiTutorAnswerText}</pre>
+                              </motion.div>
+                            ) : null}
+                          </AnimatePresence>
                         </div>
                       </div>
-                      <h4 className="text-lg md:text-xl font-bold leading-tight text-slate-900">{mcqData.question}</h4>
-                      <div className="grid gap-2">
-                        {mcqData.options.map(opt => (
-                          <button
-                            key={opt.id}
-                            onClick={() => handleAnswer(opt.id)}
-                            className="bg-slate-50 border-2 border-slate-100 p-3 rounded-lg flex items-center gap-3 hover:border-blue-600 hover:bg-blue-50 transition-all text-left group"
-                          >
-                            <span className="w-7 h-7 rounded-md bg-white flex items-center justify-center font-bold shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-colors text-xs">{opt.id}</span>
-                            <span className="font-bold text-slate-700 text-[13px]">{opt.text}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      key="r"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="space-y-6"
-                    >
-                      <div className="flex items-center gap-4">
-                        {selectedOption === mcqData.correctId ? (
-                          <div className="flex items-center gap-3 text-blue-600 font-bold text-lg italic tracking-tighter">
-                            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center shadow-inner">
-                              <CheckCircle2 size={18} />
-                            </div>
-                            Brilliant!
-                          </div>
+                  </div>
+
+                  {/* Search Bar / Input Mockup */}
+                  <div className="border-t border-slate-100 bg-white p-4">
+                    <div className="flex items-center gap-3 bg-slate-50 border border-slate-200 rounded-xl px-4 py-3">
+                      <div className="text-slate-400 text-sm flex-1 truncate">
+                        {aiTutorStage === "typing-question" ? (
+                          <>
+                            <span className="text-slate-800">{aiTutorQuestion}</span>
+                            <span className="inline-block w-0.5 h-4 ml-1 align-middle bg-blue-600 animate-pulse"></span>
+                          </>
                         ) : (
-                          <div className="flex items-center gap-3 text-slate-500 font-bold text-lg italic tracking-tighter">
-                            <div className="w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center shadow-inner">
-                              <XCircle size={18} />
-                            </div>
-                            Not quite.
-                          </div>
+                          "Ask a question..."
                         )}
                       </div>
-
-                      <div className="p-5 bg-slate-50 rounded-xl space-y-3 border border-slate-100 border-l-4 border-l-blue-600">
-                        <div className="text-[9px] font-bold uppercase tracking-widest text-slate-400">Clinical Explanation</div>
-                        <p className="text-slate-600 font-bold text-sm leading-relaxed">{mcqData.explanation}</p>
+                      <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
                       </div>
-
-                      <button
-                        onClick={() => { setDemoStep(0); setSelectedOption(null); }}
-                        className="btn-amazing-outline !py-2.5 w-full !text-sm"
-                      >
-                        Try Next Question
-                        <ChevronRight size={16} />
-                      </button>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 7: FINAL CTA (PREMIUM LIGHT) */}
-        <section className="py-10 md:py-20 bg-white relative overflow-hidden">
-          {/* Mesh Gradient Background */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1000px] h-[1000px] bg-gradient-to-br from-blue-600/10 via-blue-800/5 to-transparent rounded-full blur-[120px] -z-0" />
-
-          <div className="container relative z-10">
-            <div className="amazing-card !bg-white/80 !backdrop-blur-3xl !p-6 md:!p-24 text-center border-2 border-slate-100 shadow-[0_50px_100px_rgba(0,0,0,0.05)] rounded-[2.5rem] md:rounded-[4rem] max-w-5xl mx-auto overflow-hidden">
-              <div className="relative z-10 space-y-6 max-w-4xl mx-auto">
-                <div className="eyebrow-amazing mx-auto italic">Limited Beta Early Access</div>
-                <h2 className="text-3xl md:text-7xl font-bold tracking-tighter leading-[1.1] text-gradient">Your future in white coat <br className="hidden md:block" /> starts here.</h2>
-                <p className="text-lg md:text-xl text-slate-500 font-medium">
-                  Join the most advanced medical test preparation platform in Pakistan. <br className="hidden md:block" /> Secure early access as a founding beta member.
-                </p>
-
-                <div className="flex flex-col items-center gap-6 pt-4">
-                  <Link href="/register" className="btn-amazing !px-8 !py-4 md:!px-12 md:!py-6 text-lg md:text-xl !rounded-2xl hover:scale-105 active:scale-95 transition-all shadow-[0_20px_50px_rgba(37,99,235,0.4)]">
-                    Register
-                  </Link>
-                  <div className="flex items-center gap-3 text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-                    <div className="flex -space-x-2">
-                      {[1, 2, 3].map(i => <div key={i} className="w-6 h-6 rounded-full border-2 border-white bg-slate-100 flex items-center justify-center text-[8px] shadow-sm shadow-black/5">👨‍⚕️</div>)}
                     </div>
-                    Join 10,000+ Await list
                   </div>
                 </div>
               </div>
@@ -554,83 +511,54 @@ export default function Home() {
         </section>
       </main>
 
-      {/* PREMIUM FOOTER */}
-      <footer className="pt-16 md:pt-32 pb-12 bg-slate-50 relative overflow-hidden border-t border-slate-200">
-        {/* Subtle decorative glow */}
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[150px] -z-0" />
-
-        <div className="container relative z-10">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-24">
-            {/* Brand Column */}
-            <div className="space-y-8">
-              <Link href="/" className="flex items-center gap-3 group">
-                <div className="w-12 h-12 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-blue-600/20 group-hover:scale-110 transition-all">P</div>
-                <span className="text-3xl font-bold tracking-tighter text-slate-900">PrepCat</span>
-              </Link>
-              <p className="text-slate-500 font-medium leading-relaxed">
-                Empowering the next generation of Pakistani medical students with structured practice and data-driven insights.
-              </p>
-              <div className="flex gap-3">
-                {[Globe, MessageSquare, Smartphone, Award].map((Icon, i) => (
-                  <Link key={i} href="#" className="w-9 h-9 bg-white rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm border border-slate-100">
-                    <Icon size={16} />
-                  </Link>
-                ))}
-              </div>
+        {/* SECTION 7: FAQ */}
+        <section id="faq" className="py-16 md:py-24 bg-slate-50 relative">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03]"></div>
+          <div className="container relative z-10">
+            <div className="text-center mb-12">
+              <div className="eyebrow-amazing">FAQs</div>
+              <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-4">Frequently asked questions</h2>
+              <p className="text-slate-500 font-medium max-w-2xl mx-auto text-lg">Everything you need to know about preparing for MDCAT & NUMS with PrepCat.</p>
             </div>
 
-            {/* Resources Column */}
-            <div className="space-y-8">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900">Study Materials</h4>
-              <ul className="space-y-4">
-                {["MCQs Bank", "Past Papers", "Subject Wisdom", "Formula Sheets", "Latest Syllabus"].map(link => (
-                  <li key={link}>
-                    <Link href="#" className="text-slate-500 hover:text-blue-600 font-bold transition-colors text-sm">{link}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Platform Column */}
-            <div className="space-y-8">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900">Platform</h4>
-              <ul className="space-y-4">
-                {["Mastery Dashboard", "Performance Tracking", "Pricing Plans", "Beta Access", "Future Docs"].map(link => (
-                  <li key={link}>
-                    <Link href="#" className="text-slate-500 hover:text-blue-600 font-bold transition-colors text-sm">{link}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* PrepCat Exclusive Column */}
-            <div className="space-y-8">
-              <h4 className="text-xs font-bold uppercase tracking-widest text-slate-900">Beta Program</h4>
-              <div className="amazing-card !p-6 !bg-blue-600/5 !border-blue-600/10 !rounded-2xl space-y-4">
-                <div className="flex items-center gap-2 text-blue-600 font-bold italic text-xs tracking-tighter">
-                  <Sparkles size={14} className="animate-pulse" /> FOUNDING STUDENT
+            <div className="max-w-3xl mx-auto flex flex-col gap-4">
+              {[
+                { q: "How does the AI Tutor work?", a: "When you are stuck on a question, simply click 'Ask AI Tutor'. Our advanced AI, trained specifically on the medical entrance exam syllabus (Biology, Chemistry, Physics, English), will break down the exact reasoning behind the correct answer step-by-step." },
+                { q: "Is PrepCat completely free to use?", a: "PrepCat offers a generous free tier that includes access to a vast library of past papers. For advanced features like unlimited AI Tutor explanations and deep progress analytics, you can upgrade to our Premium plan." },
+                { q: "How does progress tracking help me score higher?", a: "Our dashboard lets you monitor your daily streaks and track your study habits. Building a daily learning habit and seeing your streak grow is one of the most effective ways to stay motivated during your prep." }
+              ].map((faq, i) => (
+                <div key={i} className={`bg-white rounded-[1.25rem] border transition-all duration-300 overflow-hidden ${faqOpenIndex === i ? 'border-blue-200 shadow-md' : 'border-slate-100 shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:border-blue-100'}`}>
+                  <button 
+                    onClick={() => setFaqOpenIndex(faqOpenIndex === i ? null : i)}
+                    className="w-full px-6 py-5 text-left flex justify-between items-center transition-colors focus:outline-none group"
+                  >
+                    <span className={`font-bold text-lg pr-8 transition-colors ${faqOpenIndex === i ? 'text-blue-900' : 'text-slate-900 group-hover:text-blue-600'}`}>{faq.q}</span>
+                    <div className={`w-9 h-9 flex-shrink-0 rounded-full flex items-center justify-center transition-colors duration-300 ${faqOpenIndex === i ? 'bg-blue-600 text-white' : 'bg-slate-50 text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600'}`}>
+                      <ChevronDown size={20} className={`transition-transform duration-300 ${faqOpenIndex === i ? 'rotate-180' : ''}`} />
+                    </div>
+                  </button>
+                  <AnimatePresence>
+                    {faqOpenIndex === i && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <div className="px-6 pb-6 pt-1 text-slate-500 leading-relaxed font-medium text-[15px]">
+                          {faq.a}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <p className="text-[10px] text-slate-400 font-bold leading-relaxed">
-                  Join 500+ medical aspirants helping us build the smartest preparation hub in Pakistan.
-                </p>
-                <Link href="/register" className="text-[10px] font-bold uppercase tracking-widest text-blue-600 hover:underline block">
-                  Join The Waitlist →
-                </Link>
-              </div>
+              ))}
             </div>
           </div>
+        </section>
 
-          <div className="pt-8 border-t border-slate-200 flex flex-col items-center justify-center gap-6 text-center">
-            <div className="flex items-center gap-6 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
-              <Link href="#" className="hover:text-blue-600 transition-colors">Privacy Policy</Link>
-              <Link href="#" className="hover:text-blue-600 transition-colors">Terms of Service</Link>
-            </div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-900">
-              Copyright © 2026 PrepCat All Rights Reserved
-            </p>
-          </div>
-        </div>
-      </footer>
+        <Footer />
     </div>
   );
 }
